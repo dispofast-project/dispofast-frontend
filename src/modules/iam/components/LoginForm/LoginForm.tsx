@@ -36,7 +36,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
 
     return (
         <Box component="div" className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold text-gray-900">Inicio de sesión</h2>
             <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} className="flex flex-col gap-4">
                 <Input
                     label="Correo electrónico"
@@ -74,7 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     type="submit"
                     disabled={!isValid}
                     data-testid="submit-button"
-                    className="w-60 self-end"
+                    className="w-full"
                 >
                     Iniciar sesión
                 </Button>
