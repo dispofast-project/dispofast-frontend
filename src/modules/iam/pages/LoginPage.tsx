@@ -17,8 +17,8 @@ const LoginPage = () => {
     }
 
     return (
-        <Box component="div" className="flex flex-col items-center justify-left min-h-screen bg-gray-100">
-            <Box className="w-full max-w-sm mx-auto">
+        <Box component="div" className="min-h-screen bg-gray-100 flex items-center w-full">
+            <Box className="w-full max-w-sm px-8 sm:px-12 lg:px-20">
                 <LoginForm onSubmit={handleSubmit} />
             </Box>
         </Box>

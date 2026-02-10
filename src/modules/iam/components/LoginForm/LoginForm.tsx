@@ -35,9 +35,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
     }
 
     return (
-        <Box component="div" className="flex flex-col items-center justify-left min-h-screen bg-gray-100">
-            <h2>Inicio de sesión</h2>
-            <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} className="w-full max-w-sm mx-auto">
+        <Box component="div" className="flex flex-col gap-4">
+            <h2 className="text-xl font-semibold text-gray-900">Inicio de sesión</h2>
+            <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} className="flex flex-col gap-4">
                 <Input
                     label="Correo electrónico"
                     id="email"
@@ -55,12 +55,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     placeholder="Ingresa tu contraseña"
                     error={errors.password?.message}
                     type={isPasswordVisible ? "text" : "password"}
-                    {...register("password")}
                     rightElement={
                         <button 
                             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                             type="button"
-                            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                            className="text-gray-500 hover:text-gray-700 focus:outline-none p-1.5"
                             aria-label={
                                 isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"
                             }
@@ -75,13 +74,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     type="submit"
                     disabled={!isValid}
                     data-testid="submit-button"
+                    className="w-60 self-end"
                 >
                     Iniciar sesión
                 </Button>
                 
             </Box>
         </Box>
-        
     )
 }
 
