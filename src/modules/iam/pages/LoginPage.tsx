@@ -4,18 +4,46 @@ import { Box } from "@mui/material";
 import LoginForm from "../components/LoginForm/LoginForm";
 import dispofastLogo from "../../../assets/dispofast-logo.png";
 import heroLoginImage from "../../../assets/hero-login-page.jpg";
+import { loginService } from "../api/auth.service";
+import { useAuth } from "../hooks/useAuth";
+import { isAxiosError } from "axios";
 
 const LoginPage = () => {
 
     const navigate = useNavigate();
+    const {login} = useAuth();
     
     const handleSubmit = async (data: LoginFormData) => {
-        // Aquí iría la lógica de autenticación, por ejemplo, una llamada a una API.
-        // Por simplicidad, vamos a simular un inicio de sesión exitoso con un timeout.
-        setTimeout(() => {
-            // Simulamos que el inicio de sesión fue exitoso y redirigimos al usuario a la página principal.
-            navigate("/");
-        }, 1000);
+        
+
+        try {
+           const response = await loginService(data)
+
+            login(response)
+
+            if (response.token) {
+                console.log("Inicie sesión", response)
+            } 
+        } catch (error) {
+            let message = 'Credenciales inválidas. Por favor, intente de nuevo.';
+
+            if (error instanceof Error && error.message === 'TOKEN_MISSING') {
+                message =
+                'La respuesta del servidor no incluyó un token de autenticación.';
+            } else if (isAxiosError(error)) {
+                const payload = error.response?.data as
+                | { message?: string }
+                | undefined;
+                const serverMessage =
+                typeof payload?.message === 'string' ? payload.message : undefined;
+                if (serverMessage) {
+                message = serverMessage;
+                } else if (!error.response) {
+                message =
+                    'No fue posible contactar al servidor. Verifique su conexión.';
+                }
+            }
+        }
     }
 
     return (

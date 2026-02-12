@@ -79,6 +79,7 @@ export const useAuthStore = create<AuthState>()(
                     })
 
                     get().checkAuth();
+                    console.log("Usuario autenticado:", baseUser);
                 },
 
                 checkAuth: () => {
