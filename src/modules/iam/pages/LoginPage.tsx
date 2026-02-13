@@ -20,10 +20,8 @@ const LoginPage = () => {
            const response = await loginService(data)
 
             login(response)
-
-            if (response.token) {
-                console.log("Inicie sesión", response)
-            } 
+            
+            navigate("/dashboard");
         } catch (error) {
             let message = 'Credenciales inválidas. Por favor, intente de nuevo.';
 
