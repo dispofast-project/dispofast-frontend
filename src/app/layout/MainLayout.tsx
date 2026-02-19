@@ -1,4 +1,3 @@
-import  React from 'react';
 import { 
     LayoutDashboard, 
     ShoppingCart, 
@@ -57,7 +56,7 @@ const navItems = [
 
 export const MainLayout = () => {
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-100">
+        <div className="flex h-screen overflow-hidden bg-">
             <Sidebar navItems={navItems} />
             
             <main className="flex-1 overflow-y-auto">
