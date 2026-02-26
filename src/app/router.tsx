@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import LoginPage from "../modules/iam/pages/LoginPage";
 import { MainLayout } from "./layout/MainLayout";
 import { ProtectedRoute } from "../modules/iam/components/ProtectedRoute/ProtectedRoute";
+import UsersPage from "../modules/iam/pages/UsersPage";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -60,10 +61,8 @@ const AppRouter = (): ReactElement => {
                             <h1 className="text-3xl font-bold text-gray-800 mb-4">Configuración</h1>
                         </div>
                     } />
-                    <Route path="/users" element={
-                        <div className="p-6">
-                            <h1 className="text-3xl font-bold text-gray-800 mb-4">Users</h1>
-                        </div>
+                    <Route path="/usuarios" element={
+                        <UsersPage />
                     } />
                 </Route>
 

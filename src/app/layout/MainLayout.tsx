@@ -6,7 +6,8 @@ import {
     Package, 
     Users, 
     Truck, 
-    Settings 
+    Settings,
+    ScrollText,
 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Outlet } from 'react-router-dom';
@@ -52,11 +53,21 @@ const navItems = [
         path: '/configuracion',
         icon: <Settings />,
     },
+    {
+        label: 'Usuarios',
+        path: '/usuarios',
+        icon: <Users />,
+    },
+    {
+        label: 'Lista de precios',
+        path: '/lista-precios',
+        icon: <ScrollText />,
+    }
 ];
 
 export const MainLayout = () => {
     return (
-        <div className="flex h-screen overflow-hidden bg-">
+        <div className="flex h-screen overflow-hidden bg-gray-100">
             <Sidebar navItems={navItems} />
             
             <main className="flex-1 overflow-y-auto">

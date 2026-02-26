@@ -29,3 +29,12 @@ export interface AuthState {
     logout: () => void;
     checkAuth: () => void;
 }
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    roles: string[];
+    createdAt: string;
+    updatedAt: string;
+}
