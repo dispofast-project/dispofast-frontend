@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import { useUsers } from "../../hooks/useUsers";
 import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import type { JSX } from "react";
+import { Button } from "../../../../shared/components/Button/Button";
 
 const UsersContent = () => {
     
@@ -49,6 +50,22 @@ const UsersContent = () => {
             formatRole(user.roles)
         ];
     };
+
+    if (error) {
+        return (
+            <Box className="text-center py-10">
+                <Box className="mb-4">   
+                    <p className="text-red-500">Error: {error}</p>
+                </Box>
+                <Button
+                    onClick={handleRefresh}
+                    variant="primary"
+                >
+                    Reintentar
+                </Button>
+            </Box>
+        );
+    }
 
     return(
         <Box component="div" className="space-y-6 pb-6">

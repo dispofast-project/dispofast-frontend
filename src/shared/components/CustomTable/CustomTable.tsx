@@ -25,7 +25,7 @@ const CustomTable = <T extends {id: string | number}>(props: CustomTableProps<T>
                     <TableHead>
                         <TableRow>
                             {props.headers.map((header, index) => (
-                                <TableCell key={index} className="text-left px-4 py-2 border-b font-bold">
+                                <TableCell key={index} className="text-left px-4 py-2 border-b" sx={{ fontWeight: 'bold', fontSize: '1.1rem', justifyContent: 'center'}}>
                                     {header}
                                 </TableCell>
                             ))}

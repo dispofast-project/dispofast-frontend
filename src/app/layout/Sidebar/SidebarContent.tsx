@@ -42,7 +42,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({
                     <img src="src\assets\dispofast-logo.png" alt="Dispofast logo" className="w-15 h-15"/>
                     {!isCollapsed && <span className="text-lg font-semibold">DISPOCOL</span>}
                 </div>
-                
+
                 {/* Botón cerrar solo visible en móvil */}
                 {!isCollapsed && (
                     <button
