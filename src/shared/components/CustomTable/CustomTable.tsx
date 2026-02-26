@@ -1,69 +1,98 @@
-import { Box, Pagination, Table, TableBody, TableCell, TableHead } from "@mui/material";
+import {
+  Box,
+  Pagination,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import type { JSX } from "react";
 
 interface CustomTableProps<T> {
-    headers: string[];
-    data: T[];
-    renderRow: (item: T) => (string | JSX.Element)[];
-    onView?: (item: T) => void;
-    onEdit?: (item: T) => void;
-    onDelete?: (item: T) => void;
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
-    onPageChange: (page: number) => void;
-    hidePagination?: boolean;
+  headers: string[];
+  data: T[];
+  renderRow: (item: T) => (string | JSX.Element)[];
+  onView?: (item: T) => void;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
+  onRowClick?: (item: T) => void;
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  hidePagination?: boolean;
 }
 
-const CustomTable = <T extends {id: string | number}>(props: CustomTableProps<T>) => {
-    const totalPages = Math.ceil(props.totalItems / props.itemsPerPage);
-    
+const CustomTable = <T extends { id: string | number }>({
+  headers,
+  data,
+  renderRow,
+  onRowClick,
+  currentPage,
+  itemsPerPage,
+  totalItems,
+  onPageChange,
+  hidePagination = false,
+}: CustomTableProps<T>) => {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  return (
     <Box>
-        <Box component="div" className="bg-background p-4 rounded-lg shadow-md">
-            <Table>
-                <TableHead>
-                    {props.headers.map((header, index) => (
-                        <Box component="th" key={index} className="text-left px-4 py-2 border-b">
-                            {header}
-                        </Box>
-                    ))}
-                </TableHead>
-                <TableBody>
-                    {props.data.length > 0 ? (
-                        props.data.map((item, index) => (
-                        <TableCell key={index} className="border-b">
-                            {props.renderRow(item).map((cell, cellIndex) => (
-                                <Box component="td" key={cellIndex} className="px-4 py-2">
-                                    {cell}
-                                </Box>
-                            ))}
-                        </TableCell>
-                    ))
-                    ) : (
-                        <Box component="tr">
-                            <Box component="td" colSpan={props.headers.length} className="text-center py-4">
-                                No hay datos disponibles.
-                            </Box>
-                        </Box>
-                    )}
-
-                    
-                </TableBody>
-            </Table>
-        </Box>
-            {!props.hidePagination && totalPages > 1 && (
-                <Box className="flex justify-center mt-4">
-                    <Pagination
-                        count={totalPages}
-                        page={props.currentPage}
-                        onChange={(_, page) => props.onPageChange(page)}
-                    />
-                </Box>
+      <Box className="bg-background p-4 rounded-lg shadow-md overflow-x-auto">
+        <Table>
+          <TableHead>
+            <TableRow>
+              {headers.map((header, index) => (
+                <TableCell key={`head-${index}`} sx={{ fontWeight: "bold" }}>
+                  {header}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.length > 0 ? (
+              data.map((item) => (
+                <TableRow
+                  key={item.id}
+                  hover
+                  onClick={() => onRowClick?.(item)}
+                  sx={{ cursor: onRowClick ? "pointer" : "default" }}
+                >
+                  {renderRow(item).map((cell, cellIndex) => (
+                    <TableCell key={`${item.id}-cell-${cellIndex}`}>
+                      {cell}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={headers.length}
+                  align="center"
+                  sx={{ py: 4 }}
+                >
+                  No hay datos disponibles.
+                </TableCell>
+              </TableRow>
             )}
+          </TableBody>
+        </Table>
+      </Box>
+
+      {!hidePagination && totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(_, page) => onPageChange(page)}
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
-    
-
-
-}
+  );
+};
 
 export default CustomTable;
