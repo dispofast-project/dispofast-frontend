@@ -2,17 +2,18 @@ import { Box, Pagination, Table, TableBody, TableCell, TableHead, TableRow } fro
 import type { JSX } from "react";
 
 interface CustomTableProps<T> {
-    headers: string[];
-    data: T[];
-    renderRow: (item: T) => (string | JSX.Element)[];
-    onView?: (item: T) => void;
-    onEdit?: (item: T) => void;
-    onDelete?: (item: T) => void;
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
-    onPageChange: (page: number) => void;
-    hidePagination?: boolean;
+  headers: string[];
+  data: T[];
+  renderRow: (item: T) => (string | JSX.Element)[];
+  onView?: (item: T) => void;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
+  onRowClick?: (item: T) => void;
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  hidePagination?: boolean;
 }
 
 const CustomTable = <T extends {id: string | number}>(props: CustomTableProps<T>): JSX.Element => {

@@ -3,11 +3,11 @@ import { VITE_APP_BASE_URL } from "../utils/constants";
 import { useAuthStore } from "../../modules/iam/auth.store";
 
 const apiClient = axios.create({
-    baseURL: VITE_APP_BASE_URL,
-    headers: {
-        "Content-Type" : "application/json",
-    },
-    timeout: 30000,
+  baseURL: VITE_APP_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 30000,
 });
 
 apiClient.interceptors.request.use(
