@@ -5,64 +5,29 @@ import {
   Typography,
   IconButton,
   CircularProgress,
-  Divider,
   Button,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   User,
-  Hash,
-  CalendarDays,
-  ReceiptText,
-  TrendingDown,
-  Percent,
 } from "lucide-react";
 
-import { getQuoteByIdService } from "../api/quotes.api";
-import { formatDate } from "../../../shared/utils/date";
-import { formatCurrency } from "../../../shared/utils/currency";
-import { QuoteStatusBadge } from "../components/QuoteStatusBadge";
-import type { Quote } from "../types";
-
-// TODO: Pagina Temporal
-
-// ─── Sub-componentes Reutilizables (Extraídos para evitar re-renders) ───────
+import DataField from "../components/detailcard/DetailItem";
+import DetailSection from "../components/detailcard/DetailSection";
+import { getQuoteByIdService, getPriceListsService, updateQuoteService } from "../api/quotes.api";
+import type { Quote, PriceList } from "../types";
+import QuoteDetailsHeaderCard from "../components/QuoteDetailsHeaderCard";
+import QuotePriceListCard from "../components/QuotePriceListCard";
+import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <Typography
     variant="overline"
-    className="text-gray-500 font-bold tracking-widest mb-2 block"
+    className="text-gray-500 font-bold tracking-widest mb-4 block"
   >
     {children}
   </Typography>
 );
-
-const DetailRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <Box className="flex items-start gap-3 py-3">
-    <Box className="text-gray-400 mt-0.5 flex-shrink-0">{icon}</Box>
-    <Box>
-      <Typography variant="caption" className="text-gray-500 font-bold uppercase tracking-wider">
-        {label}
-      </Typography>
-      <Typography variant="body2" className="font-medium mt-1 break-all">
-        {value}
-      </Typography>
-    </Box>
-  </Box>
-);
-
-const AmountRow = ({ label, value, bold, colorClass }: { label: React.ReactNode; value: string; bold?: boolean; colorClass?: string }) => (
-  <Box className="flex justify-between items-center py-2.5">
-    <Typography variant="body2" className={`${bold ? "font-bold" : "text-gray-500"} ${colorClass}`}>
-      {label}
-    </Typography>
-    <Typography variant="body2" className={`tabular-nums ${bold ? "font-bold text-lg" : "font-medium"} ${colorClass}`}>
-      {value}
-    </Typography>
-  </Box>
-);
-
-// ─── Página Principal ─────────────────────────────────────────────────────────
 
 interface QuoteState {
   data: Quote | null;
@@ -74,37 +39,73 @@ const QuoteDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // 1. Agrupamos el estado para evitar múltiples renders sincrónicos
   const [quoteState, setQuoteState] = useState<QuoteState>({
     data: null,
     isLoading: true,
     error: null,
   });
+  const [priceLists, setPriceLists] = useState<PriceList[]>([]);
+  const [selectedPriceListId, setSelectedPriceListId] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
+  
 
   useEffect(() => {
     if (!id) return;
 
-    // Marcamos inicio de carga
-    setQuoteState(prev => ({ ...prev, isLoading: true, error: null }));
+    let isMounted = true;
 
-    getQuoteByIdService(id)
-      .then((data) => {
-        // Actualizamos todo de un solo golpe
-        setQuoteState({ data, isLoading: false, error: null });
-      })
-      .catch((err: unknown) => {
-        setQuoteState({
-          data: null,
-          isLoading: false,
-          error: err instanceof Error ? err.message : "Error al cargar la cotización.",
+    // We can avoid setting isLoading to true here strictly because 
+    // the initial state is already set to isLoading = true, 
+    // which fixes the linter issue for cascading renders.
+    
+      getQuoteByIdService(id)
+        .then((data) => {
+          if (!isMounted) return;
+          setQuoteState({ data, isLoading: false, error: null });
+        })
+        .catch((err: unknown) => {
+          if (!isMounted) return;
+          setQuoteState({
+            data: null,
+            isLoading: false,
+            error: err instanceof Error ? err.message : "Error al cargar la cotización.",
+          });
         });
-      });
+
+      getPriceListsService()
+        .then(data => {
+          if (isMounted) setPriceLists(data);
+        })
+        .catch(console.error);
+
+      return () => {
+        isMounted = false;
+      };
   }, [id]);
 
-  // Desestructuramos para mantener limpio el código inferior
   const { data: quote, isLoading, error } = quoteState;
 
-  // ... (formatters se mantienen igual)
+  useEffect(() => {
+    if (quote?.priceList?.id) {
+      setSelectedPriceListId(quote.priceList.id);
+    }
+  }, [quote]);
+
+  const handleSave = async () => {
+    if (!id || selectedPriceListId === quote?.priceList?.id) return;
+    setIsSaving(true);
+    try {
+      await updateQuoteService(id, { priceListId: selectedPriceListId });
+      const newPriceList = priceLists.find(pl => pl.id === selectedPriceListId);
+      if (newPriceList && quote) {
+        setQuoteState(prev => ({ ...prev, data: { ...quote, priceList: newPriceList } }));
+      }
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -126,69 +127,96 @@ const QuoteDetailPage = () => {
       </Box>
     );
   }
+
+  const clientName = (quote?.account?.organization?.legalName || `${quote?.account?.firstName || ""} ${quote?.account?.lastName || ""}`).trim() || "N/A";
+  const initials = clientName.substring(0, 2).toUpperCase();
+
   return (
-    <Box className="p-4 sm:p-8 max-w-4xl mx-auto">
+    <Box className="p-4 sm:p-8 max-w-7xl mx-auto" component="div">
       {/* ── Barra Superior ── */}
-      <Box className="flex items-center gap-4 mb-8">
-        <IconButton onClick={() => navigate(-1)} size="small" className="border border-gray-200 rounded-lg">
-          <ArrowBackIcon fontSize="small" />
-        </IconButton>
-        <Box className="flex-1">
+      <Box className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <Box className="flex items-center gap-4">
+          <IconButton onClick={() => navigate(-1)} size="small" className="border border-gray-200 rounded-lg">
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
           <Typography variant="h5" className="font-extrabold text-gray-900">
-            {quote.number}
-          </Typography>
-          <Typography variant="body2" className="text-gray-500">
-            Creada el {formatDate(quote.createdAt)}
+            Detalle de Cotización
           </Typography>
         </Box>
-        <QuoteStatusBadge status={quote.status} />
       </Box>
 
-      {/* ── Grid de Información ── */}
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Identificación */}
-        <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <SectionTitle>Identificación</SectionTitle>
-          <DetailRow icon={<Hash size={16} />} label="No. Cotización" value={quote.number} />
-          <Divider className="opacity-50" />
-          <DetailRow icon={<User size={16} />} label="Asesor" value={quote.sellerName} />
-        </Box>
+        {/* === COLUMNA 1 (Izquierda) === */}
+        <Box className="lg:col-span-2 flex flex-col gap-6">
+          
+          {/* 1. SECCIÓN PRINCIPAL */}
+          <QuoteDetailsHeaderCard quote={quote} clientName={clientName} initials={initials} />
 
-        {/* Fechas */}
-        <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <SectionTitle>Fechas</SectionTitle>
-          <DetailRow icon={<CalendarDays size={16} />} label="Expiración" value={formatDate(quote.expirationDate)} />
-          <Divider className="opacity-50" />
-          <DetailRow icon={<CalendarDays size={16} />} label="Última actualización" value={formatDate(quote.updatedAt)} />
-        </Box>
+          {/* 2. SECCIÓN DETALLE DEL CLIENTE / ORGANIZACIÓN */}
+          <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
+            <SectionTitle>
+              <User size={16} className="inline mr-2 align-text-bottom"/>
+              {quote?.account?.organization?.legalName ? "Información del Cliente" : "Detalle del Cliente"}
+            </SectionTitle>
+            
+            <Box className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {/* Si hay organización, mostrar los datos de la empresa primero */}
+              {quote?.account?.organization?.legalName && (
+                <DetailSection>
+                  <DataField label="Razón Social" value={quote.account.organization.legalName} />
+                  <DataField label="NIT" value={quote.account.organization.nit} />
+                  <DataField label="Dirección" value={quote.account.organization.address} />
+                  <DataField label="Teléfono de la Empresa" value={quote.account.organization.phone} />
+                  <DataField label="Email de Facturación" value={quote.account.organization.billingEmail} />
+                  <DataField label="Email General" value={quote.account.organization.generalEmail} />
+                </DetailSection>
+              )}
 
-        {/* Resumen Financiero */}
-        <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 md:col-span-2">
-          <SectionTitle>Resumen Financiero</SectionTitle>
-          <Box className="max-w-md">
-            <AmountRow 
-                label={<span className="flex items-center gap-2"><ReceiptText size={14}/> Subtotal</span>} 
-                value={formatCurrency(quote.subtotalAmount)} 
-            />
-            <AmountRow 
-                label={<span className="flex items-center gap-2"><TrendingDown size={14}/> Descuento</span>} 
-                value={`- ${formatCurrency(quote.discountTotal)}`} 
-                colorClass="text-green-600"
-            />
-            <AmountRow 
-                label={<span className="flex items-center gap-2"><Percent size={14}/> IVA (19%)</span>} 
-                value={formatCurrency(quote.taxTotal)} 
-            />
-            <Divider className="my-4" />
-            <AmountRow 
-                label="Total a Pagar" 
-                value={formatCurrency(quote.totalAmount)} 
-                bold 
-                colorClass="text-dispofast-primary"
-            />
+              <DetailSection title={quote?.account?.organization?.legalName ? "Representante Legal" : undefined}>
+                <DataField label="Nombres" value={quote?.account?.firstName} />
+                <DataField label="Apellidos" value={quote?.account?.lastName} />
+                <DataField label="Identificación" value={quote?.account?.identificationNumber} />
+                <DataField label="Cargo" value={quote?.account?.jobTitle} />
+                <DataField label="Email" value={quote?.account?.email} />
+                <DataField label="Teléfono" value={quote?.account?.phone} />
+              </DetailSection>
+              
+              <DetailSection title="Ubicación">
+                <DataField label="Ciudad" value={quote?.location?.cityName} />
+                <DataField label="Departamento" value={quote?.location?.departmentName} />
+              </DetailSection>
+            </Box>
           </Box>
+
+          {/* 3. SECCIÓN LISTADO DE PRODUCTOS */}
+          <Box className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 border-dashed flex items-center justify-center min-h-[150px]">
+             <Typography variant="body1" className="text-blue-500 font-medium text-center">
+                Sección de listados de productos<br/>
+                <span className="text-sm opacity-80">(de momento no se implementará)</span>
+             </Typography>
+          </Box>
+
         </Box>
+
+        {/* === COLUMNA 2 (Derecha) === */}
+        <Box className="flex flex-col gap-6">
+          
+          {/* 1. LISTA DE PRECIOS */}
+          <QuotePriceListCard 
+            quote={quote}
+            priceLists={priceLists}
+            selectedPriceListId={selectedPriceListId}
+            setSelectedPriceListId={setSelectedPriceListId}
+            isSaving={isSaving}
+            handleSave={handleSave}
+          />
+
+          {/* 2. DETALLES DE PAGO */}
+          <QuotePaymentDetailsCard quote={quote} />
+
+        </Box>
+
       </Box>
     </Box>
   );
