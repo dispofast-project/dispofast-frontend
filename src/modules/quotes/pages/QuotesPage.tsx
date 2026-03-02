@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { getQuotesService } from "../api/quotes.api";
+import { getQuotesService, createQuoteService } from "../api/quotes.api";
 import type { QuotePreview } from "../types";
 import QuotesTable from "../components/QuotesTable";
 import type { FilterConfig, FilterState } from "../../../shared/components/SearchBar/types";
 import FilterSearchBar from "../../../shared/components/SearchBar/SearchBar";
+import QuoteCreateModal from "../components/QuoteCreateModal";
 
 /** Maps the FilterSearchBar scope value to the backend `key` query param. */
 const SCOPE_TO_API_KEY: Record<string, string> = {
@@ -39,6 +40,8 @@ const QuotesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
   const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 10;
 
@@ -95,6 +98,11 @@ const QuotesPage = () => {
     setCurrentPage(1); // reset to first page on new search
   };
 
+  const handleCreateQuote = async (accountId: string) => {
+    const newQuote = await createQuoteService(accountId);
+    navigate(`/cotizaciones/${newQuote.id}`);
+  };
+
   return (
     <Box className="p-6">
       <Box className="flex justify-between items-center mb-6">
@@ -109,7 +117,7 @@ const QuotesPage = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => console.log("Nueva Cotización")}
+          onClick={() => setIsCreateModalOpen(true)}
           sx={{ textTransform: "none", fontWeight: 600 }}
         >
           Nueva Cotización
@@ -143,6 +151,12 @@ const QuotesPage = () => {
           onRowClick={handleRowClick}
         />
       )}
+      
+      <QuoteCreateModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateQuote}
+      />
     </Box>
   );
 };
