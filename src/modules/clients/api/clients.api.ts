@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { ClientPreview } from "../types";
+import type { ClientPreview, ClientResponse } from "../types";
 
 export const getClientsService = async (
   page: number = 0,
@@ -15,5 +15,10 @@ export const getClientsService = async (
   }
 
   const response = await apiClient.get(`/clients`, { params });
+  return response.data;
+};
+
+export const getClientByIdService = async (id: string): Promise<ClientResponse> => {
+  const response = await apiClient.get<ClientResponse>(`/clients/${id}`);
   return response.data;
 };

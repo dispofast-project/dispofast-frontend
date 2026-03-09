@@ -6,6 +6,7 @@ import { ProtectedRoute } from "../modules/iam/components/ProtectedRoute/Protect
 import QuotesPage from "../modules/quotes/pages/QuotesPage";
 import QuoteDetailPage from "../modules/quotes/pages/QuoteDetailPage";
 import ClientsPage from "../modules/clients/pages/ClientsPage";
+import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -65,6 +66,7 @@ const AppRouter = (): ReactElement => {
             }
           />
           <Route path="/clientes" element={<ClientsPage />} />
+          <Route path="/clientes/:id" element={<ClientDetailsPage />} />
           <Route
             path="/despachos"
             element={
