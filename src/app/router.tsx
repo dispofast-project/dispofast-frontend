@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import type { ReactElement } from "react";
 import LoginPage from "../modules/iam/pages/LoginPage";
 import { MainLayout } from "./layout/MainLayout";
@@ -6,7 +6,6 @@ import { ProtectedRoute } from "../modules/iam/components/ProtectedRoute/Protect
 import UsersPage from "../modules/iam/pages/UsersPage";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
-
 
 const AppRouter = (): ReactElement => {
     return (
@@ -66,14 +65,12 @@ const AppRouter = (): ReactElement => {
                     } />
                 </Route>
 
-                <Route path="/404" element={<NotFound />} />
+        <Route path="/404" element={<NotFound />} />
+      </Route>
 
-            </Route>
-            
-            
-            <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
-    );
+      <Route path="*" element={<Navigate to="/404" replace />} />
+    </Routes>
+  );
 };
 
 export default AppRouter;
