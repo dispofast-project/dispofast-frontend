@@ -1,14 +1,30 @@
-import { useNavigate } from "react-router-dom"
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import type { User } from "../../types";
 import { Box } from "@mui/material";
 import { useUsers } from "../../hooks/useUsers";
 import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import type { JSX } from "react";
 import { Button } from "../../../../shared/components/Button/Button";
-import { SearchBar } from "../../../../shared/components/SearchBar/SearchBar";
+import FilterSearchBar from "../../../../shared/components/SearchBar/SearchBar";
+import type { FilterConfig, FilterState } from "../../../../shared/components/SearchBar/types";
+
+const filterConfigs: FilterConfig[] = [
+    {
+        type: "scoped-text",
+        key: "search",
+        label: "Buscar",
+        scopes: [
+            { value: "all",   label: "Todos los campos" },
+            { value: "name",  label: "Nombre" },
+            { value: "email", label: "Email" },
+        ],
+        debounceMs: 400,
+    },
+];
 
 const UsersContent = () => {
-    
+
     const navigate = useNavigate();
 
     const {
@@ -18,11 +34,15 @@ const UsersContent = () => {
         currentPage,
         totalElements,
         pageSize,
-        searchTerm,
         handlePageChange,
         handleSearchChange,
-        handleRefresh
+        handleRefresh,
     } = useUsers();
+
+    const handleFilterChange = useCallback((state: FilterState) => {
+        const term = state["search"]?.term ?? "";
+        handleSearchChange(term);
+    }, [handleSearchChange]);
 
     const formatRole = (role: string): string => {
         if (!role) return '-';
@@ -41,33 +61,29 @@ const UsersContent = () => {
         return [
             user.name,
             user.email,
-            formatRole(user.role)
+            formatRole(user.role),
         ];
     };
 
     if (error) {
         return (
             <Box className="text-center py-10">
-                <Box className="mb-4">   
+                <Box className="mb-4">
                     <p className="text-red-500">Error: {error}</p>
                 </Box>
-                <Button
-                    onClick={handleRefresh}
-                    variant="primary"
-                >
+                <Button onClick={handleRefresh} variant="primary">
                     Reintentar
                 </Button>
             </Box>
         );
     }
 
-    return(
+    return (
         <Box component="div" className="space-y-4 pb-6">
-            <SearchBar
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder="Buscar por nombre, email..."
-                className="max-w-sm"
+            <FilterSearchBar
+                configs={filterConfigs}
+                onChange={handleFilterChange}
+                className="max-w-lg"
             />
 
             <Box className={loading ? "opacity-50 pointer-events-none" : ""}>
@@ -82,7 +98,7 @@ const UsersContent = () => {
                 />
             </Box>
         </Box>
-    )
-}
+    );
+};
 
 export default UsersContent;

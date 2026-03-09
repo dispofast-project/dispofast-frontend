@@ -1,8 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { User } from "../types";
 import { getAllUsers, searchUsers } from "../api/user.service";
-
-const DEBOUNCE_MS = 400;
 
 export const useUsers = () => {
 
@@ -12,10 +10,7 @@ export const useUsers = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
     const pageSize = 10;
-
-    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const loadUsers = async (page: number, search: string) => {
         try {
@@ -34,24 +29,11 @@ export const useUsers = () => {
         }
     };
 
-    // Debounce: espera que el usuario deje de escribir antes de hacer la request
-    useEffect(() => {
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-
-        debounceTimer.current = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-        }, DEBOUNCE_MS);
-
-        return () => {
-            if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        };
-    }, [searchTerm]);
-
-    // Fetch al cambiar página o término de búsqueda (ya debounced)
+    // El debounce lo maneja FilterSearchBar internamente, aquí reaccionamos directo
     useEffect(() => {
         setLoading(true);
-        loadUsers(currentPage, debouncedSearch);
-    }, [currentPage, debouncedSearch]);
+        loadUsers(currentPage, searchTerm);
+    }, [currentPage, searchTerm]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -64,7 +46,7 @@ export const useUsers = () => {
 
     const handleRefresh = () => {
         setLoading(true);
-        loadUsers(currentPage, debouncedSearch);
+        loadUsers(currentPage, searchTerm);
     };
 
     return {
@@ -74,7 +56,6 @@ export const useUsers = () => {
         currentPage,
         totalElements,
         pageSize,
-        searchTerm,
         handlePageChange,
         handleSearchChange,
         handleRefresh,
