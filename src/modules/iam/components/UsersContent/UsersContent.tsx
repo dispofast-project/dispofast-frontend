@@ -5,6 +5,7 @@ import { useUsers } from "../../hooks/useUsers";
 import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import type { JSX } from "react";
 import { Button } from "../../../../shared/components/Button/Button";
+import { SearchBar } from "../../../../shared/components/SearchBar/SearchBar";
 
 const UsersContent = () => {
     
@@ -23,8 +24,8 @@ const UsersContent = () => {
         handleRefresh
     } = useUsers();
 
-    const formatRole = (rolesArr: string[]) => {
-        if (!rolesArr?.length) return '-';
+    const formatRole = (role: string): string => {
+        if (!role) return '-';
 
         const labels: Record<string, string> = {
             ADMIN: 'Administrador',
@@ -32,14 +33,7 @@ const UsersContent = () => {
             BODEGA: 'Bodega',
         };
 
-        return rolesArr
-            .map((r: string) => {
-                const key = r;
-                if (!key) return null;
-                return labels[key] ?? key.charAt(0) + key.slice(1).toLowerCase();
-            })
-            .filter(Boolean)
-            .join(', ');
+        return labels[role] ?? role.charAt(0) + role.slice(1).toLowerCase();
     };
 
     const renderUserRow = (item: any): (string | JSX.Element)[] => {
@@ -47,7 +41,7 @@ const UsersContent = () => {
         return [
             user.name,
             user.email,
-            formatRole(user.roles)
+            formatRole(user.role)
         ];
     };
 
@@ -68,20 +62,25 @@ const UsersContent = () => {
     }
 
     return(
-        <Box component="div" className="space-y-6 pb-6">
-            
-                <Box className={loading ? "opacity-50 pointer-events-none" : ""}>
-                    <CustomTable 
-                        data={users}
-                        headers={["Nombre", "Email", "Roles"]}
-                        renderRow={renderUserRow}
-                        currentPage={currentPage}
-                        onPageChange={handlePageChange}
-                        itemsPerPage={pageSize}
-                        totalItems={totalElements}
-                    />
-                </Box>
-            
+        <Box component="div" className="space-y-4 pb-6">
+            <SearchBar
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Buscar por nombre, email..."
+                className="max-w-sm"
+            />
+
+            <Box className={loading ? "opacity-50 pointer-events-none" : ""}>
+                <CustomTable
+                    data={users}
+                    headers={["Nombre", "Email", "Rol"]}
+                    renderRow={renderUserRow}
+                    currentPage={currentPage}
+                    onPageChange={handlePageChange}
+                    itemsPerPage={pageSize}
+                    totalItems={totalElements}
+                />
+            </Box>
         </Box>
     )
 }

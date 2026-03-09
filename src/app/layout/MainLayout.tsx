@@ -71,7 +71,7 @@ export const MainLayout = () => {
         <div className="flex h-screen overflow-hidden bg-gray-100">
             <Sidebar navItems={navItems} />
             <div className="flex flex-col flex-1 overflow-hidden">
-                <TopBar username="Admin" role="Administrador" />
+                <TopBar />
                 <main className="flex-1 overflow-y-auto">
                     <div className="p-6">
                         <Outlet />

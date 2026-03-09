@@ -23,3 +23,20 @@ export const getAllUsers = async (
 }
 
 const BASE_URL = "/users";
+
+export const searchUsers = async (query: string, params: UserServiceParams): Promise<PagedResponseDTO<User>> => {
+    const { page = 0, size = 20 } = params;
+
+    try {
+        const { data } = await apiClient.get<PagedResponseDTO<User>>(`${BASE_URL}/search`, {
+            params: {
+                q: query,
+                page,
+                size
+            }
+        });
+        return data;
+    } catch (error) {
+        throw new Error("No se pudieron cargar los usuarios. Por favor, intente de nuevo.");
+    }
+}
