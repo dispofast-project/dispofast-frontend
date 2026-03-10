@@ -94,9 +94,7 @@ const ClientsPage = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            console.log("Open create client modal/page");
-          }}
+          onClick={() => navigate("/clientes/nuevo")}
           sx={{ textTransform: "none", fontWeight: 600 }}
         >
           Nuevo Cliente
