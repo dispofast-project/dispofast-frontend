@@ -3,8 +3,8 @@ import type { ReactElement } from "react";
 import LoginPage from "../modules/iam/pages/LoginPage";
 import { MainLayout } from "./layout/MainLayout";
 import { ProtectedRoute } from "../modules/iam/components/ProtectedRoute/ProtectedRoute";
-import UsersPage from "../modules/iam/pages/UsersPage";
-import OrdersPage from "../modules/orders/pages/OrdersPage";
+import IamRoutes from "../modules/iam/IamRoutes";
+import OrdersRoutes from "../modules/orders/OrdersRoutes";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -26,7 +26,7 @@ const AppRouter = (): ReactElement => {
                             </div>
                         </div>
                     } />
-                    <Route path="/ordenes" element={<OrdersPage />} />
+                    <Route path="/ordenes/*" element={<OrdersRoutes />} />
                     <Route path="/cotizaciones" element={
                         <div className="p-6">
                             <h1 className="text-3xl font-bold text-gray-800 mb-4">Cotizaciones</h1>
@@ -57,9 +57,7 @@ const AppRouter = (): ReactElement => {
                             <h1 className="text-3xl font-bold text-gray-800 mb-4">Configuración</h1>
                         </div>
                     } />
-                    <Route path="/usuarios" element={
-                        <UsersPage />
-                    } />
+                    <Route path="/usuarios/*" element={<IamRoutes />} />
                 </Route>
 
         <Route path="/404" element={<NotFound />} />

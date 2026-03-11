@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Eye } from "lucide-react";
@@ -72,6 +73,7 @@ const ALL_STATES: { value: OrderState | ""; label: string }[] = [
 ];
 
 const OrdersContent = (): JSX.Element => {
+  const navigate = useNavigate();
   const {
     orders,
     loading,
@@ -99,16 +101,23 @@ const OrdersContent = (): JSX.Element => {
     handleStateFilter(val || undefined);
   };
 
-  const renderOrderRow = (item: SalesOrder): (string | JSX.Element)[] => [
-    <StateBadge key="state" state={item.state} />,
-    item.accountName,
-    item.orderNumber,
-    formatCurrency(item.totalValue),
-    item.invoiceNumber ?? "-",
-    item.shipmentCityName,
-    formatDate(item.orderDate),
-    <Eye key="view" className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600" />,
-  ];
+  const renderOrderRow = useCallback(
+    (item: SalesOrder): (string | JSX.Element)[] => [
+      <StateBadge key="state" state={item.state} />,
+      item.accountName,
+      item.orderNumber,
+      formatCurrency(item.totalValue),
+      item.invoiceNumber ?? "-",
+      item.shipmentCityName,
+      formatDate(item.orderDate),
+      <Eye
+        key="view"
+        className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600"
+        onClick={() => navigate(`/ordenes/${item.id}`)}
+      />,
+    ],
+    [navigate]
+  );
 
   if (error) {
     return (
