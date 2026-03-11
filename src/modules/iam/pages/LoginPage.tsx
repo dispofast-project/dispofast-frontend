@@ -7,11 +7,13 @@ import heroLoginImage from "../../../assets/hero-login-page.jpg";
 import { loginService } from "../api/auth.service";
 import { useAuth } from "../hooks/useAuth";
 import { isAxiosError } from "axios";
+import { useNotificationStore } from "../../../shared/store";
 
 const LoginPage = () => {
 
     const navigate = useNavigate();
     const {login} = useAuth();
+    const {showNotification} = useNotificationStore();
     
     const handleSubmit = async (data: LoginFormData) => {
         
@@ -41,6 +43,8 @@ const LoginPage = () => {
                     'No fue posible contactar al servidor. Verifique su conexión.';
                 }
             }
+
+            showNotification(message, "error")
         }
     }
 

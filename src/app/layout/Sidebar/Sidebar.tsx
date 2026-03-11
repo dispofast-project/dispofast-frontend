@@ -16,6 +16,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ navItems }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const location = useLocation();
 
     const toggleSidebar = () => {
@@ -24,6 +25,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems }) => {
 
     const closeSidebar = () => {
         setIsOpen(false);
+    };
+
+    const toggleCollapsed = () => {
+        setIsCollapsed(!isCollapsed);
     };
 
     return (
@@ -52,8 +57,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems }) => {
                 navItems={navItems}
                 pathName={location.pathname}
                 isOpen={isOpen}
+                isCollapsed={isCollapsed}
                 onClose={closeSidebar}
                 onLinkClick={closeSidebar}
+                onToggleCollapsed={toggleCollapsed}
             />
         </>
     );
