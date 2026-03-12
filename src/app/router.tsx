@@ -36,16 +36,6 @@ const AppRouter = (): ReactElement => {
               </div>
             }
           />
-          <Route
-            path="/ordenes"
-            element={
-              <div className="p-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                  Órdenes
-                </h1>
-              </div>
-            }
-          />
           <Route path="/cotizaciones" element={<QuotesPage />} />
           <Route path="/cotizaciones/:id" element={<QuoteDetailPage />} />
           <Route

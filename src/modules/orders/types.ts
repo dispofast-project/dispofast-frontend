@@ -19,8 +19,8 @@ export interface SalesOrderItem {
 export interface SalesOrder {
   id: string;
   orderNumber: string;
-  accountId: string;
-  accountName: string;
+  clientId: string;
+  clientName: string;
   asesorUserId: string;
   asesorName: string;
   state: OrderState;
@@ -54,13 +54,13 @@ export interface CreateOrderItemDTO {
 
 export interface CreateOrderRequestDTO {
   orderNumber: string;
-  accountId: string;
+  clientId: string;
   asesorUserId: string;
   orderDate?: string;
   shipmentCityId: string;
   shipmentAddress: string;
   zone?: string;
-  accountPriceListId: string;
+  priceListId: string;
   quoteId?: string;
   items: CreateOrderItemDTO[];
 }
@@ -72,7 +72,7 @@ export interface UpdateOrderRequestDTO {
   shipmentCityId?: string;
   shipmentAddress?: string;
   zone?: string;
-  accountPriceListId?: string;
+  priceListId?: string;
   items?: CreateOrderItemDTO[];
 }
 
