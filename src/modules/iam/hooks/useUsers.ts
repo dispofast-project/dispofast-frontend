@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import type { User } from "../types";
 import { getAllUsers, searchUsers } from "../api/user.service";
+import { useAppDispatch } from "../../../shared/hooks/redux";
+import { setLoading as setGlobalLoading } from "../../../shared/slices/loadingSlice";
 
 export const useUsers = () => {
+    const dispatch = useAppDispatch();
 
     const [users, setUsers] = useState<User[]>();
     const [loading, setLoading] = useState<boolean>(true);
@@ -15,6 +18,7 @@ export const useUsers = () => {
     const loadUsers = async (page: number, search: string) => {
         try {
             setError(null);
+            dispatch(setGlobalLoading(true));
 
             const response = search.trim()
                 ? await searchUsers(search.trim(), { page: page - 1, size: pageSize })
@@ -26,6 +30,7 @@ export const useUsers = () => {
             setError("Error al cargar los usuarios");
         } finally {
             setLoading(false);
+            dispatch(setGlobalLoading(false));
         }
     };
 

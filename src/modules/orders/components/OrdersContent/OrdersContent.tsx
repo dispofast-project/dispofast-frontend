@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import type { JSX } from "react";
 import type { OrderState, SalesOrder } from "../../types";
 import { useOrders } from "../../hooks/useOrders";
@@ -10,6 +10,7 @@ import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import { Button } from "../../../../shared/components/Button/Button";
 import FilterSearchBar from "../../../../shared/components/SearchBar/SearchBar";
 import type { FilterConfig, FilterState } from "../../../../shared/components/SearchBar/types";
+import { deleteOrder } from "../../api/order.service";
 
 const filterConfigs: FilterConfig[] = [
   {
@@ -72,6 +73,17 @@ const ALL_STATES: { value: OrderState | ""; label: string }[] = [
   { value: "CANCELLED", label: "Cancelada" },
 ];
 
+const HEADERS = [
+  "Estado", 
+  "Cliente", 
+  "# Orden", 
+  "Valor", 
+  "# Factura", 
+  "Ciudad", 
+  "Fecha", 
+  "Acciones"
+];
+
 const OrdersContent = (): JSX.Element => {
   const navigate = useNavigate();
   const {
@@ -101,6 +113,18 @@ const OrdersContent = (): JSX.Element => {
     handleStateFilter(val || undefined);
   };
 
+  const handleDelete = async (item: SalesOrder) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta orden?")) {
+      try {
+        await deleteOrder(item.id);
+        handleRefresh();
+      } catch (error) {
+        console.error("Error al eliminar la orden:", error);
+      }
+      alert(`Orden ${item.orderNumber} eliminada (simulado)`);
+    }
+  }
+
   const renderOrderRow = useCallback(
     (item: SalesOrder): (string | JSX.Element)[] => [
       <StateBadge key="state" state={item.state} />,
@@ -110,13 +134,20 @@ const OrdersContent = (): JSX.Element => {
       item.invoiceNumber ?? "-",
       item.shipmentCityName,
       formatDate(item.orderDate),
-      <Eye
-        key="view"
-        className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600"
-        onClick={() => navigate(`/ordenes/${item.id}`)}
-      />,
+      <Box className="flex items-center space-x-3" key="actions">
+        <Eye
+          key="view"
+          className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600"
+          onClick={() => navigate(`/ordenes/${item.id}`)}
+        />
+        <Trash2
+          key="delete"
+          className="w-4 h-4 text-gray-500 cursor-pointer hover:text-red-600"
+          onClick={() => handleDelete(item)}
+        />
+      </Box>
     ],
-    [navigate]
+    [navigate, handleDelete]
   );
 
   if (error) {
@@ -158,7 +189,7 @@ const OrdersContent = (): JSX.Element => {
       <Box className={loading ? "opacity-50 pointer-events-none" : ""}>
         <CustomTable
           data={orders}
-          headers={["Estado", "Cliente", "# Orden", "Valor", "# Factura", "Ciudad", "Fecha", "Acciones"]}
+          headers={HEADERS}
           renderRow={renderOrderRow}
           currentPage={currentPage}
           onPageChange={handlePageChange}

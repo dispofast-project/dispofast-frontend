@@ -2,7 +2,7 @@ import React from "react";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
-    variant?: "primary" | "secondary" | "icon";
+    variant?: "primary" | "secondary" | "icon" | "tertiary";
     isLoading?: boolean;
     badgeContent?: number;
 }
@@ -13,6 +13,7 @@ const baseStyles =
 const variantStyles: Record<NonNullable<ButtonProps["variant"]>, string> = {
     primary: "bg-dispofast-primary text-white hover:bg-dispofast-primary/90 hover:cursor-pointer disabled:bg-dispofast-neutral disabled:text-gray-500",
     secondary: "bg-dispofast-secondary text-white hover:bg-dispofast-primary hover:cursor-pointer disabled:bg-dispofast-neutral disabled:text-gray-500",
+    tertiary: "bg-transparent text-gray-700 hover:bg-gray-100 hover:cursor-pointer disabled:text-gray-400",
     icon: "p-2 bg-transparent text-dispofast-primary hover:bg-dispofast-neutral hover:cursor-pointer disabled:text-gray-400",
 };
 

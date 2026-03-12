@@ -1,6 +1,12 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponseDTO } from "../../../shared/types/common";
-import type { OrderFilters, SalesOrder } from "../types";
+import type {
+  AttachInvoiceRequestDTO,
+  CreateOrderRequestDTO,
+  OrderFilters,
+  SalesOrder,
+  UpdateOrderRequestDTO,
+} from "../types";
 
 export interface OrderServiceParams {
   page?: number;
@@ -36,5 +42,66 @@ export const getOrderById = async (id: string): Promise<SalesOrder> => {
     return data;
   } catch {
     throw new Error("Error al cargar la orden");
+  }
+};
+
+// ─── Mutations ───────────────────────────────────────────────────────────────
+
+export const createOrder = async (
+  payload: CreateOrderRequestDTO
+): Promise<SalesOrder> => {
+  try {
+    const { data } = await apiClient.post<SalesOrder>(BASE_URL, payload);
+    return data;
+  } catch {
+    throw new Error("Error al crear la orden");
+  }
+};
+
+export const createOrderFromQuote = async (
+  quoteId: string
+): Promise<SalesOrder> => {
+  try {
+    const { data } = await apiClient.post<SalesOrder>(
+      `${BASE_URL}/from-quote/${quoteId}`
+    );
+    return data;
+  } catch {
+    throw new Error("Error al crear la orden desde cotización");
+  }
+};
+
+export const updateOrder = async (
+  id: string,
+  payload: UpdateOrderRequestDTO
+): Promise<SalesOrder> => {
+  try {
+    const { data } = await apiClient.put<SalesOrder>(`${BASE_URL}/${id}`, payload);
+    return data;
+  } catch {
+    throw new Error("Error al actualizar la orden");
+  }
+};
+
+export const attachInvoice = async (
+  id: string,
+  payload: AttachInvoiceRequestDTO
+): Promise<SalesOrder> => {
+  try {
+    const { data } = await apiClient.patch<SalesOrder>(
+      `${BASE_URL}/${id}/invoice`,
+      payload
+    );
+    return data;
+  } catch {
+    throw new Error("Error al adjuntar la factura");
+  }
+};
+
+export const deleteOrder = async (id: string): Promise<void> => {
+  try {
+    await apiClient.delete(`${BASE_URL}/${id}`);
+  } catch {
+    throw new Error("Error al eliminar la orden");
   }
 };

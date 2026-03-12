@@ -41,3 +41,42 @@ export interface OrderFilters {
   state?: OrderState;
   orderNumber?: string;
 }
+
+// ─── Request DTOs ───────────────────────────────────────────────────────────
+
+export interface CreateOrderItemDTO {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  discount?: number;
+  lineTotal: number;
+}
+
+export interface CreateOrderRequestDTO {
+  orderNumber: string;
+  accountId: string;
+  asesorUserId: string;
+  orderDate?: string;
+  shipmentCityId: string;
+  shipmentAddress: string;
+  zone?: string;
+  accountPriceListId: string;
+  quoteId?: string;
+  items: CreateOrderItemDTO[];
+}
+
+export interface UpdateOrderRequestDTO {
+  asesorUserId?: string;
+  state?: OrderState;
+  orderDate?: string;
+  shipmentCityId?: string;
+  shipmentAddress?: string;
+  zone?: string;
+  accountPriceListId?: string;
+  items?: CreateOrderItemDTO[];
+}
+
+export interface AttachInvoiceRequestDTO {
+  invoiceNumber: string;
+  invoiceUrl: string;
+}

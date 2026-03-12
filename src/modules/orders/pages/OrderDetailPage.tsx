@@ -5,6 +5,8 @@ import { useOrderDetail } from "../hooks/useOrderDetail";
 import OrderStatusStepper from "../components/OrderStatusStepper/OrderStatusStepper";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import type { OrderState, SalesOrderItem } from "../types";
+import { Box } from "@mui/material";
+import { Button } from "../../../shared/components/Button/Button";
 
 const STATE_LABELS: Record<OrderState, string> = {
   PENDING:    "Creada",
@@ -44,10 +46,10 @@ interface InfoRowProps {
 }
 
 const InfoRow = ({ label, value }: InfoRowProps) => (
-  <div>
+  <Box>
     <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
     <p className="text-sm font-semibold text-gray-800">{value}</p>
-  </div>
+  </Box>
 );
 
 const OrderDetailPage = () => {
@@ -57,79 +59,81 @@ const OrderDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-dispofast-primary border-t-transparent rounded-full animate-spin" />
-      </div>
+      <Box className="flex items-center justify-center h-64">
+        <Box className="w-8 h-8 border-4 border-dispofast-primary border-t-transparent rounded-full animate-spin" />
+      </Box>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3">
+      <Box className="flex flex-col items-center justify-center h-64 gap-3">
         <p className="text-red-500">{error ?? "Orden no encontrada"}</p>
-        <button
+        <Button
           onClick={() => navigate("/ordenes")}
           className="text-sm text-dispofast-primary underline"
+          variant="primary"
         >
           Volver a órdenes
-        </button>
-      </div>
+        </Button>
+      </Box>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
+    <Box className="flex flex-col gap-6 pb-8">
       {/* Back + header */}
-      <div>
-        <button
+      <Box>
+        <Button
           onClick={() => navigate("/ordenes")}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-3 transition-colors"
+          variant="tertiary"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver
-        </button>
+        </Button>
 
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
+        <Box className="flex flex-wrap items-start justify-between gap-3">
+          <Box>
             <h1 className="text-2xl font-bold text-gray-800">
               Orden {order.orderNumber}
             </h1>
             <p className="text-sm text-gray-500 mt-0.5">{order.accountName}</p>
-          </div>
+          </Box>
           <span
             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATE_COLORS[order.state]}`}
           >
             {STATE_LABELS[order.state]}
           </span>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Status stepper */}
       <OrderStatusStepper state={order.state} />
 
       {/* Info cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Order info */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-5 flex flex-col gap-4">
+        <Box className="bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-5 flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-gray-800">
             Información de la Orden
           </h3>
 
           <InfoRow label="Cliente" value={order.accountName} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <Box className="grid grid-cols-2 gap-4">
             <InfoRow label="Valor Total" value={formatCurrency(order.totalValue)} />
             <InfoRow label="Fecha"       value={formatDate(order.orderDate)} />
-          </div>
+          </Box>
 
           <InfoRow label="Asesor Comercial" value={order.asesorName ?? "-"} />
 
           {order.invoiceNumber && (
-            <div>
+            <Box>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
                 Factura
               </p>
-              <div className="flex items-center gap-3">
+              <Box className="flex items-center gap-3">
                 <span className="text-sm font-semibold text-gray-800">
                   {order.invoiceNumber}
                 </span>
@@ -144,13 +148,13 @@ const OrderDetailPage = () => {
                     Descargar
                   </a>
                 )}
-              </div>
-            </div>
+              </Box>
+            </Box>
           )}
-        </div>
+        </Box>
 
         {/* Delivery info */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-5 flex flex-col gap-4">
+        <Box className="bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-5 flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-gray-800">
             Información de Entrega
           </h3>
@@ -158,16 +162,16 @@ const OrderDetailPage = () => {
           <InfoRow label="Ciudad"    value={order.shipmentCityName ?? "-"} />
           <InfoRow label="Dirección" value={order.shipmentAddress  ?? "-"} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <Box className="grid grid-cols-2 gap-4">
             <InfoRow label="Zona" value={order.zone ?? "-"} />
             <InfoRow label="Guía" value="-" />
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
 
       {/* Items table */}
       {order.items && order.items.length > 0 && (
-        <div>
+        <Box>
           <CustomTable<SalesOrderItem>
             headers={["Producto", "Cantidad", "Precio Unit.", "Descuento", "Total Línea"]}
             data={order.items}
@@ -184,9 +188,9 @@ const OrderDetailPage = () => {
             onPageChange={() => {}}
             hidePagination
           />
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
