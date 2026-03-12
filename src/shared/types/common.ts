@@ -23,16 +23,27 @@ export interface PageableDTO {
     unpaged: boolean;
 }
 
-export interface PagedResponseDTO<T> {
-    content: T[];
-    pageable: PageableDTO;
-    last: boolean;
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    number: number;
-    sort: SortDTO;
-    first: boolean;
-    numberOfElements: number;
-    empty: boolean;
+export interface PagedResponse<T> {
+  content: T[];
+  pageable: PageableDTO;
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  sort: Sort;
+  first: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}
+
+export interface Department {
+  code: string;
+  name: string;
+}
+
+export interface Location {
+  code: string;
+  name: string;
+  department: Department;
 }

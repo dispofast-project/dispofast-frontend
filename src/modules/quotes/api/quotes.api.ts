@@ -1,6 +1,7 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { QuotePreview, Quote } from "../types";
+import type { QuotePreview, Quote, Account } from "../types";
+import type { PriceList } from "../types";
 
 export const getQuotesService = async (
   page: number = 0,
@@ -20,5 +21,32 @@ export const getQuotesService = async (
 
 export const getQuoteByIdService = async (id: string): Promise<Quote> => {
   const response = await apiClient.get(`/quotes/${id}`);
+  return response.data;
+};
+
+export const updateQuoteService = async (
+  id: string,
+  data: Partial<Quote> & { priceListId?: string },
+): Promise<Quote> => {
+  const response = await apiClient.put(`/quotes/${id}`, data);
+  return response.data;
+};
+
+export const createQuoteService = async (accountId: string): Promise<Quote> => {
+  const response = await apiClient.post("/quotes", { accountId });
+  return response.data;
+};
+
+export const searchAccountsService = async (
+  search: string,
+): Promise<Account[]> => {
+  const response = await apiClient.get("/accounts", {
+    params: { search, size: 20 },
+  });
+  return response.data?.content || response.data || [];
+};
+
+export const getPriceListsService = async (): Promise<PriceList[]> => {
+  const response = await apiClient.get("/price-lists");
   return response.data;
 };

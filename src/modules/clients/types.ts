@@ -1,0 +1,73 @@
+import type { City } from "../../shared/types/location";
+
+export interface UserPreview {
+  id: string;
+  fullName: string;
+}
+
+export const LegalEntityType = {
+  NATURAL: "NATURAL",
+  LEGAL: "LEGAL",
+} as const;
+
+export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType];
+
+export interface ClientPreview {
+  id: string;
+  legalEntityType: LegalEntityType;
+  name: string;
+  identificationNumber: string;
+  isActive: boolean;
+  defaultAdvisor: UserPreview;
+  city: City;
+}
+
+export interface ClientType {
+  id: number;
+  name: string;
+}
+
+export interface PriceListResponse {
+  id: string;
+  name: string;
+}
+
+export interface ClientResponse {
+  id: string;
+  legalEntityType: LegalEntityType;
+  name: string;
+  identificationNumber: string;
+  email: string;
+  phone: string;
+  isActive: boolean;
+  retefuenteApplies: boolean;
+  address: string;
+  defaultAdvisor: UserPreview;
+  city: City;
+  zone: string;
+  defaultDiscountRate: number;
+  priceList: PriceListResponse;
+  clientType: ClientType;
+  legalDocuments: unknown[];
+}
+
+export interface IndividualResponse extends ClientResponse {
+  firstName: string;
+  lastName: string;
+  representativeFirstName: string;
+  representativeLastName: string;
+  representativeIdentification: string;
+  representativeJobTitle: string;
+  representativeEmail: string;
+  representativePhone: string;
+}
+
+export interface OrganizationResponse extends ClientResponse {
+  legalName: string;
+  billingEmail: string;
+  representativeFirstName: string;
+  representativeLastName: string;
+  representativeIdentification: string;
+  representativeEmail: string;
+  representativePhone: string;
+}
