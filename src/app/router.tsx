@@ -8,6 +8,7 @@ import QuoteDetailPage from "../modules/quotes/pages/QuoteDetailPage";
 import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
+import UsersPage from "../modules/iam/pages/UsersPage";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -89,14 +90,9 @@ const AppRouter = (): ReactElement => {
               </div>
             }
           />
-          <Route
-            path="/users"
-            element={
-              <div className="p-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4">Users</h1>
-              </div>
-            }
-          />
+          <Route path="/usuarios" element={
+              <UsersPage />
+          } />
         </Route>
 
         <Route path="/404" element={<NotFound />} />

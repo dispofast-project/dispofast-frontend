@@ -86,7 +86,7 @@ const FilterSearchBar = ({ configs, onChange, className }: FilterSearchBarProps)
 
   return (
     <Box
-      className={`${className} bg-white border border-gray-200 rounded-lg shadow-sm transition-all hover:border-gray-300`}
+      className={`${className} bg-white border border-gray-200 rounded-lg shadow-sm transition-all`}
     >
       <Stack direction="row" alignItems="center" gap={2} className="px-4 py-3">
         <TextField

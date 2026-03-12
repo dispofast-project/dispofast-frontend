@@ -1,31 +1,31 @@
 export interface ApiError {
-  response?: {
-    status?: number;
-    data?: {
-      message?: string;
-      [key: string]: unknown;
-    };
-  };
+    response?: {
+        status?: number;
+        data?: {
+            message?: string;
+            [key: string]: any;
+        }
+    }
 }
 
-export interface Sort {
-  empty: boolean;
-  sorted: boolean;
-  unsorted: boolean;
+export interface SortDTO {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
 }
 
-export interface Pageable {
-  pageNumber: number;
-  pageSize: number;
-  sort: Sort;
-  offset: number;
-  paged: boolean;
-  unpaged: boolean;
+export interface PageableDTO {
+    pageNumber: number;
+    pageSize: number;
+    sort: SortDTO;
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
 }
 
 export interface PagedResponse<T> {
   content: T[];
-  pageable: Pageable;
+  pageable: PageableDTO;
   last: boolean;
   totalElements: number;
   totalPages: number;
