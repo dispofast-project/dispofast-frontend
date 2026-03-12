@@ -1,0 +1,23 @@
+export type ClientFormData = {
+  retefuenteApplies: boolean;
+  defaultDiscountRate: string;
+  identificationNumber: string;
+  email: string;
+  phone: string;
+  address: string;
+  cityCode: string;
+  zone: string;
+  clientTypeId: string;
+  priceListId: string;
+  defaultAdvisorId: string;
+  firstName: string;
+  lastName: string;
+  legalName: string;
+  billingEmail: string;
+  representativeFirstName: string;
+  representativeLastName: string;
+  representativeIdentification: string;
+  representativeEmail: string;
+  representativePhone: string;
+  representativeJobTitle: string;
+};

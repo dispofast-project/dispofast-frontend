@@ -1,9 +1,10 @@
 import { Box } from "@mui/material";
 import type { QuotePreview } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
-import { formatDate } from "../../../shared/utils/date";
-import { QuoteStatusBadge } from "../components/QuoteStatusBadge"; // <-- Importamos tu nuevo componente
 import { formatCurrency } from "../../../shared/utils/currency";
+import { formatDate } from "../../../shared/utils/date";
+import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
+import { QUOTE_STATUS_CONFIG } from "../config/statusConfig";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -37,7 +38,11 @@ const QuotesTable = ({
 
   const renderRow = (quote: QuotePreview) => {
     return [
-      <QuoteStatusBadge status={quote.status} />,
+      <StatusBadge 
+        key={`status-${quote.id}`} 
+        status={quote.status} 
+        configMap={QUOTE_STATUS_CONFIG} 
+      />,
       
       <span className="font-medium text-gray-900">{quote.number}</span>,
       quote.accountName,
