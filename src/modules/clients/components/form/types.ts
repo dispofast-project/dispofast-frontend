@@ -1,5 +1,6 @@
 export type ClientFormData = {
   retefuenteApplies: boolean;
+  defaultDiscountRate: string;
   identificationNumber: string;
   email: string;
   phone: string;

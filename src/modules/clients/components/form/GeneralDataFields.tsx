@@ -1,5 +1,6 @@
 import React from "react";
-import { Typography, TextField, FormControlLabel, Switch, Box } from "@mui/material";
+import { Typography, TextField, Switch, Box } from "@mui/material";
+import { NumericFormat } from 'react-number-format';
 import type { ClientFormData } from "./types";
 
 interface GeneralDataFieldsProps {
@@ -28,26 +29,53 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
         <TextField size="small" fullWidth required label="ID Lista de Precios" name="priceListId" value={formData.priceListId} onChange={onChange} />
         {/* TODO: Agregar ComboBar para que sea buscar y seleccionar el asesor */}
         <TextField size="small" fullWidth required label="ID Asesor (UUID)" name="defaultAdvisorId" value={formData.defaultAdvisorId} onChange={onChange} />
+        <NumericFormat
+          customInput={TextField}
+          size="small"
+          fullWidth
+          required
+          label="Descuento por defecto"
+          name="defaultDiscountRate"
+          value={formData.defaultDiscountRate}
+          onValueChange={(values) => {
+            onChange({ target: { name: 'defaultDiscountRate', value: values.value } } as React.ChangeEvent<HTMLInputElement>);
+          }}
+          suffix=" %"
+          decimalScale={0}
+          allowNegative={false}
+          isAllowed={(values) => {
+            const { floatValue } = values;
+            return floatValue === undefined || (floatValue >= 0 && floatValue <= 100);
+          }}
+        />
       </div>
 
       <Box className="flex items-center justify-between border border-gray-100 p-4 rounded-xl bg-gray-50 mb-6">
-        <Box>
-          <Typography variant="subtitle2" className="font-bold text-gray-800">Aplica Retefuente</Typography>
-          <Typography variant="caption" className="text-gray-500">¿Se le aplicará a este cliente retención en la fuente?</Typography>
-        </Box>
-        <FormControlLabel
-          control={
-            <Switch
-              color="primary"
-              name="retefuenteApplies"
-              checked={formData.retefuenteApplies}
-              onChange={onChange}
-            />
-          }
-          label=""
-          className="!m-0"
-        />
+      <Box className="flex flex-col">
+        <Typography 
+          variant="subtitle2" 
+          className="font-bold text-gray-800"
+          sx={{ lineHeight: 1.4 }}
+        >
+          Aplica Retefuente
+        </Typography>
+        <Typography 
+          variant="caption" 
+          className="text-gray-500"
+          sx={{ lineHeight: 1.2, mt: 0.5 }}
+        >
+          ¿Se le aplicará a este cliente retención en la fuente?
+        </Typography>
       </Box>
+      
+      <Switch
+        color="primary"
+        name="retefuenteApplies"
+        checked={formData.retefuenteApplies}
+        onChange={onChange}
+        sx={{ ml: 2 }}
+      />
+    </Box>
     </>
   );
 };

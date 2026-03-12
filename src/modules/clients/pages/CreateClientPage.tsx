@@ -21,6 +21,7 @@ const cleanValue = (val: string | undefined): string | undefined => {
 
 const initialFormState = {
   retefuenteApplies: true,
+  defaultDiscountRate: "0",
   identificationNumber: "",
   email: "",
   phone: "",
@@ -83,9 +84,13 @@ const CreateClientPage = () => {
       const parsedClientTypeId = parseInt(formData.clientTypeId, 10);
       const finalClientTypeId = isNaN(parsedClientTypeId) ? 0 : parsedClientTypeId;
 
+      const parsedDiscountRate = parseInt(formData.defaultDiscountRate, 10);
+      const finalDiscountRate = isNaN(parsedDiscountRate) ? 0 : parsedDiscountRate;
+
       const basePayload = {
         legalEntityType: entityType,
         retefuenteApplies: formData.retefuenteApplies,
+        defaultDiscountRate: finalDiscountRate,
         identificationNumber: formData.identificationNumber,
         email: formData.email,
         phone: formData.phone,
