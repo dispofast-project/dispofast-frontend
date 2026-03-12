@@ -41,18 +41,31 @@ export interface Organization {
   billingEmail: string;
   generalEmail: string;
   phone: string;
+  representativeFirstName?: string;
+  representativeLastName?: string;
+  representativeIdentification?: string;
+  representativeEmail?: string;
+  representativePhone?: string;
 }
 
-// TODO: Mover cuando se implemente el modulo
 export interface Account {
   id: string;
+  legalEntityType: "PERSONA_NATURAL" | "PERSONA_JURIDICA";
   identificationNumber: string;
-  firstName: string;
-  lastName: string;
-  jobTitle: string;
-  email: string;
-  phone: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  jobTitle?: string;
   organization?: Organization;
+  representativeFirstName?: string;
+  representativeLastName?: string;
+  representativeIdentification?: string;
+  representativeJobTitle?: string;
+  representativeEmail?: string;
+  representativePhone?: string;
 }
 
 export interface Quote {

@@ -53,7 +53,6 @@ const QuoteDetailPage = () => {
     if (!id) return;
 
     let isMounted = true;
-
     // We can avoid setting isLoading to true here strictly because 
     // the initial state is already set to isLoading = true, 
     // which fixes the linter issue for cascading renders.
@@ -128,7 +127,7 @@ const QuoteDetailPage = () => {
     );
   }
 
-  const clientName = (quote?.account?.organization?.legalName || `${quote?.account?.firstName || ""} ${quote?.account?.lastName || ""}`).trim() || "N/A";
+  const clientName = (quote?.account?.organization?.legalName || quote?.account?.name || `${quote?.account?.firstName || ""} ${quote?.account?.lastName || ""}`).trim() || "N/A";
   const initials = clientName.substring(0, 2).toUpperCase();
 
   return (
@@ -162,7 +161,7 @@ const QuoteDetailPage = () => {
             
             <Box className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               {/* Si hay organización, mostrar los datos de la empresa primero */}
-              {quote?.account?.organization?.legalName && (
+              {quote?.account?.organization && (
                 <DetailSection>
                   <DataField label="Razón Social" value={quote.account.organization.legalName} />
                   <DataField label="NIT" value={quote.account.organization.nit} />
@@ -173,18 +172,18 @@ const QuoteDetailPage = () => {
                 </DetailSection>
               )}
 
-              <DetailSection title={quote?.account?.organization?.legalName ? "Representante Legal" : undefined}>
-                <DataField label="Nombres" value={quote?.account?.firstName} />
-                <DataField label="Apellidos" value={quote?.account?.lastName} />
-                <DataField label="Identificación" value={quote?.account?.identificationNumber} />
-                <DataField label="Cargo" value={quote?.account?.jobTitle} />
-                <DataField label="Email" value={quote?.account?.email} />
-                <DataField label="Teléfono" value={quote?.account?.phone} />
+              <DetailSection title={quote?.account?.organization ? "Representante Legal" : undefined}>
+                <DataField label="Nombres" value={quote?.account?.firstName || quote?.account?.organization?.representativeFirstName || quote?.account?.representativeFirstName} />
+                <DataField label="Apellidos" value={quote?.account?.lastName || quote?.account?.organization?.representativeLastName || quote?.account?.representativeLastName} />
+                <DataField label="Identificación" value={quote?.account?.identificationNumber || quote?.account?.organization?.representativeIdentification || quote?.account?.representativeIdentification} />
+                <DataField label="Cargo" value={quote?.account?.jobTitle || quote?.account?.representativeJobTitle} />
+                <DataField label="Email" value={quote?.account?.email || quote?.account?.organization?.representativeEmail || quote?.account?.representativeEmail} />
+                <DataField label="Teléfono" value={quote?.account?.phone || quote?.account?.organization?.representativePhone || quote?.account?.representativePhone} />
               </DetailSection>
               
               <DetailSection title="Ubicación">
-                <DataField label="Ciudad" value={quote?.location?.cityName} />
-                <DataField label="Departamento" value={quote?.location?.departmentName} />
+                <DataField label="Ciudad" value={quote?.location?.name} />
+                <DataField label="Departamento" value={quote?.location?.department?.name} />
               </DetailSection>
             </Box>
           </Box>

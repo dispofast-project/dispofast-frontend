@@ -37,9 +37,13 @@ export interface PagedResponse<T> {
   empty: boolean;
 }
 
+export interface Department {
+  code: string;
+  name: string;
+}
+
 export interface Location {
-  cityCode: string;
-  cityName: string;
-  departmentCode: string;
-  departmentName: string;
+  code: string;
+  name: string;
+  department: Department;
 }
