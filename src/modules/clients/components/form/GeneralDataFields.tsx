@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Typography, TextField, Switch, Box } from "@mui/material";
 import { NumericFormat } from 'react-number-format';
 import type { ClientFormData } from "./types";
+import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete/CityAutocomplete";
+import type { City } from "../../../../shared/types/location";
+import { ZoneSelector } from "../../../../shared/components/ZoneSelector/ZoneSelector";
 
 interface GeneralDataFieldsProps {
   formData: ClientFormData;
@@ -9,7 +12,9 @@ interface GeneralDataFieldsProps {
 }
 
 export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps) => {
-  return (
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+
+  return ( 
     <>
       <Typography variant="subtitle1" sx={{ mb: 1 }} className="mb-8 text-gray-800 font-bold opacity-90">
         Datos Generales
@@ -19,10 +24,21 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
         <TextField size="small" fullWidth required type="email" label="Correo Electrónico" name="email" value={formData.email} onChange={onChange} />
         <TextField size="small" fullWidth required label="Teléfono" name="phone" value={formData.phone} onChange={onChange} />
         <TextField size="small" fullWidth required label="Dirección" name="address" value={formData.address} onChange={onChange} />
-        {/* TODO: Agregar ComboBar para que sea seleccionar la ciudad */}
-        <TextField size="small" fullWidth required label="Código Ciudad (ej: BOG)" name="cityCode" value={formData.cityCode} onChange={onChange} />
-        {/* TODO: Agregar ComboBar para que sea seleccionar la zona (aqui no sera consultar el backend si no datos pregrabados) */}
-        <TextField size="small" fullWidth required label="Zona (ej: norte, sur)" name="zone" value={formData.zone} onChange={onChange} />
+        <CityAutocomplete 
+          required 
+          value={selectedCity}
+          onChange={(newCity) => {
+            setSelectedCity(newCity);
+            onChange({
+              target: { name: "cityCode", value: newCity?.code || "" },
+            } as React.ChangeEvent<HTMLInputElement>);
+          }}
+        />
+        <ZoneSelector 
+          value={formData.zone} 
+          onChange={onChange} 
+          required 
+        />
         {/* TODO: Agregar ComboBar para que sea seleccionar el tipo de cliente */}
         <TextField size="small" fullWidth required type="number" label="ID Tipo Cliente" name="clientTypeId" value={formData.clientTypeId} onChange={onChange} />
         {/* TODO: Agregar ComboBar para que sea seleccionar la lista de precios */}
