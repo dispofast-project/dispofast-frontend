@@ -6,6 +6,8 @@ import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete
 import type { City } from "../../../../shared/types/location";
 import { ZoneSelector } from "../../../../shared/components/ZoneSelector/ZoneSelector";
 import { AdvisorAutocomplete } from "../../../../shared/components/AdvisorAutocomplete/AdvisorAutocomplete";
+import { ClientTypeSelector } from "../../../../shared/components/ClientTypeSelector/ClientTypeSelector";
+import { PriceListAutocomplete } from "../../../../shared/components/PriceListAutocomplete/PriceListAutocomplete";
 import type { User } from "../../../iam/types";
 
 interface GeneralDataFieldsProps {
@@ -16,6 +18,7 @@ interface GeneralDataFieldsProps {
 export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps) => {
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedAdvisor, setSelectedAdvisor] = useState<User | null>(null);
+  const [selectedPriceList, setSelectedPriceList] = useState<{ id: string; name: string } | null>(null);
 
   return ( 
     <>
@@ -42,10 +45,17 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
           onChange={onChange} 
           required 
         />
-        {/* TODO: Agregar ComboBar para que sea seleccionar el tipo de cliente */}
-        <TextField size="small" fullWidth required type="number" label="ID Tipo Cliente" name="clientTypeId" value={formData.clientTypeId} onChange={onChange} />
-        {/* TODO: Agregar ComboBar para que sea seleccionar la lista de precios */}
-        <TextField size="small" fullWidth required label="ID Lista de Precios" name="priceListId" value={formData.priceListId} onChange={onChange} />
+        <ClientTypeSelector required value={formData.clientTypeId} onChange={onChange} />
+        <PriceListAutocomplete
+          required
+          value={selectedPriceList}
+          onChange={(priceList) => {
+            setSelectedPriceList(priceList);
+            onChange({
+              target: { name: "priceListId", value: priceList?.id || "" },
+            } as React.ChangeEvent<HTMLInputElement>);
+          }}
+        />
         <AdvisorAutocomplete
           required
           value={selectedAdvisor}

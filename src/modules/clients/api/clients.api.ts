@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { ClientPreview, ClientResponse } from "../types";
+import type { ClientPreview, ClientResponse, ClientType, PriceListResponse } from "../types";
 import type { CreateClientRequestDTO } from "../types/create-client.dto";
 
 export const getClientsService = async (
@@ -28,5 +28,15 @@ export const createClientService = async (
   payload: CreateClientRequestDTO
 ): Promise<ClientResponse> => {
   const response = await apiClient.post<ClientResponse>("/clients", payload);
+  return response.data;
+};
+
+export const getClientTypesService = async (): Promise<ClientType[]> => {
+  const response = await apiClient.get<ClientType[]>("/client-types");
+  return response.data;
+};
+
+export const getPriceListsService = async (): Promise<PriceListResponse[]> => {
+  const response = await apiClient.get<PriceListResponse[]>("/price-lists");
   return response.data;
 };
