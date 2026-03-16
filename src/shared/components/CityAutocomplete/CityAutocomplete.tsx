@@ -99,7 +99,7 @@ export const CityAutocomplete = ({
       renderOption={(props, option) => (
         <li {...props} key={option.code}>
           <Box>
-            <Typography variant="body2">{option.name} - {option.department.name}</Typography>
+            <Typography variant="body2">{option.name}</Typography>
             <Typography variant="caption" color="text.secondary">
               {option.department.name}
             </Typography>

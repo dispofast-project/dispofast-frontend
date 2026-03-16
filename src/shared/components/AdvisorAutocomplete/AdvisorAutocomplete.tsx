@@ -23,16 +23,18 @@ export const AdvisorAutocomplete = ({
   const [options, setOptions] = useState<User[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
 
-    if (inputValue === "") {
+    if (inputValue === "" && !open) {
       setOptions(value ? [value] : []);
       return undefined;
     }
 
     setIsSearching(true);
+    const debounce = inputValue === "" ? 0 : 400;
     const timeoutId = setTimeout(async () => {
       try {
         const result = await searchUsers(inputValue, { page: 0, size: 20 });
@@ -48,13 +50,13 @@ export const AdvisorAutocomplete = ({
           setIsSearching(false);
         }
       }
-    }, 400);
+    }, debounce);
 
     return () => {
       active = false;
       clearTimeout(timeoutId);
     };
-  }, [inputValue, value]);
+  }, [inputValue, value, open]);
 
   return (
     <Autocomplete
@@ -67,6 +69,9 @@ export const AdvisorAutocomplete = ({
       includeInputInList
       filterSelectedOptions
       value={value}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
       noOptionsText={isSearching ? "Buscando..." : "No se encontraron asesores"}
       onChange={(_event, newValue: User | null) => {
         setOptions(newValue ? [newValue, ...options] : options);
