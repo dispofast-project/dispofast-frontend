@@ -5,6 +5,8 @@ import type { ClientFormData } from "./types";
 import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete/CityAutocomplete";
 import type { City } from "../../../../shared/types/location";
 import { ZoneSelector } from "../../../../shared/components/ZoneSelector/ZoneSelector";
+import { AdvisorAutocomplete } from "../../../../shared/components/AdvisorAutocomplete/AdvisorAutocomplete";
+import type { User } from "../../../iam/types";
 
 interface GeneralDataFieldsProps {
   formData: ClientFormData;
@@ -13,6 +15,7 @@ interface GeneralDataFieldsProps {
 
 export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps) => {
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [selectedAdvisor, setSelectedAdvisor] = useState<User | null>(null);
 
   return ( 
     <>
@@ -43,8 +46,16 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
         <TextField size="small" fullWidth required type="number" label="ID Tipo Cliente" name="clientTypeId" value={formData.clientTypeId} onChange={onChange} />
         {/* TODO: Agregar ComboBar para que sea seleccionar la lista de precios */}
         <TextField size="small" fullWidth required label="ID Lista de Precios" name="priceListId" value={formData.priceListId} onChange={onChange} />
-        {/* TODO: Agregar ComboBar para que sea buscar y seleccionar el asesor */}
-        <TextField size="small" fullWidth required label="ID Asesor (UUID)" name="defaultAdvisorId" value={formData.defaultAdvisorId} onChange={onChange} />
+        <AdvisorAutocomplete
+          required
+          value={selectedAdvisor}
+          onChange={(advisor) => {
+            setSelectedAdvisor(advisor);
+            onChange({
+              target: { name: "defaultAdvisorId", value: advisor?.id || "" },
+            } as React.ChangeEvent<HTMLInputElement>);
+          }}
+        />
         <NumericFormat
           customInput={TextField}
           size="small"
