@@ -30,56 +30,47 @@ export const useAuthStore = create<AuthState>()(
                 },
 
                 login: (data) => {
-                    const { token: rawToken, user} = data;
+                    const { token: rawToken, user } = data;
 
                     const normalizedToken = typeof rawToken === "string" ? rawToken : null;
-                    const token = normalizedToken?.startsWith("Bearer ") 
-                        ? normalizedToken.slice(7) 
+                    const token = normalizedToken?.startsWith("Bearer ")
+                        ? normalizedToken.slice(7)
                         : normalizedToken;
 
-                    if(!token) {
+                    if (!token) {
                         console.error("La respuesta de inicio de sesión no contiene un token válido.");
                         throw new Error("TOKEN_MISSING");
                     }
 
                     let decodedToken: DecodedToken = {};
-
                     try {
                         decodedToken = jwtDecode(token);
                     } catch (error) {
                         console.error("Error al decodificar el token JWT:", error);
                     }
 
-                    const authorities = decodedToken.authorities 
-                        ? decodedToken.authorities 
-                        : [];
+                    // Preferir authorities del JWT (incluye ROLE_X + permisos efectivos).
+                    // Como fallback, usar effectivePermissions de la respuesta del login.
+                    const authorities: string[] = decodedToken.authorities?.length
+                        ? decodedToken.authorities
+                        : user?.effectivePermissions ?? [];
 
                     const baseUser: AuthenticatedUser = {
-                        id: 
-                            user?.id ??
-                            decodedToken?.userId ??
-                            decodedToken?.sub ??
-                            decodedToken?.email ??
-                            "",
-                        name: 
-                            user?.name ??
-                            decodedToken?.name ?? '',
-                        email: 
-                            user?.email ??
-                            decodedToken?.email ?? '',
-                        roles:
-                            user.roles ?? authorities,
-                    }
-                    
+                        id: user?.id ?? decodedToken?.userId ?? decodedToken?.sub ?? decodedToken?.email ?? "",
+                        name: user?.name ?? decodedToken?.name ?? '',
+                        email: user?.email ?? decodedToken?.email ?? '',
+                        role: user?.role ?? '',
+                        effectivePermissions: user?.effectivePermissions ?? [],
+                    };
+
                     set({
-                        token: token || null,
+                        token,
                         user: baseUser,
                         isAuthenticated: true,
-                        authorities: authorities
-                    })
+                        authorities,
+                    });
 
                     get().checkAuth();
-                    console.log("Usuario autenticado:", baseUser);
                 },
 
                 checkAuth: () => {
@@ -87,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
 
                     if (!token) {
                         if (user) {
-                        get().logout();
+                            get().logout();
                         }
                         return;
                     }
@@ -96,21 +87,13 @@ export const useAuthStore = create<AuthState>()(
                     try {
                         decodedToken = jwtDecode(token);
                     } catch (error) {
-                        console.error(
-                        'No se pudo decodificar el token JWT en checkAuth.',
-                        error
-                        );
-                        // Do not logout on decode errors; keep current session
+                        console.error('No se pudo decodificar el token JWT en checkAuth.', error);
                         return;
                     }
-                    const currentTime = Date.now() / 1000;
 
+                    const currentTime = Date.now() / 1000;
                     if (decodedToken.exp && decodedToken.exp < currentTime) {
                         get().logout();
-                        return;
-                    }
-
-                    if (!user) {
                         return;
                     }
                 }
