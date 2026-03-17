@@ -1,10 +1,25 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button as MuiButton,
+  CircularProgress,
+} from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Eye, Trash2 } from "lucide-react";
 import type { JSX } from "react";
 import type { OrderState, SalesOrder } from "../../types";
+import { ORDER_STATUS_CONFIG } from "../../config/statusConfig";
+import { StatusBadge } from "../../../../shared/components/StatusBadge/StatusBadge";
 import { useOrders } from "../../hooks/useOrders";
 import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import { Button } from "../../../../shared/components/Button/Button";
@@ -24,24 +39,6 @@ const filterConfigs: FilterConfig[] = [
   },
 ];
 
-const STATE_LABELS: Record<OrderState, string> = {
-  PENDING: "Creada",
-  INVOICED: "Facturada",
-  ASSIGNED: "Asignada",
-  IN_TRANSIT: "En Despacho",
-  DELIVERED: "Entregada",
-  CANCELLED: "Cancelada",
-};
-
-const STATE_COLORS: Record<OrderState, string> = {
-  PENDING: "bg-gray-100 text-gray-700",
-  INVOICED: "bg-amber-100 text-amber-700",
-  ASSIGNED: "bg-purple-100 text-purple-700",
-  IN_TRANSIT: "bg-blue-100 text-blue-700",
-  DELIVERED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
-
 const formatCurrency = (value: number | null | undefined): string => {
   if (value == null) return "-";
   return `$${value.toLocaleString("es-CO")}`;
@@ -56,12 +53,6 @@ const formatDate = (isoDate: string): string => {
     year: "numeric",
   });
 };
-
-const StateBadge = ({ state }: { state: OrderState }): JSX.Element => (
-  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATE_COLORS[state]}`}>
-    {STATE_LABELS[state] ?? state}
-  </span>
-);
 
 const ALL_STATES: { value: OrderState | ""; label: string }[] = [
   { value: "", label: "Todos" },
@@ -100,6 +91,10 @@ const OrdersContent = (): JSX.Element => {
     handleRefresh,
   } = useOrders();
 
+  const [orderToDelete, setOrderToDelete] = useState<SalesOrder | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const handleFilterChange = useCallback(
     (state: FilterState) => {
       const term = state["search"]?.term ?? "";
@@ -113,22 +108,31 @@ const OrdersContent = (): JSX.Element => {
     handleStateFilter(val || undefined);
   };
 
-  const handleDelete = async (item: SalesOrder) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta orden?")) {
-      try {
-        await deleteOrder(item.id);
-        handleRefresh();
-      } catch (error) {
-        console.error("Error al eliminar la orden:", error);
-      }
-      alert(`Orden ${item.orderNumber} eliminada (simulado)`);
+  const handleConfirmDelete = async () => {
+    if (!orderToDelete) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteOrder(orderToDelete.id);
+      setOrderToDelete(null);
+      handleRefresh();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Error al eliminar la orden.");
+    } finally {
+      setIsDeleting(false);
     }
-  }
+  };
+
+  const handleCloseDialog = () => {
+    if (isDeleting) return;
+    setOrderToDelete(null);
+    setDeleteError(null);
+  };
 
   const renderOrderRow = useCallback(
     (item: SalesOrder): (string | JSX.Element)[] => [
-      <StateBadge key="state" state={item.state} />,
-      item.accountName,
+      <StatusBadge key="state" status={item.state} configMap={ORDER_STATUS_CONFIG} />,
+      item.clientName,
       item.orderNumber,
       formatCurrency(item.totalValue),
       item.invoiceNumber ?? "-",
@@ -138,16 +142,18 @@ const OrdersContent = (): JSX.Element => {
         <Eye
           key="view"
           className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600"
-          onClick={() => navigate(`/ordenes/${item.id}`)}
+          onClick={(e) => { e.stopPropagation(); navigate(`/ordenes/${item.id}`); }}
         />
-        <Trash2
-          key="delete"
-          className="w-4 h-4 text-gray-500 cursor-pointer hover:text-red-600"
-          onClick={() => handleDelete(item)}
-        />
+        {item.state === "PENDING" && (
+          <Trash2
+            key="delete"
+            className="w-4 h-4 text-gray-500 cursor-pointer hover:text-red-600"
+            onClick={(e) => { e.stopPropagation(); setOrderToDelete(item); }}
+          />
+        )}
       </Box>
     ],
-    [navigate, handleDelete]
+    [navigate]
   );
 
   if (error) {
@@ -197,6 +203,35 @@ const OrdersContent = (): JSX.Element => {
           totalItems={totalElements}
         />
       </Box>
+
+      <Dialog open={!!orderToDelete} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Eliminar orden</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que deseas eliminar la orden{" "}
+            <strong>{orderToDelete?.orderNumber}</strong>? Esta acción no se puede deshacer.
+          </DialogContentText>
+          {deleteError && (
+            <Box className="mt-3 text-sm text-red-600 bg-red-50 rounded p-2">
+              {deleteError}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={handleCloseDialog} disabled={isDeleting}>
+            Cancelar
+          </MuiButton>
+          <MuiButton
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={14} color="inherit" /> : undefined}
+          >
+            {isDeleting ? "Eliminando..." : "Eliminar"}
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

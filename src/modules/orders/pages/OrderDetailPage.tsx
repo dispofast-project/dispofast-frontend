@@ -4,27 +4,11 @@ import type { JSX } from "react";
 import { useOrderDetail } from "../hooks/useOrderDetail";
 import OrderStatusStepper from "../components/OrderStatusStepper/OrderStatusStepper";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
-import type { OrderState, SalesOrderItem } from "../types";
+import type { SalesOrderItem } from "../types";
 import { Box } from "@mui/material";
 import { Button } from "../../../shared/components/Button/Button";
-
-const STATE_LABELS: Record<OrderState, string> = {
-  PENDING:    "Creada",
-  INVOICED:   "Facturada",
-  ASSIGNED:   "Asignada",
-  IN_TRANSIT: "En Despacho",
-  DELIVERED:  "Entregada",
-  CANCELLED:  "Cancelada",
-};
-
-const STATE_COLORS: Record<OrderState, string> = {
-  PENDING:    "bg-gray-100 text-gray-700",
-  INVOICED:   "bg-amber-100 text-amber-700",
-  ASSIGNED:   "bg-purple-100 text-purple-700",
-  IN_TRANSIT: "bg-blue-100 text-blue-700",
-  DELIVERED:  "bg-green-100 text-green-700",
-  CANCELLED:  "bg-red-100 text-red-600",
-};
+import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
+import { ORDER_STATUS_CONFIG } from "../config/statusConfig";
 
 const formatCurrency = (value: number | null | undefined): string => {
   if (value == null) return "-";
@@ -98,13 +82,9 @@ const OrderDetailPage = () => {
             <h1 className="text-2xl font-bold text-gray-800">
               Orden {order.orderNumber}
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">{order.accountName}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{order.clientName}</p>
           </Box>
-          <span
-            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATE_COLORS[order.state]}`}
-          >
-            {STATE_LABELS[order.state]}
-          </span>
+          <StatusBadge status={order.state} configMap={ORDER_STATUS_CONFIG} />
         </Box>
       </Box>
 
@@ -119,7 +99,7 @@ const OrderDetailPage = () => {
             Información de la Orden
           </h3>
 
-          <InfoRow label="Cliente" value={order.accountName} />
+          <InfoRow label="Cliente" value={order.clientName} />
 
           <Box className="grid grid-cols-2 gap-4">
             <InfoRow label="Valor Total" value={formatCurrency(order.totalValue)} />
