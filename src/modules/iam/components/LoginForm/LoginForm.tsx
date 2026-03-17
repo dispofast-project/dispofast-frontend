@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { LoginFormData } from "../../types";
 import { useForm } from "react-hook-form";
 import loginSchema from "../../schema/login.schema";
-import { zodResolver } from "@hookform/resolvers/zod/src/index.js";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
 import { Input } from "../../../../shared/components/Input/Input";
 import { Button } from "../../../../shared/components/Button/Button";

@@ -31,7 +31,7 @@ export interface PagedResponse<T> {
   totalPages: number;
   size: number;
   number: number;
-  sort: Sort;
+  sort: SortDTO;
   first: boolean;
   numberOfElements: number;
   empty: boolean;
