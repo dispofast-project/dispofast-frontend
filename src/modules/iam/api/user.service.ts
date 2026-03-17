@@ -1,5 +1,5 @@
 import apiClient from "../../../shared/api/apiClient";
-import type { PagedResponseDTO } from "../../../shared/types/common";
+import type { PagedResponse } from "../../../shared/types/common";
 import type { User } from "../types";
 
 export interface UserServiceParams {
@@ -9,11 +9,11 @@ export interface UserServiceParams {
 
 export const getAllUsers = async (
     params: UserServiceParams
-) : Promise<PagedResponseDTO<User>> => {
+) : Promise<PagedResponse<User>> => {
     const { page = 0, size = 20 } = params;
 
     try {
-        const { data } = await apiClient.get<PagedResponseDTO<User>>("/users", {
+        const { data } = await apiClient.get<PagedResponse<User>>("/users", {
             params: {page, size}
         });
         return data;
@@ -24,11 +24,11 @@ export const getAllUsers = async (
 
 const BASE_URL = "/users";
 
-export const searchUsers = async (query: string, params: UserServiceParams): Promise<PagedResponseDTO<User>> => {
+export const searchUsers = async (query: string, params: UserServiceParams): Promise<PagedResponse<User>> => {
     const { page = 0, size = 20 } = params;
 
     try {
-        const { data } = await apiClient.get<PagedResponseDTO<User>>(`${BASE_URL}/search`, {
+        const { data } = await apiClient.get<PagedResponse<User>>(`${BASE_URL}/search`, {
             params: {
                 q: query,
                 page,
