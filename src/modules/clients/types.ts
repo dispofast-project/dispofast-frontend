@@ -6,8 +6,8 @@ export interface UserPreview {
 }
 
 export const LegalEntityType = {
-  NATURAL: "NATURAL",
-  LEGAL: "LEGAL",
+  NATURAL: "natural",
+  LEGAL: "empresa",
 } as const;
 
 export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType];

@@ -35,7 +35,12 @@ const CustomTable = <T extends {id: string | number}>(props: CustomTableProps<T>
                     <TableBody>
                         {props.data.length > 0 ? (
                             props.data.map((item, index) => (
-                                <TableRow key={index} className="border-b">
+                                <TableRow
+                                    key={index}
+                                    className="border-b"
+                                    onClick={() => props.onRowClick?.(item)}
+                                    sx={props.onRowClick ? { cursor: "pointer", "&:hover": { backgroundColor: "action.hover" } } : undefined}
+                                >
                                     {props.renderRow(item).map((cell, cellIndex) => (
                                         <TableCell key={cellIndex} className="px-4 py-2">
                                             {cell}

@@ -1,10 +1,9 @@
-import { Box, Typography, Button, IconButton, Avatar } from "@mui/material";
+import { Box, Typography, Button, IconButton, Avatar, FormControlLabel, Switch, CircularProgress } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router-dom";
 import type { ClientPreview } from "../types";
 
-// Helper para obtener las iniciales
 const getInitials = (name: string) => {
   if (!name) return "";
   const parts = name.trim().split(" ");
@@ -16,9 +15,21 @@ const getInitials = (name: string) => {
 
 interface ClientDetailsHeaderProps {
   client: ClientPreview;
+  isActive: boolean;
+  onActiveChange: (value: boolean) => void;
+  isDirty: boolean;
+  isUpdating: boolean;
+  onUpdate: () => void;
 }
 
-const ClientDetailsHeader = ({ client }: ClientDetailsHeaderProps) => {
+const ClientDetailsHeader = ({
+  client,
+  isActive,
+  onActiveChange,
+  isDirty,
+  isUpdating,
+  onUpdate,
+}: ClientDetailsHeaderProps) => {
   const navigate = useNavigate();
 
   return (
@@ -31,15 +42,15 @@ const ClientDetailsHeader = ({ client }: ClientDetailsHeaderProps) => {
         >
           <ArrowBackIcon fontSize="small" />
         </IconButton>
-        
-        <Avatar 
-          sx={{ 
-            width: 56, 
-            height: 56, 
-            bgcolor: 'primary.main', 
-            fontSize: '1.25rem',
-            fontWeight: 'bold',
-            boxShadow: 1
+
+        <Avatar
+          sx={{
+            width: 56,
+            height: 56,
+            bgcolor: "primary.main",
+            fontSize: "1.25rem",
+            fontWeight: "bold",
+            boxShadow: 1,
           }}
         >
           {getInitials(client.name)}
@@ -51,28 +62,39 @@ const ClientDetailsHeader = ({ client }: ClientDetailsHeaderProps) => {
           </Typography>
           <Typography variant="body2" className="text-gray-500 mt-1 flex items-center gap-2">
             NIT: <span className="font-medium text-gray-700">{client.identificationNumber}</span>
-            &bull; 
+            &bull;
             Ciudad: <span className="font-medium text-gray-700 capitalize">{client.city?.name || "No registrada"}</span>
           </Typography>
         </Box>
       </Box>
-      <Box className="flex gap-3 w-full md:w-auto">
+
+      <Box className="flex gap-3 items-center w-full md:w-auto">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={isActive}
+              onChange={(e) => onActiveChange(e.target.checked)}
+              color="success"
+            />
+          }
+          label={
+            <Typography variant="body2" sx={{ fontWeight: 600, color: isActive ? "success.main" : "text.secondary" }}>
+              {isActive ? "Activo" : "Inactivo"}
+            </Typography>
+          }
+          labelPlacement="start"
+          sx={{ mx: 0, mr: 1 }}
+        />
         <Button
-          variant="outlined"
-          color={client.isActive ? "success" : "error"}
-          sx={{ textTransform: "none", fontWeight: 600, borderRadius: '8px' }}
+          variant="contained"
+          color="primary"
+          disabled={!isDirty || isUpdating}
+          onClick={onUpdate}
+          startIcon={isUpdating ? <CircularProgress size={16} color="inherit" /> : <SaveIcon fontSize="small" />}
+          sx={{ textTransform: "none", fontWeight: 600, borderRadius: "8px" }}
           className="flex-1 md:flex-none"
         >
-          {client.isActive ? "Activo" : "Inactivo"}
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<EditIcon fontSize="small" />}
-          color="primary"
-          sx={{ textTransform: "none", fontWeight: 600, borderRadius: '8px' }}
-          className="flex-1 md:flex-none border-gray-300 text-gray-700 hover:bg-gray-50"
-        >
-          Editar
+          Actualizar Cliente
         </Button>
       </Box>
     </Box>

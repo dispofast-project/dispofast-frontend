@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import type { User } from "../../types";
 import { Box } from "@mui/material";
 import { useUsers } from "../../hooks/useUsers";
@@ -24,8 +23,6 @@ const filterConfigs: FilterConfig[] = [
 ];
 
 const UsersContent = () => {
-
-    const navigate = useNavigate();
 
     const {
         users = [],
