@@ -110,9 +110,24 @@ const AppRouter = (): ReactElement => {
           <Route element={<ProtectedRoute requiredAuthorities={["QUOTES_VIEW"]} />}>
             <Route path="/ordenes/*" element={<OrdersRoutes />} />
           </Route>
-        </Route>
+          
+          <Route element={<ProtectedRoute requiredAuthorities={["PRICE_LISTS_VIEW"]} />}>
+            <Route
+              path="/lista-precios"
+              element={
+                <div className="p-6">
+                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                    Lista de Precios
+                  </h1>
+                </div>
+              }
+            />
+          </Route>
 
-        <Route path="/404" element={<NotFound />} />
+        
+
+          <Route path="/404" element={<NotFound />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/404" replace />} />
