@@ -14,7 +14,7 @@ export const getAllInventoryProducts = async (
   size = 100,
 ): Promise<PagedResponse<InventoryItem>> => {
   try {
-    const { data } = await apiClient.get("/inventory/all-products", {
+    const { data } = await apiClient.get("/inventory", {
       params: { page, size },
     });
     return data;

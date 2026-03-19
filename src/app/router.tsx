@@ -10,6 +10,7 @@ import QuoteDetailPage from "../modules/quotes/pages/QuoteDetailPage";
 import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
+import CarteraPage from "../modules/cartera/pages/CarteraPage";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -46,16 +47,7 @@ const AppRouter = (): ReactElement => {
 
           {/* Cartera / Cuentas */}
           <Route element={<ProtectedRoute requiredAuthorities={["ACCOUNTS_VIEW"]} />}>
-            <Route
-              path="/cartera"
-              element={
-                <div className="p-6">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                    Cartera
-                  </h1>
-                </div>
-              }
-            />
+            <Route path="/cartera" element={<CarteraPage />} />
           </Route>
 
           {/* Inventario */}
@@ -118,9 +110,24 @@ const AppRouter = (): ReactElement => {
           <Route element={<ProtectedRoute requiredAuthorities={["QUOTES_VIEW"]} />}>
             <Route path="/ordenes/*" element={<OrdersRoutes />} />
           </Route>
-        </Route>
+          
+          <Route element={<ProtectedRoute requiredAuthorities={["PRICE_LISTS_VIEW"]} />}>
+            <Route
+              path="/lista-precios"
+              element={
+                <div className="p-6">
+                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                    Lista de Precios
+                  </h1>
+                </div>
+              }
+            />
+          </Route>
 
-        <Route path="/404" element={<NotFound />} />
+        
+
+          <Route path="/404" element={<NotFound />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/404" replace />} />

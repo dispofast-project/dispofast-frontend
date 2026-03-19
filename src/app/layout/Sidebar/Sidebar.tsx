@@ -7,7 +7,7 @@ interface NavItems {
     label: string;
     path: string;
     icon: React.ReactNode;
-    roles?: string[];
+    requiredAuthorities?: string[];
 }
 
 interface SidebarProps {
