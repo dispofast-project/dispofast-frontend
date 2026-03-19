@@ -6,8 +6,10 @@ import {
   IconButton,
   CircularProgress,
   Button,
+  Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
   User,
 } from "lucide-react";
@@ -15,7 +17,9 @@ import {
 import DataField from "../components/detailcard/DetailItem";
 import DetailSection from "../components/detailcard/DetailSection";
 import { getQuoteByIdService, getPriceListsService, updateQuoteService } from "../api/quotes.api";
+import { createOrderFromQuote } from "../../orders/api/order.service";
 import type { Quote, PriceList } from "../types";
+import { QuoteStatus } from "../types";
 import QuoteDetailsHeaderCard from "../components/QuoteDetailsHeaderCard";
 import QuotePriceListCard from "../components/QuotePriceListCard";
 import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
@@ -47,6 +51,8 @@ const QuoteDetailPage = () => {
   const [priceLists, setPriceLists] = useState<PriceList[]>([]);
   const [selectedPriceListId, setSelectedPriceListId] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   
 
   useEffect(() => {
@@ -89,6 +95,20 @@ const QuoteDetailPage = () => {
       setSelectedPriceListId(quote.priceList.id);
     }
   }, [quote]);
+
+  const handleCreateOrder = async () => {
+    if (!id) return;
+    setIsCreatingOrder(true);
+    setOrderError(null);
+    try {
+      const order = await createOrderFromQuote(id);
+      navigate(`/ordenes/${order.id}`);
+    } catch (err: unknown) {
+      setOrderError(err instanceof Error ? err.message : "Error al crear la orden.");
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!id || selectedPriceListId === quote?.priceList?.id) return;
@@ -201,7 +221,38 @@ const QuoteDetailPage = () => {
         {/* === COLUMNA 2 (Derecha) === */}
         <Box className="flex flex-col gap-6">
           
-          {/* 1. LISTA DE PRECIOS */}
+          {/* 1. CONVERTIR A ORDEN (solo si está aprobada) */}
+          {quote.status === QuoteStatus.ACCEPTED && (
+            <Box className="bg-white rounded-2xl p-6 shadow-sm border border-green-100">
+              <SectionTitle>Orden de Compra</SectionTitle>
+              <Typography variant="body2" className="text-gray-500 mb-4">
+                Esta cotización está aprobada. Puedes generar una orden de compra a partir de ella.
+              </Typography>
+              {orderError && (
+                <Alert severity="error" sx={{ mb: 2, fontSize: "0.8rem" }}>
+                  {orderError}
+                </Alert>
+              )}
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={
+                  isCreatingOrder ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <ShoppingCartIcon />
+                  )
+                }
+                disabled={isCreatingOrder}
+                onClick={handleCreateOrder}
+                sx={{ textTransform: "none", fontWeight: 600 }}
+              >
+                {isCreatingOrder ? "Creando orden..." : "Convertir a Orden"}
+              </Button>
+            </Box>
+          )}
+
+          {/* 2. LISTA DE PRECIOS */}
           <QuotePriceListCard 
             quote={quote}
             priceLists={priceLists}

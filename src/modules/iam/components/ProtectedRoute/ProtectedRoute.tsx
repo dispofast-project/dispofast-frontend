@@ -2,24 +2,24 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 interface ProtectedRouteProps {
-    permitedRoles?: string[];
+    requiredAuthorities?: string[];
 }
 
-export const ProtectedRoute = ({ permitedRoles }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ requiredAuthorities }: ProtectedRouteProps) => {
 
     const { isAuthenticated, authorities: userAuthorities } = useAuth();
 
-    if(!isAuthenticated) {
-        return <Navigate to="/" replace/>
+    if (!isAuthenticated) {
+        return <Navigate to="/" replace />;
     }
 
-    if(permitedRoles && permitedRoles.length > 0) {
-        const hasRequiredRole = permitedRoles.some(role => userAuthorities.includes(role));
+    if (requiredAuthorities && requiredAuthorities.length > 0) {
+        const hasAuthority = requiredAuthorities.some(auth => userAuthorities.includes(auth));
 
-        if(!hasRequiredRole) {
-            return <Navigate to="/no-access" replace/>
+        if (!hasAuthority) {
+            return <Navigate to="/no-access" replace />;
         }
     }
 
-    return <Outlet />
+    return <Outlet />;
 }

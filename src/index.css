@@ -84,6 +84,9 @@
 }
 
 @theme inline {
+  --color-dispofast-primary: var(--dispofast-primary);
+  --color-dispofast-secondary: var(--dispofast-secondary);
+  --color-dispofast-neutral: var(--dispofast-neutral);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -37,6 +37,8 @@ export interface PagedResponse<T> {
   empty: boolean;
 }
 
+export type PagedResponseDTO<T> = PagedResponse<T>;
+
 export interface Department {
   code: string;
   name: string;

@@ -5,19 +5,23 @@ export interface LoginFormData {
 
 export interface LoginResponse {
     token: string;
+    tokenType: string;
+    expiresIn: number;
     user: {
-        id: number;
+        id: string;
         name: string;
         email: string;
-        roles: string[];
+        role: string;
+        effectivePermissions: string[];
     }
 }
 
 export interface AuthenticatedUser {
-    id: number;
+    id: string;
     name: string;
     email: string;
-    roles: string[];
+    role: string;
+    effectivePermissions: string[];
 }
 
 export interface AuthState {

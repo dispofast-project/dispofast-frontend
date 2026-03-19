@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { getQuotesService, createQuoteService } from "../api/quotes.api";
+import { createOrderFromQuote } from "../../orders/api/order.service";
 import type { QuotePreview } from "../types";
 import QuotesTable from "../components/QuotesTable";
 import type { FilterConfig, FilterState } from "../../../shared/components/SearchBar/types";
@@ -103,6 +104,16 @@ const QuotesPage = () => {
     navigate(`/cotizaciones/${newQuote.id}`);
   };
 
+  const handleCreateOrder = async (quote: QuotePreview) => {
+    try {
+      const order = await createOrderFromQuote(quote.id);
+      navigate(`/ordenes/${order.id}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error al crear la orden.";
+      setError(message);
+    }
+  };
+
   return (
     <Box className="p-6">
       <Box className="flex justify-between items-center mb-6">
@@ -149,6 +160,7 @@ const QuotesPage = () => {
           onDownload={handleDownload}
           onShowActions={handleShowActions}
           onRowClick={handleRowClick}
+          onCreateOrder={handleCreateOrder}
         />
       )}
       
