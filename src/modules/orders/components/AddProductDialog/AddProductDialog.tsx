@@ -20,7 +20,7 @@ import type { CreateOrderItemDTO } from "../../types";
 interface AddProductDialogProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (item: CreateOrderItemDTO & { productName: string }) => void;
+  onAdd: (item: CreateOrderItemDTO & { productName: string; productReference: string; taxFree: boolean }) => void;
 }
 
 const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
@@ -30,7 +30,6 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
   const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
-  const [discount, setDiscount] = useState("0");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,15 +61,16 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
       setSelectedProduct(null);
       setQuantity("");
       setUnitPrice("");
-      setDiscount("0");
       setError(null);
     }
   }, [open]);
 
   const qty = parseFloat(quantity) || 0;
   const price = parseFloat(unitPrice) || 0;
-  const disc = parseFloat(discount) || 0;
-  const lineTotal = qty * price * (1 - disc / 100);
+  const lineTotal = qty * price;
+  const IVA_RATE = 0.19;
+  const ivaAmount = selectedProduct && !selectedProduct.taxFree ? lineTotal * IVA_RATE : 0;
+  const totalWithIva = lineTotal + ivaAmount;
 
   const handleAdd = () => {
     if (!selectedProduct) {
@@ -89,9 +89,10 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
     onAdd({
       productId: selectedProduct.productId,
       productName: selectedProduct.productName,
+      productReference: selectedProduct.productReference,
+      taxFree: selectedProduct.taxFree,
       quantity: qty,
       unitPrice: price,
-      discount: disc > 0 ? disc : undefined,
       lineTotal,
     });
     onClose();
@@ -179,7 +180,7 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
                 </Typography>
               </Box>
 
-              <Box className="grid grid-cols-3 gap-3">
+              <Box className="grid grid-cols-2 gap-3">
                 <TextField
                   size="small"
                   label="Cantidad"
@@ -191,7 +192,7 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
                 />
                 <TextField
                   size="small"
-                  label="Precio unitario"
+                  label="Valor unitario"
                   type="number"
                   value={unitPrice}
                   onChange={(e) => setUnitPrice(e.target.value)}
@@ -201,24 +202,30 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
                   }}
                   required
                 />
-                <TextField
-                  size="small"
-                  label="Descuento %"
-                  type="number"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  inputProps={{ min: 0, max: 100, step: 0.01 }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                  }}
-                />
               </Box>
 
-              <Box className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-                <Typography variant="body2" className="text-gray-600">Total línea</Typography>
-                <Typography variant="body1" className="font-bold text-gray-800">
-                  ${lineTotal.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
-                </Typography>
+              <Box className="bg-gray-50 rounded-lg px-4 py-3 flex flex-col gap-1.5">
+                <Box className="flex items-center justify-between">
+                  <Typography variant="body2" className="text-gray-500">Subtotal</Typography>
+                  <Typography variant="body2" className="font-medium text-gray-700">
+                    ${lineTotal.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
+                  </Typography>
+                </Box>
+                <Box className="flex items-center justify-between">
+                  <Typography variant="body2" className="text-gray-500">
+                    IVA (19%){selectedProduct?.taxFree ? " — Exento" : ""}
+                  </Typography>
+                  <Typography variant="body2" className="font-medium text-gray-700">
+                    ${ivaAmount.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
+                  </Typography>
+                </Box>
+                <Divider />
+                <Box className="flex items-center justify-between">
+                  <Typography variant="body2" className="font-semibold text-gray-700">Total línea</Typography>
+                  <Typography variant="body1" className="font-bold text-gray-800">
+                    ${totalWithIva.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
+                  </Typography>
+                </Box>
               </Box>
             </>
           )}
