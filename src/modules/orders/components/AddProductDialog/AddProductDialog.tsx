@@ -14,18 +14,22 @@ import {
 import { Search, Package } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { getAllInventoryProducts } from "../../../inventory/api/inventory.api";
+import { getPriceListItems } from "../../../pricelist/api/pricelist.api";
 import type { InventoryItem } from "../../../inventory/api/inventory.api";
+import type { PriceListProductItem } from "../../../pricelist/api/pricelist.api";
 import type { CreateOrderItemDTO } from "../../types";
 
 interface AddProductDialogProps {
   open: boolean;
+  priceListId: string;
   onClose: () => void;
   onAdd: (item: CreateOrderItemDTO & { productName: string; productReference: string; taxFree: boolean }) => void;
 }
 
-const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
+const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialogProps) => {
   const [products, setProducts] = useState<InventoryItem[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<InventoryItem[]>([]);
+  const [priceMap, setPriceMap] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState("");
@@ -33,17 +37,28 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load inventory + price list items when dialog opens
   useEffect(() => {
     if (!open) return;
 
     setIsLoading(true);
     setError(null);
-    getAllInventoryProducts(0, 100)
-      .then((res) => setProducts(res.content))
+
+    Promise.all([
+      getAllInventoryProducts(0, 100),
+      priceListId ? getPriceListItems(priceListId) : Promise.resolve([] as PriceListProductItem[]),
+    ])
+      .then(([inventory, priceItems]) => {
+        setProducts(inventory.content);
+        const map: Record<string, number> = {};
+        priceItems.forEach((pi) => { map[pi.productId] = pi.unitPrice; });
+        setPriceMap(map);
+      })
       .catch(() => setError("No se pudieron cargar los productos"))
       .finally(() => setIsLoading(false));
-  }, [open]);
+  }, [open, priceListId]);
 
+  // Filter products by search
   useEffect(() => {
     if (!search.trim()) {
       setFilteredProducts(products);
@@ -55,6 +70,7 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
     }
   }, [search, products]);
 
+  // Reset form when closed
   useEffect(() => {
     if (!open) {
       setSearch("");
@@ -64,6 +80,14 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
       setError(null);
     }
   }, [open]);
+
+  // Auto-fill unit price from price list when a product is selected
+  const handleSelectProduct = (product: InventoryItem) => {
+    setSelectedProduct(product);
+    setError(null);
+    const priceFromList = priceMap[product.productId];
+    setUnitPrice(priceFromList !== undefined ? String(priceFromList) : "");
+  };
 
   const qty = parseFloat(quantity) || 0;
   const price = parseFloat(unitPrice) || 0;
@@ -110,12 +134,14 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
             placeholder="Buscar producto por nombre..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search className="w-4 h-4 text-gray-400" />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search className="w-4 h-4 text-gray-400" />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
@@ -137,37 +163,53 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
               </Box>
             ) : (
               <Box className="max-h-52 overflow-y-auto">
-                {filteredProducts.map((product) => (
-                  <Box
-                    key={product.productId}
-                    onClick={() => {
-                      setSelectedProduct(product);
-                      setError(null);
-                    }}
-                    className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
-                      selectedProduct?.productId === product.productId
-                        ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
-                        : "hover:bg-gray-50"
-                    }`}
-                  >
-                    <Box className="flex items-center gap-3">
-                      <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
-                        <Package className="w-4 h-4 text-gray-500" />
+                {filteredProducts.map((product) => {
+                  const hasPrice = priceMap[product.productId] !== undefined;
+                  return (
+                    <Box
+                      key={product.productId}
+                      onClick={() => handleSelectProduct(product)}
+                      className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
+                        selectedProduct?.productId === product.productId
+                          ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      <Box className="flex items-center gap-3">
+                        <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                          <Package className="w-4 h-4 text-gray-500" />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" className="font-medium text-gray-800">
+                            {product.productName}
+                          </Typography>
+                          <Typography variant="caption" className="text-gray-400">
+                            {product.productReference}
+                          </Typography>
+                        </Box>
                       </Box>
-                      <Typography variant="body2" className="font-medium text-gray-800">
-                        {product.productName}
-                      </Typography>
+                      <Box className="text-right">
+                        {hasPrice ? (
+                          <Typography variant="caption" className="text-dispofast-primary font-semibold">
+                            ${priceMap[product.productId].toLocaleString("es-CO")}
+                          </Typography>
+                        ) : (
+                          <Typography variant="caption" className="text-amber-500">
+                            Sin precio
+                          </Typography>
+                        )}
+                        <Typography variant="caption" className="text-gray-400 block">
+                          Stock: {product.quantityAvailable}
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Typography variant="caption" className="text-gray-500">
-                      Stock: {product.quantityAvailable}
-                    </Typography>
-                  </Box>
-                ))}
+                  );
+                })}
               </Box>
             )}
           </Box>
 
-          {/* Selected product details form */}
+          {/* Selected product form */}
           {selectedProduct && (
             <>
               <Divider />
@@ -176,7 +218,7 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
                   {selectedProduct.productName}
                 </Typography>
                 <Typography variant="caption" className="text-gray-500">
-                  Disponible: {selectedProduct.quantityAvailable} unidades
+                  {selectedProduct.productReference} · Disponible: {selectedProduct.quantityAvailable} unidades
                 </Typography>
               </Box>
 
@@ -187,7 +229,7 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  inputProps={{ min: 0.01, step: 0.01 }}
+                  slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }}
                   required
                 />
                 <TextField
@@ -196,9 +238,9 @@ const AddProductDialog = ({ open, onClose, onAdd }: AddProductDialogProps) => {
                   type="number"
                   value={unitPrice}
                   onChange={(e) => setUnitPrice(e.target.value)}
-                  inputProps={{ min: 0, step: 0.01 }}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  slotProps={{
+                    htmlInput: { min: 0, step: 0.01 },
+                    input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
                   }}
                   required
                 />

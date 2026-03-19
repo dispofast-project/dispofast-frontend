@@ -126,6 +126,16 @@ export const useCreateOrder = () => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleUpdateItem = (index: number, qty: number, price: number) => {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? { ...item, quantity: qty, unitPrice: price, lineTotal: qty * price }
+          : item
+      )
+    );
+  };
+
   const subtotal = items.reduce((acc, it) => acc + it.lineTotal, 0);
 
   // ─── Validation ────────────────────────────────────────────────────────────
@@ -204,6 +214,7 @@ export const useCreateOrder = () => {
     handleClientChange,
     handleAddProduct,
     handleRemoveItem,
+    handleUpdateItem,
     handleSubmit,
   };
 };

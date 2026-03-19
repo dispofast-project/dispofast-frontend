@@ -8,15 +8,21 @@ import type { OrderItem } from "../../hooks/useCreateOrder";
 import type { CreateOrderItemDTO } from "../../types";
 
 interface OrderItemsCardProps {
+  priceListId: string;
   items: OrderItem[];
   onAddProduct: (item: CreateOrderItemDTO & { productName: string; productReference: string; taxFree: boolean }) => void;
   onRemoveItem: (index: number) => void;
+  onUpdateItem: (index: number, qty: number, unitPrice: number) => void;
 }
 
-const OrderItemsCard = ({ items, onAddProduct, onRemoveItem }: OrderItemsCardProps) => {
+const IVA_RATE = 0.19;
+
+const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpdateItem }: OrderItemsCardProps) => {
   const [productDialogOpen, setProductDialogOpen] = useState(false);
 
-  const subtotal = items.reduce((acc, it) => acc + it.lineTotal, 0);
+  const totalSubtotal  = items.reduce((acc, it) => acc + it.lineTotal, 0);
+  const totalIva       = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA_RATE), 0);
+  const totalWithIva   = totalSubtotal + totalIva;
 
   return (
     <>
@@ -39,11 +45,20 @@ const OrderItemsCard = ({ items, onAddProduct, onRemoveItem }: OrderItemsCardPro
             variant="primary"
             onClick={() => setProductDialogOpen(true)}
             className="flex items-center gap-1.5"
+            disabled={!priceListId}
           >
             <Plus className="w-4 h-4" />
             Agregar Producto
           </Button>
         </Box>
+
+        {!priceListId && (
+          <Box className="px-6 py-3 bg-amber-50 border-b border-amber-100">
+            <Typography variant="caption" className="text-amber-700">
+              Selecciona una lista de precios antes de agregar productos.
+            </Typography>
+          </Box>
+        )}
 
         {items.length === 0 ? (
           <Box className="flex flex-col items-center justify-center py-14 gap-3">
@@ -62,30 +77,63 @@ const OrderItemsCard = ({ items, onAddProduct, onRemoveItem }: OrderItemsCardPro
             <table className="w-full min-w-[640px] border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">Código</th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Producto</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide w-16">Cant.</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Valor Unit.</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Subtotal</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">IVA</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Total</th>
+                  <th className="px-4 py-2 text-left   text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Código</th>
+                  <th className="px-4 py-2 text-left   text-xs font-semibold text-gray-500 uppercase tracking-wide">Producto</th>
+                  <th className="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">Cant.</th>
+                  <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-32">Valor Unit.</th>
+                  <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Subtotal</th>
+                  <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">IVA</th>
+                  <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Total</th>
                   <th className="w-8" />
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, idx) => {
-                  const ivaAmt = item.taxFree ? 0 : item.lineTotal * 0.19;
-                  const totalWithIva = item.lineTotal + ivaAmt;
+                  const ivaAmt      = item.taxFree ? 0 : item.lineTotal * IVA_RATE;
+                  const totalLine   = item.lineTotal + ivaAmt;
                   return (
                     <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 group">
-                      <td className="px-4 py-3 text-xs text-gray-500 font-mono">{item.productReference}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800">{item.productName}</td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">{item.quantity}</td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">{formatCurrency(item.unitPrice)}</td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-700">{formatCurrency(item.lineTotal)}</td>
-                      <td className="px-4 py-3 text-sm text-right text-gray-500">{formatCurrency(ivaAmt)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">{formatCurrency(totalWithIva)}</td>
-                      <td className="px-2 py-3 text-right">
+                      <td className="px-4 py-2 text-xs text-gray-500 font-mono">{item.productReference}</td>
+                      <td className="px-4 py-2 text-sm font-medium text-gray-800">{item.productName}</td>
+
+                      {/* Cant. — editable inline */}
+                      <td className="px-2 py-2 text-center">
+                        <input
+                          type="number"
+                          min={0.01}
+                          step={0.01}
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const qty = parseFloat(e.target.value) || 0;
+                            onUpdateItem(idx, qty, item.unitPrice);
+                          }}
+                          className="w-16 text-center text-sm border border-gray-200 rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+                        />
+                      </td>
+
+                      {/* Valor Unit. — editable inline */}
+                      <td className="px-2 py-2 text-right">
+                        <div className="flex items-center justify-end gap-0.5">
+                          <span className="text-xs text-gray-400">$</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={item.unitPrice}
+                            onChange={(e) => {
+                              const price = parseFloat(e.target.value) || 0;
+                              onUpdateItem(idx, item.quantity, price);
+                            }}
+                            className="w-24 text-right text-sm border border-gray-200 rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+                          />
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-2 text-sm text-right text-gray-700">{formatCurrency(item.lineTotal)}</td>
+                      <td className="px-4 py-2 text-sm text-right text-gray-500">{formatCurrency(ivaAmt)}</td>
+                      <td className="px-4 py-2 text-sm text-right font-semibold text-gray-800">{formatCurrency(totalLine)}</td>
+
+                      <td className="px-2 py-2 text-right">
                         <button
                           onClick={() => onRemoveItem(idx)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50"
@@ -98,15 +146,11 @@ const OrderItemsCard = ({ items, onAddProduct, onRemoveItem }: OrderItemsCardPro
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-gray-50">
-                  <td colSpan={4} className="px-4 py-3 text-sm font-semibold text-gray-700">Subtotal</td>
-                  <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right">{formatCurrency(subtotal)}</td>
-                  <td className="px-4 py-3 text-sm font-bold text-gray-500 text-right">
-                    {formatCurrency(items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * 0.19), 0))}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right">
-                    {formatCurrency(items.reduce((acc, it) => acc + it.lineTotal + (it.taxFree ? 0 : it.lineTotal * 0.19), 0))}
-                  </td>
+                <tr className="bg-gray-50 border-t border-gray-200">
+                  <td colSpan={4} className="px-4 py-3 text-sm font-semibold text-gray-700">Totales</td>
+                  <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right">{formatCurrency(totalSubtotal)}</td>
+                  <td className="px-4 py-3 text-sm font-bold text-gray-500 text-right">{formatCurrency(totalIva)}</td>
+                  <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right">{formatCurrency(totalWithIva)}</td>
                   <td />
                 </tr>
               </tfoot>
@@ -117,6 +161,7 @@ const OrderItemsCard = ({ items, onAddProduct, onRemoveItem }: OrderItemsCardPro
 
       <AddProductDialog
         open={productDialogOpen}
+        priceListId={priceListId}
         onClose={() => setProductDialogOpen(false)}
         onAdd={onAddProduct}
       />

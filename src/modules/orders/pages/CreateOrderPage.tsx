@@ -56,9 +56,11 @@ const CreateOrderPage = () => {
             onAdditionalDiscountRateChange={order.setAdditionalDiscountRate}
           />
           <OrderItemsCard
+            priceListId={order.priceListId}
             items={order.items}
             onAddProduct={order.handleAddProduct}
             onRemoveItem={order.handleRemoveItem}
+            onUpdateItem={order.handleUpdateItem}
           />
         </Box>
 

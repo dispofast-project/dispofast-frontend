@@ -45,7 +45,7 @@ const OrderShippingCard = ({
             value={shipmentCity}
             onChange={onShipmentCityChange}
             required
-            label="Ciudad de Envío *"
+            label="Ciudad de Envío"
           />
           <Dropdown
             label="Zona"
