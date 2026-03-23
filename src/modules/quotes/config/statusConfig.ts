@@ -5,22 +5,22 @@ import React from "react";
 
 export const QUOTE_STATUS_CONFIG: Record<string, StatusBadgeConfig> = {
   [QuoteStatus.PENDING]: {
-    label: QuoteStatus.PENDING,
+    label: "Pendiente",
     color: "warning",
     icon: React.createElement(Clock, { size: 14 }),
   },
   [QuoteStatus.ACCEPTED]: {
-    label: QuoteStatus.ACCEPTED,
+    label: "Aprobada",
     color: "success",
     icon: React.createElement(CheckCircle, { size: 14 }),
   },
   [QuoteStatus.REJECTED]: {
-    label: QuoteStatus.REJECTED,
+    label: "Rechazada",
     color: "error",
     icon: React.createElement(XCircle, { size: 14 }),
   },
   [QuoteStatus.EXPIRED]: {
-    label: QuoteStatus.EXPIRED,
+    label: "Caducada",
     color: "default",
     icon: React.createElement(FileText, { size: 14 }),
   },

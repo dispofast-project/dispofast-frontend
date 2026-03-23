@@ -103,11 +103,9 @@ const QuoteCreateModal = ({ open, onClose, onSubmit }: QuoteCreateModalProps) =>
             id="account-selector"
             options={options}
             getOptionLabel={(option) => {
-              if (option.organization?.legalName) {
-                return `${option.identificationNumber || ""} - ${option.organization.legalName}`.replace(/^ - /, "");
-              }
-              const fullName = `${option.firstName || ""} ${option.lastName || ""}`.trim();
-              return `${option.identificationNumber || ""} - ${fullName}`.replace(/^ - /, "");
+              const displayName = option.legalName
+                ?? (`${option.firstName ?? ""} ${option.lastName ?? ""}`.trim() || option.name);
+              return `${option.identificationNumber ?? ""} - ${displayName ?? ""}`.replace(/^ - /, "");
             }}
             filterOptions={(x) => x}
             autoComplete

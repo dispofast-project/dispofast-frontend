@@ -12,13 +12,20 @@ export interface SellerPreview {
 }
 
 export const QuoteStatus = {
-  PENDING: "pendiente",
-  ACCEPTED: "aprobada",
-  REJECTED: "rechazada",
-  EXPIRED: "caducada",
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  REJECTED: "REJECTED",
+  EXPIRED: "EXPIRED",
 } as const;
 
 export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus];
+
+export const LegalEntityType = {
+  NATURAL: "natural",
+  EMPRESA: "empresa",
+} as const;
+
+export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType];
 
 export interface QuotePreview {
   id: string;
@@ -31,35 +38,25 @@ export interface QuotePreview {
   expirationDate: string;
 }
 
-// TODO: Mover cuando se implemente el modulo
-export interface Organization {
-  id: string;
-  nit: string;
-  legalName: string;
-  defaultDiscountRate: number;
-  address: string;
-  billingEmail: string;
-  generalEmail: string;
-  phone: string;
-  representativeFirstName?: string;
-  representativeLastName?: string;
-  representativeIdentification?: string;
-  representativeEmail?: string;
-  representativePhone?: string;
-}
-
 export interface Account {
   id: string;
-  legalEntityType: "PERSONA_NATURAL" | "PERSONA_JURIDICA";
+  legalEntityType: LegalEntityType;
+  name: string;
   identificationNumber: string;
+  email: string;
+  phone: string;
+  address: string;
+  isActive: boolean;
+  retefuenteApplies: boolean;
+  defaultDiscountRate: number;
+  zone: string;
+  // Persona Natural
   firstName?: string;
   lastName?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  jobTitle?: string;
-  organization?: Organization;
+  // Empresa
+  legalName?: string;
+  billingEmail?: string;
+  // Representante (ambos tipos)
   representativeFirstName?: string;
   representativeLastName?: string;
   representativeIdentification?: string;
