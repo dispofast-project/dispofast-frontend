@@ -69,15 +69,25 @@ export interface Quote {
   id: string;
   number: string;
   status: QuoteStatus;
-  subtotalAmount: number;
-  discountTotal: number;
-  taxTotal: number;
-  totalAmount: number;
   expirationDate: string;
   account: Account;
+  sellerId: string;
   sellerName: string;
   location: Location;
   priceList: PriceList;
   createdAt: string;
   updatedAt: string;
+  // Detalles de pago
+  subtotalAmount: number;
+  commercialDiscountRate: number;
+  commercialDiscountAmount: number;
+  otherDiscountsRate: number;
+  otherDiscountsAmount: number;
+  ivaRate: number;
+  ivaAmount: number;
+  retefuenteRate: number | null;
+  retefuenteAmount: number | null;
+  reteicaRate: number | null;
+  reteicaAmount: number | null;
+  totalAmount: number;
 }

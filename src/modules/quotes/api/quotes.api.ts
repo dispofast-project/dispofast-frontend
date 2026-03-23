@@ -26,7 +26,7 @@ export const getQuoteByIdService = async (id: string): Promise<Quote> => {
 
 export const updateQuoteService = async (
   id: string,
-  data: Partial<Quote> & { priceListId?: string },
+  data: Partial<Quote> & { priceListId?: string; sellerId?: string },
 ): Promise<Quote> => {
   const response = await apiClient.put(`/quotes/${id}`, data);
   return response.data;

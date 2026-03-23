@@ -61,10 +61,6 @@ const QuoteDetailsHeaderCard = ({ quote }: QuoteHeaderCardProps) => {
           <strong className="text-gray-800 font-semibold">{quote.number}</strong>
         </Typography>
         <Typography variant="body2" className="text-gray-500">
-          Asesor:{" "}
-          <strong className="text-gray-800 font-semibold">{quote.sellerName || "—"}</strong>
-        </Typography>
-        <Typography variant="body2" className="text-gray-500">
           Actualizado:{" "}
           <strong className="text-gray-800 font-semibold">{formatDate(quote.updatedAt)}</strong>
         </Typography>

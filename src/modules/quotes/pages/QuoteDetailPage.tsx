@@ -14,12 +14,15 @@ import BusinessIcon from "@mui/icons-material/Business";
 import PersonIcon from "@mui/icons-material/Person";
 import BadgeIcon from "@mui/icons-material/Badge";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 
 import DataField from "../components/detailcard/DetailItem";
 import { getQuoteByIdService, getPriceListsService, updateQuoteService } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
 import type { Quote, PriceList } from "../types";
 import { QuoteStatus, LegalEntityType } from "../types";
+import { AdvisorAutocomplete } from "../../../shared/components/AdvisorAutocomplete/AdvisorAutocomplete";
+import type { User } from "../../iam/types";
 import QuoteDetailsHeaderCard from "../components/QuoteDetailsHeaderCard";
 import QuotePriceListCard from "../components/QuotePriceListCard";
 import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
@@ -59,6 +62,8 @@ const QuoteDetailPage = () => {
   const [priceLists, setPriceLists] = useState<PriceList[]>([]);
   const [selectedPriceListId, setSelectedPriceListId] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedSeller, setSelectedSeller] = useState<User | null>(null);
+  const [isSavingSeller, setIsSavingSeller] = useState(false);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
 
@@ -98,6 +103,15 @@ const QuoteDetailPage = () => {
     if (quote?.priceList?.id) {
       setSelectedPriceListId(quote.priceList.id);
     }
+    if (quote?.sellerId && quote?.sellerName) {
+      setSelectedSeller({
+        id: quote.sellerId,
+        name: quote.sellerName,
+        email: "",
+        role: "",
+        effectivePermissions: [],
+      });
+    }
   }, [quote]);
 
   const handleCreateOrder = async () => {
@@ -111,6 +125,24 @@ const QuoteDetailPage = () => {
       setOrderError(err instanceof Error ? err.message : "Error al crear la orden.");
     } finally {
       setIsCreatingOrder(false);
+    }
+  };
+
+  const handleSaveSeller = async () => {
+    if (!id || !selectedSeller) return;
+    setIsSavingSeller(true);
+    try {
+      await updateQuoteService(id, { sellerId: selectedSeller.id });
+      setQuoteState((prev) => ({
+        ...prev,
+        data: prev.data
+          ? { ...prev.data, sellerId: selectedSeller.id, sellerName: selectedSeller.name }
+          : prev.data,
+      }));
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setIsSavingSeller(false);
     }
   };
 
@@ -184,6 +216,22 @@ const QuoteDetailPage = () => {
           ) : (
             <NaturalClientSection account={quote.account} location={quote.location} />
           )}
+
+          {/* 3. Asesor */}
+          <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
+            <SectionTitle icon={<SupportAgentIcon fontSize="small" />}>Asesor</SectionTitle>
+            <Box className="flex items-center gap-3">
+              <AdvisorAutocomplete value={selectedSeller} onChange={setSelectedSeller} />
+              <Button
+                variant="contained"
+                disabled={isSavingSeller || !selectedSeller || selectedSeller.id === quote.sellerId}
+                onClick={handleSaveSeller}
+                sx={{ textTransform: "none", fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0 }}
+              >
+                {isSavingSeller ? <CircularProgress size={20} color="inherit" /> : "Confirmar"}
+              </Button>
+            </Box>
+          </Box>
         </Box>
 
         {/* ── Columna lateral ── */}

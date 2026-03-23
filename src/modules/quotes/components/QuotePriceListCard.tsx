@@ -44,7 +44,6 @@ const QuotePriceListCard = ({
             ))}
           </Select>
         </Box>
-        <DataField label="Asesor Validado" value={quote?.sellerName} />
         <DataField label="Fecha de Expiración" value={quote?.expirationDate ? formatDate(quote.expirationDate) : ""} />
       </Box>
       
