@@ -68,6 +68,15 @@ const CreateOrderPage = () => {
           selectedClient={order.selectedClient}
           orderNumber={order.orderNumber}
           subtotal={order.subtotal}
+          tax={order.tax}
+          discount={order.discountAmt}
+          additionalDiscount={order.additionalDiscountAmt}
+          retefuente={order.retefuente}
+          reteica={order.reteica}
+          onReteicaChange={order.setReteica}
+          freight={order.freight}
+          onFreightChange={order.setFreight}
+          total={order.total}
           items={order.items}
           missingFields={order.missingFields}
           isLoading={order.isLoading}

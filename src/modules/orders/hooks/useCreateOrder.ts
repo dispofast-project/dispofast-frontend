@@ -51,6 +51,10 @@ export const useCreateOrder = () => {
   const [discountRate, setDiscountRate] = useState("0");
   const [additionalDiscountRate, setAdditionalDiscountRate] = useState("");
 
+  // ─── Financial panel ───────────────────────────────────────────────────────
+  const [freight, setFreight] = useState(0);
+  const [reteica, setReteica] = useState(0);
+
   // ─── Products ──────────────────────────────────────────────────────────────
   const [items, setItems] = useState<OrderItem[]>([]);
 
@@ -136,7 +140,15 @@ export const useCreateOrder = () => {
     );
   };
 
-  const subtotal = items.reduce((acc, it) => acc + it.lineTotal, 0);
+  const IVA_RATE = 0.19;
+  const RETEFUENTE_RATE = 0.035;
+
+  const subtotal           = items.reduce((acc, it) => acc + it.lineTotal, 0);
+  const tax                = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA_RATE), 0);
+  const discountAmt        = subtotal * ((parseInt(discountRate, 10) || 0) / 100);
+  const additionalDiscountAmt = subtotal * ((parseFloat(additionalDiscountRate || "0")) / 100);
+  const retefuente         = clientDetail?.retefuenteApplies ? subtotal * RETEFUENTE_RATE : 0;
+  const total              = subtotal + tax - discountAmt - additionalDiscountAmt - retefuente - reteica + freight;
 
   // ─── Validation ────────────────────────────────────────────────────────────
   const missingFields: string[] = [];
@@ -168,6 +180,9 @@ export const useCreateOrder = () => {
         paymentCondition: paymentCondition || undefined,
         discountRate: parseInt(discountRate, 10) || 0,
         additionalDiscountRate: additionalDiscountRate ? parseFloat(additionalDiscountRate) : undefined,
+        retefuenteAmount: retefuente > 0 ? retefuente : undefined,
+        reteicaAmount: reteica > 0 ? reteica : undefined,
+        freight: freight > 0 ? freight : undefined,
         items: items.map(({ productName: _pn, productReference: _pr, taxFree: _tf, ...rest }) => rest),
       };
 
@@ -210,6 +225,15 @@ export const useCreateOrder = () => {
     items,
     isLoading,
     subtotal,
+    tax,
+    discountAmt,
+    additionalDiscountAmt,
+    retefuente,
+    freight,
+    setFreight,
+    reteica,
+    setReteica,
+    total,
     missingFields,
     handleClientChange,
     handleAddProduct,
