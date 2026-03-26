@@ -78,5 +78,5 @@ export interface UpdateOrderRequestDTO {
 
 export interface AttachInvoiceRequestDTO {
   invoiceNumber: string;
-  invoiceUrl: string;
+  file: File;
 }

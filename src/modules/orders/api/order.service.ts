@@ -88,13 +88,39 @@ export const attachInvoice = async (
   payload: AttachInvoiceRequestDTO
 ): Promise<SalesOrder> => {
   try {
+    const form = new FormData();
+    form.append("invoiceNumber", payload.invoiceNumber);
+    form.append("file", payload.file);
     const { data } = await apiClient.patch<SalesOrder>(
       `${BASE_URL}/${id}/invoice`,
-      payload
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
     return data;
   } catch {
     throw new Error("Error al adjuntar la factura");
+  }
+};
+
+export const downloadInvoice = async (id: string): Promise<void> => {
+  try {
+    const response = await apiClient.get(`${BASE_URL}/${id}/invoice/download`, {
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(response.data as Blob);
+    const disposition = response.headers["content-disposition"] as string | undefined;
+    let fileName = "factura.pdf";
+    if (disposition) {
+      const match = disposition.match(/filename[^;=\n]*=(['"]?)([^'";\n]*)\1/);
+      if (match?.[2]) fileName = match[2];
+    }
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    throw new Error("Error al descargar la factura");
   }
 };
 
