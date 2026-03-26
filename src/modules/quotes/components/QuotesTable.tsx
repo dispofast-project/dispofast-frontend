@@ -1,7 +1,5 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { Box } from "@mui/material";
 import type { QuotePreview } from "../types";
-import { QuoteStatus, OfferValidity } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
@@ -26,7 +24,6 @@ const QuotesTable = ({
   totalItems,
   onPageChange,
   onRowClick,
-  onCreateOrder,
 }: QuotesTableProps) => {
 
   const headers = [
@@ -36,8 +33,6 @@ const QuotesTable = ({
     "Asesor",
     "Fecha",
     "Total",
-    "Validez",
-    "Acciones",
   ];
 
   const renderRow = (quote: QuotePreview) => {
@@ -57,25 +52,6 @@ const QuotesTable = ({
       <span className="font-mono text-right">
         {formatCurrency(quote.total)}
       </span>,
-
-      quote.offerValidity ? OfferValidity[quote.offerValidity] : "-",
-
-      quote.status === QuoteStatus.ACCEPTED ? (
-        <Tooltip title="Convertir a Orden de Compra" arrow>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCreateOrder(quote);
-            }}
-          >
-            <ShoppingCartIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <span />
-      ),
     ];
   };
 

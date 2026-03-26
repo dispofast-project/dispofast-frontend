@@ -8,6 +8,7 @@ import { createOrderFromQuote } from "../../orders/api/order.service";
 import type { Quote, PriceList } from "../types";
 import { QuoteStatus } from "../types";
 import { useQuoteEdit } from "../hooks/useQuoteEdit";
+import { useAuth } from "../../iam/hooks/useAuth";
 
 import QuoteDetailsHeaderCard from "../components/QuoteDetailsHeaderCard";
 import QuoteClientCard from "../components/QuoteClientCard";
@@ -37,6 +38,8 @@ const QuoteDetailPage = () => {
   const [orderError, setOrderError] = useState<string | null>(null);
 
   const { data: quote, isLoading, error } = quoteState;
+  const { authorities } = useAuth();
+  const isAdmin = authorities.includes("ROLE_ADMIN");
 
   const {
     selectedSeller, setSelectedSeller,
@@ -123,7 +126,7 @@ const QuoteDetailPage = () => {
         <Box className="lg:col-span-2 flex flex-col gap-6">
           <QuoteDetailsHeaderCard quote={quote} />
           <QuoteClientCard account={quote.account} location={quote.location} />
-          <QuoteAdvisorCard value={selectedSeller} onChange={setSelectedSeller} />
+          <QuoteAdvisorCard value={selectedSeller} onChange={setSelectedSeller} readOnly={!isAdmin} />
           <QuoteTermsCard
             paymentCondition={selectedPaymentCondition}
             offerValidity={selectedOfferValidity}
