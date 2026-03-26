@@ -1,10 +1,9 @@
 import { Box, IconButton, Tooltip } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import type { QuotePreview } from "../types";
-import { QuoteStatus } from "../types";
+import { QuoteStatus, OfferValidity } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
-import { formatDate } from "../../../shared/utils/date";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
 import { QUOTE_STATUS_CONFIG } from "../config/statusConfig";
 
@@ -53,13 +52,13 @@ const QuotesTable = ({
       quote.accountName,
       quote.seller?.fullName ?? "-",
 
-      formatDate(quote.createdAt),
+      new Date(quote.createdAt).toLocaleDateString("es-CO"),
 
       <span className="font-mono text-right">
         {formatCurrency(quote.total)}
       </span>,
 
-      formatDate(quote.expirationDate),
+      quote.offerValidity ? OfferValidity[quote.offerValidity] : "-",
 
       quote.status === QuoteStatus.ACCEPTED ? (
         <Tooltip title="Convertir a Orden de Compra" arrow>

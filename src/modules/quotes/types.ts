@@ -20,6 +20,26 @@ export const QuoteStatus = {
 
 export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus];
 
+export const PaymentCondition = {
+  CONTADO: "Contado",
+  CONTADO_15_DIAS: "Contado 15 días",
+  CONTADO_30_DIAS: "Contado 30 días",
+  CONTADO_60_DIAS: "Contado 60 días",
+  CONTADO_90_DIAS: "Contado 90 días",
+  CONTRAENTREGA: "Contraentrega",
+} as const;
+
+export type PaymentCondition = keyof typeof PaymentCondition;
+
+export const OfferValidity = {
+  DIAS_15: "15 días",
+  DIAS_30: "30 días",
+  DIAS_45: "45 días",
+  DIAS_60: "60 días",
+} as const;
+
+export type OfferValidity = keyof typeof OfferValidity;
+
 export const LegalEntityType = {
   NATURAL: "natural",
   EMPRESA: "empresa",
@@ -35,7 +55,7 @@ export interface QuotePreview {
   seller: SellerPreview;
   createdAt: string;
   total: number;
-  expirationDate: string;
+  offerValidity: OfferValidity | null;
 }
 
 export interface Account {
@@ -69,7 +89,8 @@ export interface Quote {
   id: string;
   number: string;
   status: QuoteStatus;
-  expirationDate: string;
+  paymentCondition: PaymentCondition | null;
+  offerValidity: OfferValidity | null;
   account: Account;
   sellerId: string;
   sellerName: string;
