@@ -2,8 +2,7 @@ import { Box } from "@mui/material";
 import type { QuotePreview } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
-import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
-import { QUOTE_STATUS_CONFIG } from "../config/statusConfig";
+import { QuoteStatusBadge } from "./QuoteStatusBadge";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -37,10 +36,9 @@ const QuotesTable = ({
 
   const renderRow = (quote: QuotePreview) => {
     return [
-      <StatusBadge
+      <QuoteStatusBadge
         key={`status-${quote.id}`}
         status={quote.status}
-        configMap={QUOTE_STATUS_CONFIG}
       />,
 
       <span className="font-medium text-gray-900">{quote.number}</span>,
