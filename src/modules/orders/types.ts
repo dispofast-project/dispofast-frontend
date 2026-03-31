@@ -32,8 +32,6 @@ export interface SalesOrder {
   totalValue: number;
   priceListId: string;
   quoteId: string | null;
-  invoiceNumber: string | null;
-  invoiceUrl: string | null;
   items: SalesOrderItem[];
 }
 

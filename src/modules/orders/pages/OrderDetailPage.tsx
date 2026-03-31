@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Download, FileText, ChevronDown } from "lucide-react";
 import type { JSX } from "react";
@@ -21,6 +21,8 @@ import { Button } from "../../../shared/components/Button/Button";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
 import { ORDER_STATUS_CONFIG } from "../config/statusConfig";
 import { attachInvoice, downloadInvoice, updateOrder } from "../api/order.service";
+import { getInvoiceByOrderId } from "../../invoices/api/invoice.service";
+import type { Invoice } from "../../invoices/types";
 
 const formatCurrency = (value: number | null | undefined): string => {
   if (value == null) return "-";
@@ -64,6 +66,19 @@ const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { order, loading, error, refetch } = useOrderDetail(id);
+
+  // ── Invoice data ────────────────────────────────────────────────────────────
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+
+  useEffect(() => {
+    if (!id || !order || order.state === "PENDING") {
+      setInvoice(null);
+      return;
+    }
+    getInvoiceByOrderId(id)
+      .then(setInvoice)
+      .catch(() => setInvoice(null));
+  }, [id, order?.state]);
 
   // ── Invoice dialog ──────────────────────────────────────────────────────────
   const [invoiceOpen, setInvoiceOpen] = useState(false);
@@ -151,7 +166,7 @@ const OrderDetailPage = () => {
   }
 
   const nextStates = NEXT_STATES[order.state] ?? [];
-  const canAttachInvoice = order.state === "PENDING" && !order.invoiceNumber;
+  const canAttachInvoice = order.state === "PENDING";
   const isTerminal = order.state === "DELIVERED" || order.state === "CANCELLED";
 
   return (
@@ -179,7 +194,7 @@ const OrderDetailPage = () => {
           <Box className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={order.state} configMap={ORDER_STATUS_CONFIG} />
 
-            {/* Attach invoice button — only PENDING without invoice */}
+            {/* Attach invoice button — only PENDING orders */}
             {canAttachInvoice && (
               <button
                 onClick={() => setInvoiceOpen(true)}
@@ -251,41 +266,32 @@ const OrderDetailPage = () => {
           <InfoRow label="Asesor Comercial" value={order.asesorName ?? "-"} />
 
           {/* Invoice section */}
-          {order.invoiceNumber ? (
-            <Box>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                Factura
-              </p>
+          <Box>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+              Factura
+            </p>
+            {invoice ? (
               <Box className="flex items-center gap-3">
                 <span className="text-sm font-semibold text-gray-800">
-                  {order.invoiceNumber}
+                  {invoice.invoiceNumber}
                 </span>
-                {order.invoiceUrl && (
-                  <button
-                    onClick={handleDownloadInvoice}
-                    disabled={downloadLoading}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                  >
-                    {downloadLoading ? (
-                      <CircularProgress size={12} />
-                    ) : (
-                      <Download className="w-3.5 h-3.5" />
-                    )}
-                    Descargar
-                  </button>
-                )}
+                <button
+                  onClick={handleDownloadInvoice}
+                  disabled={downloadLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  {downloadLoading ? (
+                    <CircularProgress size={12} />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  Descargar
+                </button>
               </Box>
-            </Box>
-          ) : (
-            canAttachInvoice && (
-              <Box>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                  Factura
-                </p>
-                <p className="text-xs text-gray-400 italic">Sin factura adjunta</p>
-              </Box>
-            )
-          )}
+            ) : (
+              <p className="text-xs text-gray-400 italic">Sin factura adjunta</p>
+            )}
+          </Box>
         </Box>
 
         {/* Delivery info */}
