@@ -5,6 +5,12 @@ export interface PriceListItem {
   name: string;
 }
 
+export interface PriceListProductItem {
+  productId: string;
+  productReference: string;
+  unitPrice: number;
+}
+
 export const getAllPriceLists = async (): Promise<PriceListItem[]> => {
   try {
     const { data } = await apiClient.get<PriceListItem[]>("/price-lists");
@@ -12,4 +18,9 @@ export const getAllPriceLists = async (): Promise<PriceListItem[]> => {
   } catch {
     throw new Error("Error al cargar las listas de precios");
   }
+};
+
+export const getPriceListItems = async (priceListId: string): Promise<PriceListProductItem[]> => {
+  const { data } = await apiClient.get<PriceListProductItem[]>(`/price-lists/${priceListId}/items`);
+  return data;
 };

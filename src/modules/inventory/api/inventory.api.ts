@@ -4,6 +4,8 @@ import type { PagedResponse } from "../../../shared/types/common";
 export interface InventoryItem {
   productId: string;
   productName: string;
+  productReference: string;
+  taxFree: boolean;
   quantityAvailable: number;
   quantityReserved: number;
   state: string;
