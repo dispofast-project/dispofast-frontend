@@ -1,12 +1,8 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { Box } from "@mui/material";
 import type { QuotePreview } from "../types";
-import { QuoteStatus } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
-import { formatDate } from "../../../shared/utils/date";
-import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
-import { QUOTE_STATUS_CONFIG } from "../config/statusConfig";
+import { QuoteStatusBadge } from "./QuoteStatusBadge";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -27,7 +23,6 @@ const QuotesTable = ({
   totalItems,
   onPageChange,
   onRowClick,
-  onCreateOrder,
 }: QuotesTableProps) => {
 
   const headers = [
@@ -37,46 +32,24 @@ const QuotesTable = ({
     "Asesor",
     "Fecha",
     "Total",
-    "Validez",
-    "Acciones",
   ];
 
   const renderRow = (quote: QuotePreview) => {
     return [
-      <StatusBadge
+      <QuoteStatusBadge
         key={`status-${quote.id}`}
         status={quote.status}
-        configMap={QUOTE_STATUS_CONFIG}
       />,
 
       <span className="font-medium text-gray-900">{quote.number}</span>,
       quote.accountName,
       quote.seller?.fullName ?? "-",
 
-      formatDate(quote.createdAt),
+      new Date(quote.createdAt).toLocaleDateString("es-CO"),
 
       <span className="font-mono text-right">
         {formatCurrency(quote.total)}
       </span>,
-
-      formatDate(quote.expirationDate),
-
-      quote.status === QuoteStatus.ACCEPTED ? (
-        <Tooltip title="Convertir a Orden de Compra" arrow>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCreateOrder(quote);
-            }}
-          >
-            <ShoppingCartIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <span />
-      ),
     ];
   };
 

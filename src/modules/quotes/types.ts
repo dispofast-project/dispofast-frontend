@@ -11,14 +11,64 @@ export interface SellerPreview {
   fullName: string;
 }
 
+/** Matches ClientPreviewDTO — returned by GET /clients search */
+export interface ClientPreview {
+  id: string;
+  legalEntityType: LegalEntityType;
+  name: string;
+  identificationNumber: string;
+  isActive: boolean;
+  defaultAdvisor: SellerPreview | null;
+}
+
+/** Matches ClientResponseDTO — returned by GET /clients/{id} */
+export interface ClientDetails {
+  id: string;
+  legalEntityType: LegalEntityType;
+  name: string;
+  identificationNumber: string;
+  isActive: boolean;
+  retefuenteApplies: boolean;
+  defaultAdvisor: SellerPreview | null;
+  defaultDiscountRate: number | null;
+  priceList: PriceList | null;
+}
+
 export const QuoteStatus = {
-  PENDING: "pendiente",
-  ACCEPTED: "aprobada",
-  REJECTED: "rechazada",
-  EXPIRED: "caducada",
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  REJECTED: "REJECTED",
+  EXPIRED: "EXPIRED",
 } as const;
 
 export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus];
+
+export const PaymentCondition = {
+  CONTADO: "Contado",
+  CONTADO_15_DIAS: "Contado 15 días",
+  CONTADO_30_DIAS: "Contado 30 días",
+  CONTADO_60_DIAS: "Contado 60 días",
+  CONTADO_90_DIAS: "Contado 90 días",
+  CONTRAENTREGA: "Contraentrega",
+} as const;
+
+export type PaymentCondition = keyof typeof PaymentCondition;
+
+export const OfferValidity = {
+  DIAS_15: "15 días",
+  DIAS_30: "30 días",
+  DIAS_45: "45 días",
+  DIAS_60: "60 días",
+} as const;
+
+export type OfferValidity = keyof typeof OfferValidity;
+
+export const LegalEntityType = {
+  NATURAL: "natural",
+  EMPRESA: "empresa",
+} as const;
+
+export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType];
 
 export interface QuotePreview {
   id: string;
@@ -28,38 +78,28 @@ export interface QuotePreview {
   seller: SellerPreview;
   createdAt: string;
   total: number;
-  expirationDate: string;
-}
-
-// TODO: Mover cuando se implemente el modulo
-export interface Organization {
-  id: string;
-  nit: string;
-  legalName: string;
-  defaultDiscountRate: number;
-  address: string;
-  billingEmail: string;
-  generalEmail: string;
-  phone: string;
-  representativeFirstName?: string;
-  representativeLastName?: string;
-  representativeIdentification?: string;
-  representativeEmail?: string;
-  representativePhone?: string;
+  offerValidity: OfferValidity | null;
 }
 
 export interface Account {
   id: string;
-  legalEntityType: "PERSONA_NATURAL" | "PERSONA_JURIDICA";
+  legalEntityType: LegalEntityType;
+  name: string;
   identificationNumber: string;
+  email: string;
+  phone: string;
+  address: string;
+  isActive: boolean;
+  retefuenteApplies: boolean;
+  defaultDiscountRate: number;
+  zone: string;
+  // Persona Natural
   firstName?: string;
   lastName?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  jobTitle?: string;
-  organization?: Organization;
+  // Empresa
+  legalName?: string;
+  billingEmail?: string;
+  // Representante (ambos tipos)
   representativeFirstName?: string;
   representativeLastName?: string;
   representativeIdentification?: string;
@@ -72,15 +112,26 @@ export interface Quote {
   id: string;
   number: string;
   status: QuoteStatus;
-  subtotalAmount: number;
-  discountTotal: number;
-  taxTotal: number;
-  totalAmount: number;
-  expirationDate: string;
+  paymentCondition: PaymentCondition | null;
+  offerValidity: OfferValidity | null;
   account: Account;
+  sellerId: string;
   sellerName: string;
   location: Location;
   priceList: PriceList;
   createdAt: string;
   updatedAt: string;
+  // Detalles de pago
+  subtotalAmount: number;
+  commercialDiscountRate: number;
+  commercialDiscountAmount: number;
+  otherDiscountsRate: number;
+  otherDiscountsAmount: number;
+  ivaRate: number;
+  ivaAmount: number;
+  retefuenteRate: number | null;
+  retefuenteAmount: number | null;
+  reteicaRate: number | null;
+  reteicaAmount: number | null;
+  totalAmount: number;
 }

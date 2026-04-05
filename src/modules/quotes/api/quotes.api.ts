@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { QuotePreview, Quote, Account } from "../types";
+import type { QuotePreview, Quote, ClientPreview, ClientDetails } from "../types";
 import type { PriceList } from "../types";
 
 export const getQuotesService = async (
@@ -26,7 +26,7 @@ export const getQuoteByIdService = async (id: string): Promise<Quote> => {
 
 export const updateQuoteService = async (
   id: string,
-  data: Partial<Quote> & { priceListId?: string },
+  data: Partial<Quote> & { priceListId?: string; sellerId?: string },
 ): Promise<Quote> => {
   const response = await apiClient.put(`/quotes/${id}`, data);
   return response.data;
@@ -37,13 +37,18 @@ export const createQuoteService = async (accountId: string): Promise<Quote> => {
   return response.data;
 };
 
-export const searchAccountsService = async (
-  search: string,
-): Promise<Account[]> => {
-  const response = await apiClient.get("/accounts", {
-    params: { search, size: 20 },
+export const searchClientsService = async (
+  text: string,
+): Promise<ClientPreview[]> => {
+  const response = await apiClient.get("/clients", {
+    params: { text, size: 20 },
   });
   return response.data?.content || response.data || [];
+};
+
+export const getClientByIdService = async (id: string): Promise<ClientDetails> => {
+  const response = await apiClient.get(`/clients/${id}`);
+  return response.data;
 };
 
 export const getPriceListsService = async (): Promise<PriceList[]> => {
