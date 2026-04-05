@@ -11,6 +11,29 @@ export interface SellerPreview {
   fullName: string;
 }
 
+/** Matches ClientPreviewDTO — returned by GET /clients search */
+export interface ClientPreview {
+  id: string;
+  legalEntityType: LegalEntityType;
+  name: string;
+  identificationNumber: string;
+  isActive: boolean;
+  defaultAdvisor: SellerPreview | null;
+}
+
+/** Matches ClientResponseDTO — returned by GET /clients/{id} */
+export interface ClientDetails {
+  id: string;
+  legalEntityType: LegalEntityType;
+  name: string;
+  identificationNumber: string;
+  isActive: boolean;
+  retefuenteApplies: boolean;
+  defaultAdvisor: SellerPreview | null;
+  defaultDiscountRate: number | null;
+  priceList: PriceList | null;
+}
+
 export const QuoteStatus = {
   PENDING: "PENDING",
   ACCEPTED: "ACCEPTED",
