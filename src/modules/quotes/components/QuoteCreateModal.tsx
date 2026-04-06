@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   TextField,
   Box,
-  Typography,
   CircularProgress,
   Autocomplete,
 } from "@mui/material";
-import { searchAccountsService } from "../api/quotes.api";
-import type { Account } from "../types";
+import { X, FileText, Search } from "lucide-react";
+import { searchClientsService } from "../api/quotes.api";
+import type { ClientPreview } from "../types";
 
 interface QuoteCreateModalProps {
   open: boolean;
@@ -21,50 +17,41 @@ interface QuoteCreateModalProps {
 }
 
 const QuoteCreateModal = ({ open, onClose, onSubmit }: QuoteCreateModalProps) => {
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [selectedClient, setSelectedClient] = useState<ClientPreview | null>(null);
   const [inputValue, setInputValue] = useState("");
-  const [options, setOptions] = useState<Account[]>([]);
+  const [options, setOptions] = useState<ClientPreview[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-search effect
+  // Search effect — fires on input change or when modal opens
   useEffect(() => {
+    if (!open) return;
+
     let active = true;
-
-    if (inputValue === '') {
-      setOptions(selectedAccount ? [selectedAccount] : []);
-      return undefined;
-    }
-
     setIsSearching(true);
+    const delay = inputValue === "" ? 0 : 400;
     const timeoutId = setTimeout(async () => {
       try {
-        const results = await searchAccountsService(inputValue);
-        if (active) {
-          setOptions(results);
-        }
-      } catch (err) {
-        if (active) {
-          console.error("Error buscando clientes:", err);
-        }
+        const results = await searchClientsService(inputValue);
+        if (active) setOptions(results);
+      } catch {
+        // silently ignore search errors
       } finally {
-        if (active) {
-          setIsSearching(false);
-        }
+        if (active) setIsSearching(false);
       }
-    }, 400);
+    }, delay);
 
     return () => {
       active = false;
       clearTimeout(timeoutId);
     };
-  }, [inputValue, selectedAccount]);
+  }, [inputValue, open]);
 
-  // Reset state on open/close
+  // Reset on open
   useEffect(() => {
     if (open) {
-      setSelectedAccount(null);
+      setSelectedClient(null);
       setInputValue("");
       setOptions([]);
       setError(null);
@@ -73,104 +60,156 @@ const QuoteCreateModal = ({ open, onClose, onSubmit }: QuoteCreateModalProps) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAccount) {
+    if (!selectedClient) {
       setError("Debes seleccionar un cliente de la lista.");
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     setError(null);
     try {
-      await onSubmit(selectedAccount.id);
+      await onSubmit(selectedClient.id);
       onClose();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error al crear la cotización.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={!isLoading ? onClose : undefined} maxWidth="sm" fullWidth>
-      <DialogTitle>Nueva Cotización</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={!isSubmitting ? onClose : undefined}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          className: "rounded-2xl overflow-hidden shadow-xl",
+          style: { borderRadius: "16px" },
+        },
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center w-10 h-10 rounded-xl"
+            style={{ backgroundColor: "var(--dispofast-primary)", opacity: 0.9 }}
+          >
+            <FileText size={20} color="white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Nueva Cotización</h2>
+            <p className="text-sm text-gray-500">Selecciona el cliente para comenzar</p>
+          </div>
+        </div>
+        {!isSubmitting && (
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-1.5 transition-colors"
+          >
+            <X size={18} />
+          </button>
+        )}
+      </div>
+
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent sx={{ minHeight: "200px" }}>
-          <Typography variant="body2" className="text-gray-600 mb-4">
-            Busca y selecciona el cliente para la nueva cotización.
-          </Typography>
-          
+        {/* Content */}
+        <div className="px-6 pb-2">
           <Autocomplete
-            id="account-selector"
+            id="client-selector"
             options={options}
-            getOptionLabel={(option) => {
-              if (option.organization?.legalName) {
-                return `${option.identificationNumber || ""} - ${option.organization.legalName}`.replace(/^ - /, "");
-              }
-              const fullName = `${option.firstName || ""} ${option.lastName || ""}`.trim();
-              return `${option.identificationNumber || ""} - ${fullName}`.replace(/^ - /, "");
-            }}
+            getOptionLabel={(option) => option.name}
             filterOptions={(x) => x}
             autoComplete
             includeInputInList
             filterSelectedOptions
-            value={selectedAccount}
-            noOptionsText={isSearching ? "Buscando..." : "No se encontraron clientes"}
-            onChange={(_event: unknown, newValue: Account | null) => {
+            value={selectedClient}
+            noOptionsText={
+              <span className="text-sm text-gray-500">
+                {isSearching ? "Buscando..." : "No se encontraron clientes"}
+              </span>
+            }
+            onChange={(_event: unknown, newValue: ClientPreview | null) => {
               setOptions(newValue ? [newValue, ...options] : options);
-              setSelectedAccount(newValue);
+              setSelectedClient(newValue);
+              setError(null);
             }}
             onInputChange={(_event, newInputValue) => {
               setInputValue(newInputValue);
             }}
-            disabled={isLoading}
+            disabled={isSubmitting}
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Cliente"
+                placeholder="Escribe para buscar..."
                 variant="outlined"
                 fullWidth
                 error={!!error}
                 helperText={error}
                 InputProps={{
                   ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <Search size={16} className="text-gray-400 mr-2 shrink-0" />
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
                   endAdornment: (
                     <>
-                      {isSearching ? <CircularProgress color="inherit" size={20} /> : null}
+                      {isSearching ? <CircularProgress color="inherit" size={16} /> : null}
                       {params.InputProps.endAdornment}
                     </>
                   ),
                 }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "10px",
+                    backgroundColor: "#f9fafb",
+                    "&:hover fieldset": { borderColor: "var(--dispofast-primary)" },
+                    "&.Mui-focused fieldset": { borderColor: "var(--dispofast-primary)" },
+                  },
+                }}
               />
             )}
-            renderOption={(props, option) => {
-              const displayName = option.organization?.legalName || `${option.firstName || ""} ${option.lastName || ""}`.trim();
-              return (
-                <li {...props} key={option.id}>
-                  <Box>
-                    <Typography variant="body1">{displayName}</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      {option.identificationNumber ? `ID: ${option.identificationNumber}` : "Sin ID"}
-                      {option.email ? ` | ${option.email}` : ""}
-                    </Typography>
-                  </Box>
-                </li>
-              );
+            renderOption={(props, option) => (
+              <li
+                {...props}
+                key={option.id}
+                className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <span className="text-sm font-medium text-gray-800">{option.name}</span>
+              </li>
+            )}
+            slotProps={{
+              paper: {
+                style: { borderRadius: "10px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" },
+              },
             }}
           />
-        </DialogContent>
-        <DialogActions className="p-4">
-          <Button onClick={onClose} disabled={isLoading} color="inherit">
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isLoading || !selectedAccount}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 mt-2 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            {isLoading ? "Creando..." : "Crear Cotización"}
-          </Button>
-        </DialogActions>
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting || !selectedClient}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: "var(--dispofast-primary)" }}
+          >
+            {isSubmitting && <CircularProgress size={14} color="inherit" />}
+            {isSubmitting ? "Creando..." : "Crear Cotización"}
+          </button>
+        </div>
       </Box>
     </Dialog>
   );

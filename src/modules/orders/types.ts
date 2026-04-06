@@ -1,3 +1,11 @@
+export type PaymentCondition =
+  | 'CONTADO'
+  | 'CONTADO_15_DIAS'
+  | 'CONTADO_30_DIAS'
+  | 'CONTADO_60_DIAS'
+  | 'CONTADO_90_DIAS'
+  | 'CONTRAENTREGA';
+
 export type OrderState =
   | 'PENDING'
   | 'INVOICED'
@@ -10,6 +18,8 @@ export interface SalesOrderItem {
   id: string;
   productId: string;
   productName: string;
+  productReference: string;
+  taxFree: boolean;
   quantity: number;
   unitPrice: number;
   discount: number;
@@ -32,6 +42,9 @@ export interface SalesOrder {
   totalValue: number;
   priceListId: string;
   quoteId: string | null;
+  paymentCondition: PaymentCondition | null;
+  discountRate: number | null;
+  additionalDiscountRate: number | null;
   items: SalesOrderItem[];
 }
 
@@ -60,6 +73,9 @@ export interface CreateOrderRequestDTO {
   zone?: string;
   priceListId: string;
   quoteId?: string;
+  paymentCondition?: PaymentCondition;
+  discountRate?: number;
+  additionalDiscountRate?: number;
   items: CreateOrderItemDTO[];
 }
 
