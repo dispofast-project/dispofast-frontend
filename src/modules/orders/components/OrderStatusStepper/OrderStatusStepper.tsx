@@ -21,16 +21,6 @@ const STATE_ORDER: OrderState[] = [
   "DELIVERED",
 ];
 
-const getStepIndex = (state: OrderState): number => {
-  if (state === "ASSIGNED" || state === "IN_TRANSIT") return 2;
-  return ["PENDING", "INVOICED", "_", "_", "DELIVERED"].indexOf(
-    state === "PENDING" ? "PENDING"
-    : state === "INVOICED" ? "INVOICED"
-    : state === "DELIVERED" ? "DELIVERED"
-    : state
-  );
-};
-
 const resolveCurrentStep = (state: OrderState): number => {
   const idx = STATE_ORDER.indexOf(state);
   if (state === "ASSIGNED")   return 2;
@@ -63,7 +53,6 @@ const OrderStatusStepper = ({ state }: OrderStatusStepperProps) => {
           {STEPS.map((step, index) => {
             const isDone    = index < currentStep;
             const isCurrent = index === currentStep;
-            const isPending = index > currentStep;
 
             return (
               <div key={index} className="flex items-center flex-1 last:flex-none">

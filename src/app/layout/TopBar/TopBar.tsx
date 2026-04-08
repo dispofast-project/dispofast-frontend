@@ -6,9 +6,10 @@ interface TopBarProps {
     notificationCount?: number;
 }
 
-const formatRole = (roles: string[]): string => {
-    if (!roles || roles.length === 0) return "";
-    const raw = roles[0].replace(/^ROLE_/, "");
+const formatRole = (roles: string[] | string | undefined): string => {
+    if (!roles) return "";
+    const role = Array.isArray(roles) ? roles[0] : roles;
+    const raw = role.replace(/^ROLE_/, "");
     return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
 };
 
@@ -16,7 +17,7 @@ const TopBar: React.FC<TopBarProps> = ({ notificationCount = 0 }) => {
     const user = useAuthStore((state) => state.user);
 
     const username = user?.name ?? "";
-    const role = formatRole(user?.roles ?? []);
+    const role = formatRole(user?.role ?? []);
 
     return (
         <header className="h-16 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
