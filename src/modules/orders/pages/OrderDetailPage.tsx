@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Download, FileText, ChevronDown } from "lucide-react";
 import type { JSX } from "react";
@@ -20,7 +20,9 @@ import type { OrderState, SalesOrderItem } from "../types";
 import { Button } from "../../../shared/components/Button/Button";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
 import { ORDER_STATUS_CONFIG } from "../config/statusConfig";
-import { attachInvoice, updateOrder } from "../api/order.service";
+import { attachInvoice, downloadInvoice, updateOrder } from "../api/order.service";
+import { getInvoiceByOrderId } from "../../invoices/api/invoice.service";
+import type { Invoice } from "../../invoices/types";
 
 const formatCurrency = (value: number | null | undefined): string => {
   if (value == null) return "-";
@@ -65,25 +67,39 @@ const OrderDetailPage = () => {
   const navigate = useNavigate();
   const { order, loading, error, refetch } = useOrderDetail(id);
 
+  // ── Invoice data ────────────────────────────────────────────────────────────
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+
+  useEffect(() => {
+    if (!id || !order || order.state === "PENDING") {
+      setInvoice(null);
+      return;
+    }
+    getInvoiceByOrderId(id)
+      .then(setInvoice)
+      .catch(() => setInvoice(null));
+  }, [id, order?.state]);
+
   // ── Invoice dialog ──────────────────────────────────────────────────────────
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceUrl, setInvoiceUrl] = useState("");
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const handleAttachInvoice = async () => {
-    if (!id || !invoiceNumber.trim() || !invoiceUrl.trim()) return;
+    if (!id || !invoiceNumber.trim() || !invoiceFile) return;
     setInvoiceLoading(true);
     setInvoiceError(null);
     try {
       await attachInvoice(id, {
         invoiceNumber: invoiceNumber.trim(),
-        invoiceUrl: invoiceUrl.trim(),
+        file: invoiceFile,
       });
       setInvoiceOpen(false);
       setInvoiceNumber("");
-      setInvoiceUrl("");
+      setInvoiceFile(null);
       refetch();
     } catch {
       setInvoiceError("No se pudo adjuntar la factura. Intenta de nuevo.");
@@ -92,11 +108,21 @@ const OrderDetailPage = () => {
     }
   };
 
+  const handleDownloadInvoice = async () => {
+    if (!id) return;
+    setDownloadLoading(true);
+    try {
+      await downloadInvoice(id);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
   const handleCloseInvoiceDialog = () => {
     if (invoiceLoading) return;
     setInvoiceOpen(false);
     setInvoiceNumber("");
-    setInvoiceUrl("");
+    setInvoiceFile(null);
     setInvoiceError(null);
   };
 
@@ -140,7 +166,7 @@ const OrderDetailPage = () => {
   }
 
   const nextStates = NEXT_STATES[order.state] ?? [];
-  const canAttachInvoice = order.state === "PENDING" && !order.invoiceNumber;
+  const canAttachInvoice = order.state === "PENDING";
   const isTerminal = order.state === "DELIVERED" || order.state === "CANCELLED";
 
   return (
@@ -168,7 +194,7 @@ const OrderDetailPage = () => {
           <Box className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={order.state} configMap={ORDER_STATUS_CONFIG} />
 
-            {/* Attach invoice button — only PENDING without invoice */}
+            {/* Attach invoice button — only PENDING orders */}
             {canAttachInvoice && (
               <button
                 onClick={() => setInvoiceOpen(true)}
@@ -240,38 +266,32 @@ const OrderDetailPage = () => {
           <InfoRow label="Asesor Comercial" value={order.asesorName ?? "-"} />
 
           {/* Invoice section */}
-          {order.invoiceNumber ? (
-            <Box>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                Factura
-              </p>
+          <Box>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+              Factura
+            </p>
+            {invoice ? (
               <Box className="flex items-center gap-3">
                 <span className="text-sm font-semibold text-gray-800">
-                  {order.invoiceNumber}
+                  {invoice.invoiceNumber}
                 </span>
-                {order.invoiceUrl && (
-                  <a
-                    href={order.invoiceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
+                <button
+                  onClick={handleDownloadInvoice}
+                  disabled={downloadLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  {downloadLoading ? (
+                    <CircularProgress size={12} />
+                  ) : (
                     <Download className="w-3.5 h-3.5" />
-                    Descargar
-                  </a>
-                )}
+                  )}
+                  Descargar
+                </button>
               </Box>
-            </Box>
-          ) : (
-            canAttachInvoice && (
-              <Box>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                  Factura
-                </p>
-                <p className="text-xs text-gray-400 italic">Sin factura adjunta</p>
-              </Box>
-            )
-          )}
+            ) : (
+              <p className="text-xs text-gray-400 italic">Sin factura adjunta</p>
+            )}
+          </Box>
         </Box>
 
         {/* Delivery info */}
@@ -336,16 +356,21 @@ const OrderDetailPage = () => {
             disabled={invoiceLoading}
             inputProps={{ maxLength: 50 }}
           />
-          <TextField
-            label="URL del documento"
-            value={invoiceUrl}
-            onChange={(e) => setInvoiceUrl(e.target.value)}
-            size="small"
-            fullWidth
-            disabled={invoiceLoading}
-            placeholder="https://..."
-            inputProps={{ maxLength: 500 }}
-          />
+          <Box>
+            <p className="text-xs font-medium text-gray-500 mb-1">
+              Archivo PDF
+            </p>
+            <input
+              type="file"
+              accept="application/pdf"
+              disabled={invoiceLoading}
+              onChange={(e) => setInvoiceFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-sm text-gray-700 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+            />
+            {invoiceFile && (
+              <p className="text-xs text-gray-400 mt-1 truncate">{invoiceFile.name}</p>
+            )}
+          </Box>
         </DialogContent>
 
         <DialogActions className="px-6 pb-4 gap-2">
@@ -361,7 +386,7 @@ const OrderDetailPage = () => {
             disabled={
               invoiceLoading ||
               !invoiceNumber.trim() ||
-              !invoiceUrl.trim()
+              !invoiceFile
             }
             className="px-4 py-2 rounded-md text-sm text-white bg-dispofast-primary hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5"
           >

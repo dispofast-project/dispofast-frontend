@@ -65,14 +65,13 @@ const ALL_STATES: { value: OrderState | ""; label: string }[] = [
 ];
 
 const HEADERS = [
-  "Estado", 
-  "Cliente", 
-  "# Orden", 
-  "Valor", 
-  "# Factura", 
-  "Ciudad", 
-  "Fecha", 
-  "Acciones"
+  "Estado",
+  "Cliente",
+  "# Orden",
+  "Valor",
+  "Ciudad",
+  "Fecha",
+  "Acciones",
 ];
 
 const OrdersContent = (): JSX.Element => {
@@ -135,7 +134,6 @@ const OrdersContent = (): JSX.Element => {
       item.clientName,
       item.orderNumber,
       formatCurrency(item.totalValue),
-      item.invoiceNumber ?? "-",
       item.shipmentCityName,
       formatDate(item.orderDate),
       <Box className="flex items-center space-x-3" key="actions">

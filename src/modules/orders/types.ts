@@ -42,8 +42,6 @@ export interface SalesOrder {
   totalValue: number;
   priceListId: string;
   quoteId: string | null;
-  invoiceNumber: string | null;
-  invoiceUrl: string | null;
   paymentCondition: PaymentCondition | null;
   discountRate: number | null;
   additionalDiscountRate: number | null;
@@ -94,5 +92,5 @@ export interface UpdateOrderRequestDTO {
 
 export interface AttachInvoiceRequestDTO {
   invoiceNumber: string;
-  invoiceUrl: string;
+  file: File;
 }

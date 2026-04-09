@@ -13,8 +13,9 @@ export interface ArEntry {
   asesorName: string | null;
   orderNumber: string | null;
   value: number;
-  invoiceNumber: string;
-  invoiceDate: string;
+  invoiceId: string | null;
+  invoiceNumber: string | null;
+  invoiceDate: string | null;
   paymentTermDays: number;
   expirationDate: string;
   diasCartera: number;

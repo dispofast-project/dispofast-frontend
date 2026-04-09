@@ -149,7 +149,7 @@ const CarteraPage = (): JSX.Element => {
           }
           sx={{ minWidth: 150 }}
           renderValue={(v) =>
-            v === "" ? <span className="text-gray-400">Estado</span> : v === "PENDING" ? "Pendiente" : "Pagado"
+            (v as string) === "" ? <span className="text-gray-400">Estado</span> : v === "PENDING" ? "Pendiente" : "Pagado"
           }
         >
           <MenuItem value="">Todos</MenuItem>
