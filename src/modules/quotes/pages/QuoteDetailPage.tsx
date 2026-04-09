@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, IconButton, CircularProgress, Button, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -17,6 +17,8 @@ import QuoteTermsCard from "../components/QuoteTermsCard";
 import QuotePriceListCard from "../components/QuotePriceListCard";
 import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
 import QuoteOrderCard from "../components/QuoteOrderCard";
+import QuoteItemsSection from "../components/QuoteItemsSection";
+import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
 
 interface QuoteState {
   data: Quote | null;
@@ -36,6 +38,9 @@ const QuoteDetailPage = () => {
   const [priceLists, setPriceLists] = useState<PriceList[]>([]);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [hasItemChanges, setHasItemChanges] = useState(false);
+
+  const quoteItemsRef = useRef<QuoteItemsSectionHandle>(null);
 
   const { data: quote, isLoading, error } = quoteState;
   const { authorities } = useAuth();
@@ -73,6 +78,12 @@ const QuoteDetailPage = () => {
 
     return () => { isMounted = false; };
   }, [id]);
+
+  const handleSave = () => {
+    if (!id) return;
+    if (hasChanges) handleSaveAll(id);
+    if (hasItemChanges) quoteItemsRef.current?.saveChanges();
+  };
 
   const handleCreateOrder = async () => {
     if (!id) return;
@@ -137,6 +148,17 @@ const QuoteDetailPage = () => {
             onCommercialRateChange={setCommercialRate}
             onOtherRateChange={setOtherRate}
           />
+          <QuoteItemsSection
+            ref={quoteItemsRef}
+            quoteId={quote.id}
+            priceListId={quote.priceList.id}
+            onHasPendingChanges={setHasItemChanges}
+            onItemsChanged={() =>
+              getQuoteByIdService(id!).then((data) =>
+                setQuoteState((prev) => ({ ...prev, data }))
+              )
+            }
+          />
         </Box>
 
         {/* ── Columna lateral ── */}
@@ -166,8 +188,8 @@ const QuoteDetailPage = () => {
             <Button
               variant="contained"
               fullWidth
-              disabled={isSaving || !hasChanges}
-              onClick={() => id && handleSaveAll(id)}
+              disabled={isSaving || (!hasChanges && !hasItemChanges)}
+              onClick={handleSave}
               sx={{ textTransform: "none", fontWeight: 600 }}
             >
               {isSaving ? <CircularProgress size={20} color="inherit" /> : "Guardar cambios"}

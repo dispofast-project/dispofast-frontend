@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { QuotePreview, Quote, ClientPreview, ClientDetails } from "../types";
+import type { QuotePreview, Quote, QuoteItem, ClientPreview, ClientDetails } from "../types";
 import type { PriceList } from "../types";
 
 export const getQuotesService = async (
@@ -54,4 +54,30 @@ export const getClientByIdService = async (id: string): Promise<ClientDetails> =
 export const getPriceListsService = async (): Promise<PriceList[]> => {
   const response = await apiClient.get("/price-lists");
   return response.data;
+};
+
+export const getQuoteItemsService = async (quoteId: string): Promise<QuoteItem[]> => {
+  const response = await apiClient.get(`/quotes/${quoteId}/items`);
+  return response.data;
+};
+
+export const addQuoteItemService = async (
+  quoteId: string,
+  data: { productId: string; quantity: number; unitPrice?: number },
+): Promise<QuoteItem> => {
+  const response = await apiClient.post(`/quotes/${quoteId}/items`, data);
+  return response.data;
+};
+
+export const updateQuoteItemService = async (
+  quoteId: string,
+  itemId: string,
+  data: { quantity?: number; unitPrice?: number },
+): Promise<QuoteItem> => {
+  const response = await apiClient.put(`/quotes/${quoteId}/items/${itemId}`, data);
+  return response.data;
+};
+
+export const removeQuoteItemService = async (quoteId: string, itemId: string): Promise<void> => {
+  await apiClient.delete(`/quotes/${quoteId}/items/${itemId}`);
 };

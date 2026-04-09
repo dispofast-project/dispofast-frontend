@@ -140,11 +140,11 @@ export const useCreateOrder = () => {
     );
   };
 
-  const IVA_RATE = 0.19;
+  const IVA = 0.19;
   const RETEFUENTE_RATE = 0.035;
 
   const subtotal           = items.reduce((acc, it) => acc + it.lineTotal, 0);
-  const tax                = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA_RATE), 0);
+  const tax                = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA), 0);
   const discountAmt        = subtotal * ((parseInt(discountRate, 10) || 0) / 100);
   const additionalDiscountAmt = subtotal * ((parseFloat(additionalDiscountRate || "0")) / 100);
   const retefuente         = clientDetail?.retefuenteApplies ? subtotal * RETEFUENTE_RATE : 0;
