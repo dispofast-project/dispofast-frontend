@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { getQuotesService, createQuoteService } from "../api/quotes.api";
+import { getQuotesService } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
 import type { QuotePreview } from "../types";
 import QuotesTable from "../components/QuotesTable";
@@ -100,8 +100,7 @@ const QuotesPage = () => {
   };
 
   const handleCreateQuote = async (accountId: string) => {
-    const newQuote = await createQuoteService(accountId);
-    navigate(`/cotizaciones/${newQuote.id}`);
+    navigate(`/cotizaciones/nuevo/${accountId}`);
   };
 
   const handleCreateOrder = async (quote: QuotePreview) => {
