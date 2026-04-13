@@ -53,6 +53,7 @@ const QuoteDetailPage = () => {
     selectedOfferValidity, setSelectedOfferValidity,
     commercialRate, setCommercialRate,
     otherRate, setOtherRate,
+    reteicaRate, setReteicaRate,
     isSaving,
     saveError,
     hasChanges,
@@ -176,7 +177,7 @@ const QuoteDetailPage = () => {
             selectedPriceListId={selectedPriceListId}
             setSelectedPriceListId={setSelectedPriceListId}
           />
-          <QuotePaymentDetailsCard quote={quote} />
+          <QuotePaymentDetailsCard quote={quote} reteicaRate={reteicaRate} onReteicaRateChange={setReteicaRate} />
 
           {/* Guardar cambios */}
           <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-3">

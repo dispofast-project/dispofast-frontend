@@ -3,9 +3,12 @@ import { Box, Typography } from "@mui/material";
 import { Hash } from "lucide-react";
 import type { Quote } from "../types";
 import { formatCurrency } from "../../../shared/utils/currency";
+import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
 
 interface QuotePaymentDetailsCardProps {
   quote: Quote | null;
+  reteicaRate: string;
+  onReteicaRateChange: (value: string) => void;
 }
 
 type RowVariant = "normal" | "discount" | "tax" | "retention" | "total";
@@ -23,11 +26,11 @@ const formatRate = (rate: number | null | undefined): string => {
 };
 
 const VARIANT_STYLES: Record<RowVariant, { label: string; value: string }> = {
-  normal:    { label: "text-gray-500",                      value: "font-medium tabular-nums" },
-  discount:  { label: "text-green-600",                     value: "font-medium tabular-nums text-green-600" },
-  tax:       { label: "text-gray-500",                      value: "font-medium tabular-nums" },
-  retention: { label: "text-orange-500",                    value: "font-medium tabular-nums text-orange-500" },
-  total:     { label: "font-bold text-gray-900",            value: "font-bold tabular-nums" },
+  normal:    { label: "text-gray-500",       value: "font-medium tabular-nums" },
+  discount:  { label: "text-green-600",      value: "font-medium tabular-nums text-green-600" },
+  tax:       { label: "text-gray-500",       value: "font-medium tabular-nums" },
+  retention: { label: "text-orange-500",     value: "font-medium tabular-nums text-orange-500" },
+  total:     { label: "font-bold text-gray-900", value: "font-bold tabular-nums" },
 };
 
 const PaymentRow = ({ label, value, variant = "normal" }: RowConfig) => {
@@ -47,46 +50,39 @@ const PaymentRow = ({ label, value, variant = "normal" }: RowConfig) => {
 
 const Divider = () => <Box className="h-px bg-gray-100" />;
 
-const buildSections = (quote: Quote | null): RowConfig[][] => [
-  [
-    { label: "Subtotal", value: formatCurrency(quote?.subtotalAmount) },
-  ],
-  [
-    {
-      label: `Descuento comercial (${formatRate(quote?.commercialDiscountRate)})`,
-      value: `-${formatCurrency(quote?.commercialDiscountAmount)}`,
-      variant: "discount",
-    },
-    {
-      label: `Otros descuentos (${formatRate(quote?.otherDiscountsRate)})`,
-      value: `-${formatCurrency(quote?.otherDiscountsAmount)}`,
-      variant: "discount",
-    },
-  ],
-  [
-    {
-      label: `IVA (${formatRate(quote?.ivaRate)})`,
-      value: formatCurrency(quote?.ivaAmount),
-      variant: "tax",
-    },
-    {
-      label: `Retefuente (${formatRate(quote?.retefuenteRate)})`,
-      value: `-${formatCurrency(quote?.retefuenteAmount)}`,
-      variant: "retention",
-    },
-    {
-      label: `Reteica (${formatRate(quote?.reteicaRate)})`,
-      value: `-${formatCurrency(quote?.reteicaAmount)}`,
-      variant: "retention",
-    },
-  ],
-  [
-    { label: "Total a Pagar", value: formatCurrency(quote?.totalAmount), variant: "total" },
-  ],
-];
-
-const QuotePaymentDetailsCard = ({ quote }: QuotePaymentDetailsCardProps) => {
-  const sections = buildSections(quote);
+const QuotePaymentDetailsCard = ({ quote, reteicaRate, onReteicaRateChange }: QuotePaymentDetailsCardProps) => {
+  const sections: RowConfig[][] = [
+    [
+      { label: "Subtotal", value: formatCurrency(quote?.subtotalAmount) },
+    ],
+    [
+      {
+        label: `Descuento comercial (${formatRate(quote?.commercialDiscountRate)})`,
+        value: `-${formatCurrency(quote?.commercialDiscountAmount)}`,
+        variant: "discount",
+      },
+      {
+        label: `Otros descuentos (${formatRate(quote?.otherDiscountsRate)})`,
+        value: `-${formatCurrency(quote?.otherDiscountsAmount)}`,
+        variant: "discount",
+      },
+    ],
+    [
+      {
+        label: `IVA (${formatRate(quote?.ivaRate)})`,
+        value: formatCurrency(quote?.ivaAmount),
+        variant: "tax",
+      },
+      {
+        label: `Retefuente (${formatRate(quote?.retefuenteRate)})`,
+        value: `-${formatCurrency(quote?.retefuenteAmount)}`,
+        variant: "retention",
+      },
+    ],
+    [
+      { label: "Total a Pagar", value: formatCurrency(quote?.totalAmount), variant: "total" },
+    ],
+  ];
 
   return (
     <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
@@ -106,6 +102,27 @@ const QuotePaymentDetailsCard = ({ quote }: QuotePaymentDetailsCardProps) => {
             {rows.map((row) => (
               <PaymentRow key={row.label} {...row} />
             ))}
+            {/* Reteica editable — va después de Retefuente (sección index 2) */}
+            {i === 2 && (
+              <Box className="flex justify-between items-center">
+                <Box className="flex items-center gap-1.5">
+                  <Typography variant="body2" className="text-orange-500">Reteica</Typography>
+                  <PercentageInput
+                    value={reteicaRate}
+                    onChange={onReteicaRateChange}
+                    decimalScale={1}
+                    sx={{
+                      width: 80,
+                      "& .MuiOutlinedInput-root": { height: 24, fontSize: "0.8rem" },
+                      "& .MuiOutlinedInput-input": { padding: "2px 6px" },
+                    }}
+                  />
+                </Box>
+                <Typography variant="body2" className="font-medium tabular-nums text-orange-500">
+                  -{formatCurrency(quote?.reteicaAmount)}
+                </Typography>
+              </Box>
+            )}
           </Fragment>
         ))}
       </Box>
