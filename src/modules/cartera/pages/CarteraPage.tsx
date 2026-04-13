@@ -20,7 +20,7 @@ import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge"
 import { Button } from "../../../shared/components/Button/Button";
 import { useCartera } from "../hooks/useCartera";
 import { CARTERA_STATUS_CONFIG } from "../config/statusConfig";
-import { getDisplayState, type ArEntry, type ArEntryState } from "../types";
+import { type ArEntry, type ArEntryState } from "../types";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -36,10 +36,8 @@ const formatDate = (iso: string | null | undefined): string => {
   });
 };
 
-const DaysBadge = ({ dias, isVencida }: { dias: number; isVencida: boolean }) => {
-  const color = isVencida
-    ? "text-red-600 bg-red-50"
-    : dias <= 10
+const DaysBadge = ({ dias }: { dias: number}) => {
+  const color = dias <= 10
     ? "text-amber-600 bg-amber-50"
     : "text-green-600 bg-green-50";
 
@@ -193,13 +191,10 @@ const CarteraPage = (): JSX.Element => {
         ]}
         data={loading ? [] : entries}
         renderRow={(entry): (string | JSX.Element)[] => {
-          const displayState = getDisplayState(entry);
-          const isVencida = displayState === "VENCIDA";
-
           return [
             <StatusBadge
               key="estado"
-              status={displayState}
+              status={entry.state}
               configMap={CARTERA_STATUS_CONFIG}
             />,
             <Box key="cliente">
@@ -215,16 +210,9 @@ const CarteraPage = (): JSX.Element => {
             formatCurrency(entry.value ?? 0),
             entry.invoiceNumber ?? "-",
             formatDate(entry.invoiceDate),
-            <span
-              key="vencimiento"
-              className={isVencida ? "text-red-600 font-medium" : ""}
-            >
-              {formatDate(entry.expirationDate)}
-            </span>,
             <DaysBadge
               key="dias"
               dias={entry.diasCartera}
-              isVencida={isVencida}
             />,
             entry.cityName ?? "-",
           ];
