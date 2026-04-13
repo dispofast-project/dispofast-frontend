@@ -135,7 +135,7 @@ const QuoteDetailPage = () => {
       <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── Columna principal ── */}
         <Box className="lg:col-span-2 flex flex-col gap-6">
-          <QuoteDetailsHeaderCard quote={quote} />
+          <QuoteDetailsHeaderCard quote={quote} onUpdated={(updated) => setQuoteState((prev) => ({ ...prev, data: updated }))} />
           <QuoteClientCard account={quote.account} location={quote.location} />
           <QuoteAdvisorCard value={selectedSeller} onChange={setSelectedSeller} readOnly={!isAdmin} />
           <QuoteTermsCard

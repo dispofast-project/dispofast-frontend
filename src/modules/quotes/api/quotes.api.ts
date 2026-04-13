@@ -81,3 +81,8 @@ export const updateQuoteItemService = async (
 export const removeQuoteItemService = async (quoteId: string, itemId: string): Promise<void> => {
   await apiClient.delete(`/quotes/${quoteId}/items/${itemId}`);
 };
+
+export const changeQuoteStatusService = async (id: string, status: string): Promise<Quote> => {
+  const response = await apiClient.patch(`/quotes/${id}/status`, { status });
+  return response.data;
+};
