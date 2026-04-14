@@ -1,0 +1,96 @@
+export type PaymentCondition =
+  | 'CONTADO'
+  | 'CONTADO_15_DIAS'
+  | 'CONTADO_30_DIAS'
+  | 'CONTADO_60_DIAS'
+  | 'CONTADO_90_DIAS'
+  | 'CONTRAENTREGA';
+
+export type OrderState =
+  | 'PENDING'
+  | 'INVOICED'
+  | 'ASSIGNED'
+  | 'IN_TRANSIT'
+  | 'DELIVERED'
+  | 'CANCELLED';
+
+export interface SalesOrderItem {
+  id: string;
+  productId: string;
+  productName: string;
+  productReference: string;
+  taxFree: boolean;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  lineTotal: number;
+}
+
+export interface SalesOrder {
+  id: string;
+  orderNumber: string;
+  clientId: string;
+  clientName: string;
+  asesorUserId: string;
+  asesorName: string;
+  state: OrderState;
+  orderDate: string;
+  shipmentCityId: string;
+  shipmentCityName: string;
+  shipmentAddress: string;
+  zone: string;
+  totalValue: number;
+  priceListId: string;
+  quoteId: string | null;
+  paymentCondition: PaymentCondition | null;
+  discountRate: number | null;
+  additionalDiscountRate: number | null;
+  items: SalesOrderItem[];
+}
+
+export interface OrderFilters {
+  state?: OrderState;
+  orderNumber?: string;
+}
+
+// ─── Request DTOs ───────────────────────────────────────────────────────────
+
+export interface CreateOrderItemDTO {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  discount?: number;
+  lineTotal: number;
+}
+
+export interface CreateOrderRequestDTO {
+  orderNumber: string;
+  clientId: string;
+  asesorUserId: string;
+  orderDate?: string;
+  shipmentCityId: string;
+  shipmentAddress: string;
+  zone?: string;
+  priceListId: string;
+  quoteId?: string;
+  paymentCondition?: PaymentCondition;
+  discountRate?: number;
+  additionalDiscountRate?: number;
+  items: CreateOrderItemDTO[];
+}
+
+export interface UpdateOrderRequestDTO {
+  asesorUserId?: string;
+  state?: OrderState;
+  orderDate?: string;
+  shipmentCityId?: string;
+  shipmentAddress?: string;
+  zone?: string;
+  priceListId?: string;
+  items?: CreateOrderItemDTO[];
+}
+
+export interface AttachInvoiceRequestDTO {
+  invoiceNumber: string;
+  file: File;
+}

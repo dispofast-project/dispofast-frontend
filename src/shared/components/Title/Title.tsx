@@ -20,7 +20,7 @@ const CustomTitle: React.FC<TitleProps> = ({ breadcrumbs }) => {
                                 {'>'}
                             </span>
                         )}
-                        <span className={`text-lg sm:text-1 md:text-2x1 font-bold ${
+                        <span className={`text-3xl font-bold text-gray-800 mb-4 ${
                             breadcrumb.onClick 
                             ? "cursor-pointer text-dispocol-main-color hover:underline" 
                             : "text-black"
