@@ -1,12 +1,6 @@
-/**
- * For a detailed explanation regarding each configuration property, visit:
- * https://jestjs.io/docs/configuration
- */
-
-import type {Config} from 'jest';
-
-const config: Config = {
-   preset: 'ts-jest',
+/** @type {import('jest').Config} */
+const config = {
+  preset: 'ts-jest',
   collectCoverage: false,
   coverageDirectory: 'coverage',
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
@@ -51,4 +45,4 @@ const config: Config = {
   testTimeout: 50000,
 };
 
-export default config;
+module.exports = config;
