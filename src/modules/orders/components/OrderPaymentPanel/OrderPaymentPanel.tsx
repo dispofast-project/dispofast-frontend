@@ -1,6 +1,8 @@
 import { Box, Divider, Typography } from "@mui/material";
 import type { PaymentCondition } from "../../types";
 import { PAYMENT_CONDITION_OPTIONS } from "../../constants/orderConstants";
+import { Button } from "../../../../shared/components/Button/Button";
+import { Download } from "lucide-react";
 
 const formatCurrency = (value: number | null | undefined): string => {
   if (value == null) return "$0,00";
@@ -43,13 +45,13 @@ interface OrderPaymentPanelProps {
   subtotal: number;
   tax: number;
   retefuenteAmount: number;
-  reteicaAmount: number;
   freight: number;
   discountRate: number;
   discountAmt: number;
   additionalDiscountRate: number;
   additionalDiscountAmt: number;
   totalValue: number;
+  handleDownload: () => void;
 }
 
 const OrderPaymentPanel = ({
@@ -57,13 +59,13 @@ const OrderPaymentPanel = ({
   subtotal,
   tax,
   retefuenteAmount,
-  reteicaAmount,
   freight,
   discountRate,
   discountAmt,
   additionalDiscountRate,
   additionalDiscountAmt,
   totalValue,
+  handleDownload,
 }: OrderPaymentPanelProps) => {
   const conditionLabel =
     PAYMENT_CONDITION_OPTIONS.find((o) => o.value === paymentCondition)?.label ?? "-";
@@ -98,11 +100,6 @@ const OrderPaymentPanel = ({
             negative={retefuenteAmount > 0}
           />
           <PaymentRow
-            label="Reteica"
-            value={formatCurrency(reteicaAmount)}
-            negative={reteicaAmount > 0}
-          />
-          <PaymentRow
             label={`Descuento Comercial${discountRate ? ` (${discountRate}%)` : ""}`}
             value={formatCurrency(discountAmt)}
             negative={discountAmt > 0}
@@ -119,6 +116,14 @@ const OrderPaymentPanel = ({
 
         {/* Total */}
         <PaymentRow label="Total" value={formatCurrency(totalValue)} highlight />
+
+        <Divider />
+
+        <Box>
+          <Button variant="primary" className="w-full flex items-center justify-center gap-2" onClick={handleDownload}>
+            <Download/> Descargar orden de compra
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

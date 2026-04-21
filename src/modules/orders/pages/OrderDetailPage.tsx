@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box } from "@mui/material";
 import { useOrderDetail } from "../hooks/useOrderDetail";
@@ -7,6 +7,7 @@ import { Button } from "../../../shared/components/Button/Button";
 import { attachInvoice, downloadInvoice, updateOrder } from "../api/order.service";
 import { getInvoiceByOrderId } from "../../invoices/api/invoice.service";
 import type { Invoice } from "../../invoices/types";
+import { downloadElementAsPdf } from "../../../shared/utils/downloadAsPdf";
 
 import OrderDetailHeader from "../components/OrderDetailHeader/OrderDetailHeader";
 import OrderStatusStepper from "../components/OrderStatusStepper/OrderStatusStepper";
@@ -47,6 +48,8 @@ const OrderDetailPage = () => {
   const [invoiceError, setInvoiceError]   = useState<string | null>(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
 
+  const orderRef = useRef<HTMLDivElement>(null);
+
   const handleAttachInvoice = async () => {
     if (!id || !invoiceNumber.trim() || !invoiceFile) return;
     setInvoiceLoading(true);
@@ -76,6 +79,11 @@ const OrderDetailPage = () => {
     if (!id) return;
     setDownloadLoading(true);
     try { await downloadInvoice(id); } finally { setDownloadLoading(false); }
+  };
+
+  const handleDownloadOrder = async () => {
+    if (!orderRef.current) return;
+    await downloadElementAsPdf(orderRef.current, `orden_${order?.orderNumber}.pdf`);
   };
 
   // ── State change ────────────────────────────────────────────────────────────
@@ -114,15 +122,15 @@ const OrderDetailPage = () => {
   const discountAmt         = subtotal * (discountRate / 100);
   const additionalDiscountAmt = subtotal * (additionalDiscountRate / 100);
   const retefuenteAmount    = order.retefuenteAmount ?? 0;
-  const reteicaAmount       = order.reteicaAmount ?? 0;
   const freight             = order.freight ?? 0;
 
   const nextStates      = NEXT_STATES[order.state] ?? [];
   const canAttachInvoice = order.state === "PENDING";
   const isTerminal      = order.state === "DELIVERED" || order.state === "CANCELLED";
 
+
   return (
-    <Box className="flex flex-col gap-6 pb-8">
+    <Box className="flex flex-col gap-6 pb-8" ref={orderRef}>
       <OrderDetailHeader
         orderNumber={order.orderNumber}
         clientName={order.clientName}
@@ -169,13 +177,13 @@ const OrderDetailPage = () => {
             subtotal={subtotal}
             tax={tax}
             retefuenteAmount={retefuenteAmount}
-            reteicaAmount={reteicaAmount}
             freight={freight}
             discountRate={discountRate}
             discountAmt={discountAmt}
             additionalDiscountRate={additionalDiscountRate}
             additionalDiscountAmt={additionalDiscountAmt}
             totalValue={order.totalValue}
+            handleDownload={handleDownloadOrder}
           />
         </Box>
       </Box>
