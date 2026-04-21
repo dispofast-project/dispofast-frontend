@@ -70,28 +70,26 @@ export const useCreateOrder = () => {
   useEffect(() => {
     let active = true;
 
-    if (clientInputValue.trim().length < 2) {
-      setClientOptions(selectedClient ? [selectedClient] : []);
-      return undefined;
-    }
-
     setIsClientSearching(true);
+
+    const delay = clientInputValue.trim() ? 400 : 0;
+
     const timer = setTimeout(async () => {
       try {
-        const res = await getClientsService(0, 20, clientInputValue);
+        const res = await getClientsService(0, 50, clientInputValue.trim() || undefined);
         if (active) setClientOptions(res.content);
       } catch {
         // ignore
       } finally {
         if (active) setIsClientSearching(false);
       }
-    }, 400);
+    }, delay);
 
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [clientInputValue, selectedClient]);
+  }, [clientInputValue]);
 
   // ─── When client selected, fetch full details to get priceList ────────────
   const handleClientChange = useCallback(
