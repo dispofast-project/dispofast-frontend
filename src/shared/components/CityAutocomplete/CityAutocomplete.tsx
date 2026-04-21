@@ -23,16 +23,18 @@ export const CityAutocomplete = ({
   const [cityOptions, setCityOptions] = useState<City[]>([]);
   const [cityInputValue, setCityInputValue] = useState("");
   const [isCitySearching, setIsCitySearching] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
 
-    if (cityInputValue === "") {
+    if (!open && cityInputValue === "") {
       setCityOptions(value ? [value] : []);
       return undefined;
     }
 
     setIsCitySearching(true);
+    const debounce = cityInputValue === "" ? 0 : 400;
     const timeoutId = setTimeout(async () => {
       try {
         const results = await searchCitiesService(cityInputValue);
@@ -48,13 +50,13 @@ export const CityAutocomplete = ({
           setIsCitySearching(false);
         }
       }
-    }, 400);
+    }, debounce);
 
     return () => {
       active = false;
       clearTimeout(timeoutId);
     };
-  }, [cityInputValue, value]);
+  }, [cityInputValue, value, open]);
 
   return (
     <Autocomplete
@@ -67,6 +69,9 @@ export const CityAutocomplete = ({
       includeInputInList
       filterSelectedOptions
       value={value}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
       noOptionsText={isCitySearching ? "Buscando..." : "No se encontraron ciudades"}
       onChange={(_event, newValue: City | null) => {
         setCityOptions(newValue ? [newValue, ...cityOptions] : cityOptions);
