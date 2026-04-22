@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, IconButton, CircularProgress, Button, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { PackageSearch } from "lucide-react";
 
 import {
   getQuoteByIdService,
   getPriceListsService,
   getClientByIdService,
   createQuoteService,
+  addQuoteItemService,
 } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
 import type { Quote, PriceList, ClientDetails } from "../types";
@@ -26,6 +26,8 @@ import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
 import QuoteOrderCard from "../components/QuoteOrderCard";
 import QuoteItemsSection from "../components/QuoteItemsSection";
 import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
+import QuoteItemsDraftSection from "../components/QuoteItemsDraftSection";
+import type { QuoteItemsDraftSectionHandle } from "../components/QuoteItemsDraftSection";
 
 interface QuoteDetailPageProps {
   mode: "create" | "edit";
@@ -66,6 +68,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const [createError, setCreateError] = useState<string | null>(null);
 
   const quoteItemsRef = useRef<QuoteItemsSectionHandle>(null);
+  const draftItemsRef = useRef<QuoteItemsDraftSectionHandle>(null);
 
   const { data: quote, isLoading: isQuoteLoading, error: quoteError } = quoteState;
   const { data: client, isLoading: isClientLoading, error: clientError } = clientState;
@@ -173,6 +176,16 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
       try {
         const newQuote = await createQuoteService(clientId);
         await handleSaveAll(newQuote.id);
+        const draftItems = draftItemsRef.current?.getItems() ?? [];
+        await Promise.all(
+          draftItems.map((item) =>
+            addQuoteItemService(newQuote.id, {
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            }),
+          ),
+        );
         navigate(`/cotizaciones/${newQuote.id}`);
       } catch (err: unknown) {
         setCreateError(err instanceof Error ? err.message : "Error al crear la cotización.");
@@ -289,12 +302,10 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               }
             />
           ) : (
-            <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center gap-3 text-center">
-              <PackageSearch size={32} strokeWidth={1.5} className="text-gray-300" />
-              <Typography variant="body2" className="text-gray-400">
-                Guarda la cotización para comenzar a agregar productos.
-              </Typography>
-            </Box>
+            <QuoteItemsDraftSection
+              ref={draftItemsRef}
+              priceListId={selectedPriceListId ?? ""}
+            />
           )}
         </Box>
 
@@ -338,7 +349,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               {isCreating || isSaving ? (
                 <CircularProgress size={20} color="inherit" />
               ) : mode === "create" ? (
-                "Crear Cotización"
+                "Guardar"
               ) : (
                 "Guardar cambios"
               )}
