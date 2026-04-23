@@ -149,7 +149,5 @@ export interface Quote {
   ivaAmount: number;
   retefuenteRate: number | null;
   retefuenteAmount: number | null;
-  reteicaRate: number | null;
-  reteicaAmount: number | null;
   totalAmount: number;
 }

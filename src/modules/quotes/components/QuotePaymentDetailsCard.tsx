@@ -3,12 +3,9 @@ import { Box, Typography } from "@mui/material";
 import { Hash } from "lucide-react";
 import type { Quote } from "../types";
 import { formatCurrency } from "../../../shared/utils/currency";
-import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
 
 interface QuotePaymentDetailsCardProps {
   quote: Quote | null;
-  reteicaRate: string;
-  onReteicaRateChange: (value: string) => void;
 }
 
 type RowVariant = "normal" | "discount" | "tax" | "retention" | "total";
@@ -50,7 +47,7 @@ const PaymentRow = ({ label, value, variant = "normal" }: RowConfig) => {
 
 const Divider = () => <Box className="h-px bg-gray-100" />;
 
-const QuotePaymentDetailsCard = ({ quote, reteicaRate, onReteicaRateChange }: QuotePaymentDetailsCardProps) => {
+const QuotePaymentDetailsCard = ({ quote }: QuotePaymentDetailsCardProps) => {
   const sections: RowConfig[][] = [
     [
       { label: "Subtotal", value: formatCurrency(quote?.subtotalAmount) },
@@ -102,27 +99,6 @@ const QuotePaymentDetailsCard = ({ quote, reteicaRate, onReteicaRateChange }: Qu
             {rows.map((row) => (
               <PaymentRow key={row.label} {...row} />
             ))}
-            {/* Reteica editable — va después de Retefuente (sección index 2) */}
-            {i === 2 && (
-              <Box className="flex justify-between items-center">
-                <Box className="flex items-center gap-1.5">
-                  <Typography variant="body2" className="text-orange-500">Reteica</Typography>
-                  <PercentageInput
-                    value={reteicaRate}
-                    onChange={onReteicaRateChange}
-                    decimalScale={1}
-                    sx={{
-                      width: 80,
-                      "& .MuiOutlinedInput-root": { height: 24, fontSize: "0.8rem" },
-                      "& .MuiOutlinedInput-input": { padding: "2px 6px" },
-                    }}
-                  />
-                </Box>
-                <Typography variant="body2" className="font-medium tabular-nums text-orange-500">
-                  -{formatCurrency(quote?.reteicaAmount)}
-                </Typography>
-              </Box>
-            )}
           </Fragment>
         ))}
       </Box>

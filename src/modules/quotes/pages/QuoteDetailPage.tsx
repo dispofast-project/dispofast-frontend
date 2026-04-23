@@ -88,8 +88,6 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setCommercialRate,
     otherRate,
     setOtherRate,
-    reteicaRate,
-    setReteicaRate,
     isSaving,
     saveError,
     hasChanges,
@@ -327,8 +325,6 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
           {mode === "edit" && quote && (
             <QuotePaymentDetailsCard
               quote={quote}
-              reteicaRate={reteicaRate}
-              onReteicaRateChange={setReteicaRate}
             />
           )}
 

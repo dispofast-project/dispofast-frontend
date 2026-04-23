@@ -16,8 +16,6 @@ interface UseQuoteEditReturn {
   setCommercialRate: (value: string) => void;
   otherRate: string;
   setOtherRate: (value: string) => void;
-  reteicaRate: string;
-  setReteicaRate: (value: string) => void;
   isSaving: boolean;
   saveError: string | null;
   hasChanges: boolean;
@@ -34,7 +32,6 @@ export function useQuoteEdit(
   const [selectedOfferValidity, setSelectedOfferValidity] = useState<OfferValidity | "">("");
   const [commercialRate, setCommercialRate] = useState<string>("");
   const [otherRate, setOtherRate] = useState<string>("");
-  const [reteicaRate, setReteicaRate] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -48,7 +45,6 @@ export function useQuoteEdit(
     setSelectedOfferValidity(quote.offerValidity ?? "");
     setCommercialRate(String(Math.round((quote.commercialDiscountRate ?? 0) * 100)));
     setOtherRate(String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
-    setReteicaRate(String((quote.reteicaRate ?? 0) * 100));
   }, [quote]);
 
   const hasChanges =
@@ -58,8 +54,7 @@ export function useQuoteEdit(
       (selectedPaymentCondition || null) !== (quote.paymentCondition ?? null) ||
       (selectedOfferValidity || null) !== (quote.offerValidity ?? null) ||
       commercialRate !== String(Math.round((quote.commercialDiscountRate ?? 0) * 100)) ||
-      otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)) ||
-      reteicaRate !== String((quote.reteicaRate ?? 0) * 100));
+      otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
 
   const handleSaveAll = async (id: string) => {
     setIsSaving(true);
@@ -72,7 +67,6 @@ export function useQuoteEdit(
         offerValidity: selectedOfferValidity || undefined,
         commercialDiscountRate: commercialRate !== "" ? parseFloat(commercialRate) / 100 : 0,
         otherDiscountsRate: otherRate !== "" ? parseFloat(otherRate) / 100 : 0,
-        reteicaRate: reteicaRate !== "" ? parseFloat(reteicaRate) / 100 : 0,
       } as Parameters<typeof updateQuoteService>[1]);
       onUpdated(updated);
     } catch (err) {
@@ -95,8 +89,6 @@ export function useQuoteEdit(
     setCommercialRate,
     otherRate,
     setOtherRate,
-    reteicaRate,
-    setReteicaRate,
     isSaving,
     saveError,
     hasChanges,

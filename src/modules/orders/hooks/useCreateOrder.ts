@@ -53,7 +53,6 @@ export const useCreateOrder = () => {
 
   // ─── Financial panel ───────────────────────────────────────────────────────
   const [freight, setFreight] = useState(0);
-  const [reteica, setReteica] = useState(0);
 
   // ─── Products ──────────────────────────────────────────────────────────────
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -148,7 +147,7 @@ export const useCreateOrder = () => {
   const discountAmt        = subtotal * ((parseInt(discountRate, 10) || 0) / 100);
   const additionalDiscountAmt = subtotal * ((parseFloat(additionalDiscountRate || "0")) / 100);
   const retefuente         = clientDetail?.retefuenteApplies ? subtotal * RETEFUENTE_RATE : 0;
-  const total              = subtotal + tax - discountAmt - additionalDiscountAmt - retefuente - reteica + freight;
+  const total              = subtotal + tax - discountAmt - additionalDiscountAmt - retefuente + freight;
 
   // ─── Validation ────────────────────────────────────────────────────────────
   const missingFields: string[] = [];
@@ -181,7 +180,6 @@ export const useCreateOrder = () => {
         discountRate: parseInt(discountRate, 10) || 0,
         additionalDiscountRate: additionalDiscountRate ? parseFloat(additionalDiscountRate) : undefined,
         retefuenteAmount: retefuente > 0 ? retefuente : undefined,
-        reteicaAmount: reteica > 0 ? reteica : undefined,
         freight: freight > 0 ? freight : undefined,
         items: items.map(({ productName: _pn, productReference: _pr, taxFree: _tf, ...rest }) => rest),
       };
@@ -231,8 +229,6 @@ export const useCreateOrder = () => {
     retefuente,
     freight,
     setFreight,
-    reteica,
-    setReteica,
     total,
     missingFields,
     handleClientChange,
