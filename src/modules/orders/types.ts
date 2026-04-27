@@ -45,6 +45,9 @@ export interface SalesOrder {
   paymentCondition: PaymentCondition | null;
   discountRate: number | null;
   additionalDiscountRate: number | null;
+  retefuenteAmount?: number | null;
+  reteicaAmount?: number | null;
+  freight?: number | null;
   items: SalesOrderItem[];
 }
 
