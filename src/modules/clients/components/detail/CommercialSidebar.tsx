@@ -1,9 +1,6 @@
 import React from "react";
-import { TextField } from "@mui/material";
-import { NumericFormat } from "react-number-format";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
-
 import type { ClientFormData } from "../form/types";
 import type { PriceListResponse } from "../../types";
 import type { User } from "../../../iam/types";
@@ -11,6 +8,7 @@ import SectionCard from "./SectionCard";
 import { ClientTypeSelector } from "../../../../shared/components/ClientTypeSelector/ClientTypeSelector";
 import { PriceListAutocomplete } from "../../../../shared/components/PriceListAutocomplete/PriceListAutocomplete";
 import { AdvisorAutocomplete } from "../../../../shared/components/AdvisorAutocomplete/AdvisorAutocomplete";
+import CommercialDiscountSelect from "../../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
 
 interface CommercialSidebarProps {
   formData: ClientFormData;
@@ -35,23 +33,12 @@ const CommercialSidebar = ({
     <SectionCard title="Información Comercial" icon={<StorefrontIcon fontSize="small" />}>
       <div className="flex flex-col gap-4">
         <ClientTypeSelector required value={formData.clientTypeId} onChange={onChange} />
-        <NumericFormat
-          customInput={TextField}
-          size="small"
-          fullWidth
-          required
-          label="Descuento por defecto"
-          name="defaultDiscountRate"
-          value={formData.defaultDiscountRate}
-          onValueChange={(values) => onDiscountChange(values.value)}
-          suffix=" %"
-          decimalScale={0}
-          allowNegative={false}
-          isAllowed={({ floatValue }) =>
-            floatValue === undefined || (floatValue >= 0 && floatValue <= 100)
-          }
-        />
         <PriceListAutocomplete required value={selectedPriceList} onChange={onPriceListChange} />
+        <CommercialDiscountSelect
+          label="Descuento comercial"
+          value={formData.defaultDiscountRate}
+          onChange={onDiscountChange}
+        />
       </div>
     </SectionCard>
 

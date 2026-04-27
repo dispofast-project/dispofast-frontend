@@ -9,7 +9,7 @@ export interface SystemParams {
 const DEFAULT_PARAMS: SystemParams = {
   IVA: 0.19,
   RETEFUENTE_RATE: 0.025,
-  RETEFUENTE_THRESHOLD: 540,
+  RETEFUENTE_THRESHOLD: 540000,
 };
 
 export const getPublicSystemParams = async (): Promise<SystemParams> => {
