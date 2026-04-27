@@ -72,8 +72,6 @@ const CreateOrderPage = () => {
           discount={order.discountAmt}
           additionalDiscount={order.additionalDiscountAmt}
           retefuente={order.retefuente}
-          reteica={order.reteica}
-          onReteicaChange={order.setReteica}
           freight={order.freight}
           onFreightChange={order.setFreight}
           total={order.total}

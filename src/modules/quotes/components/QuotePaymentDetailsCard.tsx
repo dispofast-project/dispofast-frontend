@@ -23,11 +23,11 @@ const formatRate = (rate: number | null | undefined): string => {
 };
 
 const VARIANT_STYLES: Record<RowVariant, { label: string; value: string }> = {
-  normal:    { label: "text-gray-500",                      value: "font-medium tabular-nums" },
-  discount:  { label: "text-green-600",                     value: "font-medium tabular-nums text-green-600" },
-  tax:       { label: "text-gray-500",                      value: "font-medium tabular-nums" },
-  retention: { label: "text-orange-500",                    value: "font-medium tabular-nums text-orange-500" },
-  total:     { label: "font-bold text-gray-900",            value: "font-bold tabular-nums" },
+  normal:    { label: "text-gray-500",       value: "font-medium tabular-nums" },
+  discount:  { label: "text-green-600",      value: "font-medium tabular-nums text-green-600" },
+  tax:       { label: "text-gray-500",       value: "font-medium tabular-nums" },
+  retention: { label: "text-orange-500",     value: "font-medium tabular-nums text-orange-500" },
+  total:     { label: "font-bold text-gray-900", value: "font-bold tabular-nums" },
 };
 
 const PaymentRow = ({ label, value, variant = "normal" }: RowConfig) => {
@@ -47,46 +47,39 @@ const PaymentRow = ({ label, value, variant = "normal" }: RowConfig) => {
 
 const Divider = () => <Box className="h-px bg-gray-100" />;
 
-const buildSections = (quote: Quote | null): RowConfig[][] => [
-  [
-    { label: "Subtotal", value: formatCurrency(quote?.subtotalAmount) },
-  ],
-  [
-    {
-      label: `Descuento comercial (${formatRate(quote?.commercialDiscountRate)})`,
-      value: `-${formatCurrency(quote?.commercialDiscountAmount)}`,
-      variant: "discount",
-    },
-    {
-      label: `Otros descuentos (${formatRate(quote?.otherDiscountsRate)})`,
-      value: `-${formatCurrency(quote?.otherDiscountsAmount)}`,
-      variant: "discount",
-    },
-  ],
-  [
-    {
-      label: `IVA (${formatRate(quote?.ivaRate)})`,
-      value: formatCurrency(quote?.ivaAmount),
-      variant: "tax",
-    },
-    {
-      label: `Retefuente (${formatRate(quote?.retefuenteRate)})`,
-      value: `-${formatCurrency(quote?.retefuenteAmount)}`,
-      variant: "retention",
-    },
-    {
-      label: `Reteica (${formatRate(quote?.reteicaRate)})`,
-      value: `-${formatCurrency(quote?.reteicaAmount)}`,
-      variant: "retention",
-    },
-  ],
-  [
-    { label: "Total a Pagar", value: formatCurrency(quote?.totalAmount), variant: "total" },
-  ],
-];
-
 const QuotePaymentDetailsCard = ({ quote }: QuotePaymentDetailsCardProps) => {
-  const sections = buildSections(quote);
+  const sections: RowConfig[][] = [
+    [
+      { label: "Subtotal", value: formatCurrency(quote?.subtotalAmount) },
+    ],
+    [
+      {
+        label: `Descuento comercial (${formatRate(quote?.commercialDiscountRate)})`,
+        value: `-${formatCurrency(quote?.commercialDiscountAmount)}`,
+        variant: "discount",
+      },
+      {
+        label: `Otros descuentos (${formatRate(quote?.otherDiscountsRate)})`,
+        value: `-${formatCurrency(quote?.otherDiscountsAmount)}`,
+        variant: "discount",
+      },
+    ],
+    [
+      {
+        label: `IVA (${formatRate(quote?.ivaRate)})`,
+        value: formatCurrency(quote?.ivaAmount),
+        variant: "tax",
+      },
+      {
+        label: `Retefuente (${formatRate(quote?.retefuenteRate)})`,
+        value: `-${formatCurrency(quote?.retefuenteAmount)}`,
+        variant: "retention",
+      },
+    ],
+    [
+      { label: "Total a Pagar", value: formatCurrency(quote?.totalAmount), variant: "total" },
+    ],
+  ];
 
   return (
     <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
