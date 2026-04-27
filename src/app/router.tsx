@@ -42,7 +42,8 @@ const AppRouter = (): ReactElement => {
           {/* Cotizaciones */}
           <Route element={<ProtectedRoute requiredAuthorities={["QUOTES_VIEW"]} />}>
             <Route path="/cotizaciones" element={<QuotesPage />} />
-            <Route path="/cotizaciones/:id" element={<QuoteDetailPage />} />
+            <Route path="/cotizaciones/nuevo/:clientId" element={<QuoteDetailPage mode="create" />} />
+            <Route path="/cotizaciones/:id" element={<QuoteDetailPage mode="edit" />} />
           </Route>
 
           {/* Cartera / Cuentas */}

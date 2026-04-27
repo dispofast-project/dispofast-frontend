@@ -9,6 +9,7 @@ import { AdvisorAutocomplete } from "../../../../shared/components/AdvisorAutoco
 import { ClientTypeSelector } from "../../../../shared/components/ClientTypeSelector/ClientTypeSelector";
 import { PriceListAutocomplete } from "../../../../shared/components/PriceListAutocomplete/PriceListAutocomplete";
 import type { User } from "../../../iam/types";
+import { useAuthStore } from "../../../iam/auth.store";
 
 interface GeneralDataFieldsProps {
   formData: ClientFormData;
@@ -19,6 +20,9 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedAdvisor, setSelectedAdvisor] = useState<User | null>(null);
   const [selectedPriceList, setSelectedPriceList] = useState<{ id: string; name: string } | null>(null);
+  const authorities = useAuthStore((state) => state.authorities);
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = authorities.includes("ROLE_ADMIN");
 
   return ( 
     <>
@@ -56,16 +60,27 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
             } as React.ChangeEvent<HTMLInputElement>);
           }}
         />
-        <AdvisorAutocomplete
-          required
-          value={selectedAdvisor}
-          onChange={(advisor) => {
-            setSelectedAdvisor(advisor);
-            onChange({
-              target: { name: "defaultAdvisorId", value: advisor?.id || "" },
-            } as React.ChangeEvent<HTMLInputElement>);
-          }}
-        />
+        {isAdmin ? (
+          <AdvisorAutocomplete
+            required
+            value={selectedAdvisor}
+            onChange={(advisor) => {
+              setSelectedAdvisor(advisor);
+              onChange({
+                target: { name: "defaultAdvisorId", value: advisor?.id || "" },
+              } as React.ChangeEvent<HTMLInputElement>);
+            }}
+          />
+        ) : (
+          <TextField
+            size="small"
+            fullWidth
+            label="Asesor"
+            value={user?.name ?? ""}
+            disabled
+            InputProps={{ readOnly: true }}
+          />
+        )}
         <NumericFormat
           customInput={TextField}
           size="small"

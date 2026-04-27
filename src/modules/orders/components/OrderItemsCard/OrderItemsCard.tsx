@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { ShoppingCart, Plus, Trash2 } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
-import AddProductDialog from "../AddProductDialog/AddProductDialog";
+import AddLineItemDialog from "../../../../shared/components/AddLineItemDialog/AddLineItemDialog";
 import { formatCurrency } from "../../utils/format";
 import type { OrderItem } from "../../hooks/useCreateOrder";
 import type { CreateOrderItemDTO } from "../../types";
+import type { LineItemResult } from "../../../../shared/components/AddLineItemDialog/AddLineItemDialog";
 
 interface OrderItemsCardProps {
   priceListId: string;
@@ -15,13 +16,23 @@ interface OrderItemsCardProps {
   onUpdateItem: (index: number, qty: number, unitPrice: number) => void;
 }
 
-const IVA_RATE = 0.19;
+const toCreateOrderItem = (result: LineItemResult): CreateOrderItemDTO & { productName: string; productReference: string; taxFree: boolean } => ({
+  productId: result.productId,
+  productName: result.productName,
+  productReference: result.productReference,
+  taxFree: result.taxFree,
+  quantity: result.quantity,
+  unitPrice: result.unitPrice,
+  lineTotal: result.lineTotal,
+});
+
+const IVA = 0.19;
 
 const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpdateItem }: OrderItemsCardProps) => {
   const [productDialogOpen, setProductDialogOpen] = useState(false);
 
   const totalSubtotal  = items.reduce((acc, it) => acc + it.lineTotal, 0);
-  const totalIva       = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA_RATE), 0);
+  const totalIva       = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA), 0);
   const totalWithIva   = totalSubtotal + totalIva;
 
   return (
@@ -89,7 +100,7 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
               </thead>
               <tbody>
                 {items.map((item, idx) => {
-                  const ivaAmt      = item.taxFree ? 0 : item.lineTotal * IVA_RATE;
+                  const ivaAmt      = item.taxFree ? 0 : item.lineTotal * IVA;
                   const totalLine   = item.lineTotal + ivaAmt;
                   return (
                     <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 group">
@@ -159,11 +170,12 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
         )}
       </Box>
 
-      <AddProductDialog
+      <AddLineItemDialog
         open={productDialogOpen}
         priceListId={priceListId}
         onClose={() => setProductDialogOpen(false)}
-        onAdd={onAddProduct}
+        onAdd={(result) => onAddProduct(toCreateOrderItem(result))}
+        priceEditable
       />
     </>
   );
