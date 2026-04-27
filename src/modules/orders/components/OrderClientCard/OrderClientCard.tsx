@@ -29,7 +29,6 @@ const OrderClientCard = ({
   selectedClient,
   clientDetail,
   clientOptions,
-  clientInputValue,
   isClientSearching,
   onClientInputChange,
   onClientChange,

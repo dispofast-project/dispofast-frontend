@@ -2,7 +2,6 @@ import { Box, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { ArrowLeft, ChevronDown, FileText } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { StatusBadge } from "../../../../shared/components/StatusBadge/StatusBadge";
-import CustomTitle from "../../../../shared/components/Title/Title";
 import { ORDER_STATUS_CONFIG } from "../../config/statusConfig";
 import type { OrderState } from "../../types";
 import { useState } from "react";
