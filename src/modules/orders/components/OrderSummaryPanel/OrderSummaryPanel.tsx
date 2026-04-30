@@ -2,7 +2,6 @@ import { Box, Typography, Divider, TextField, InputAdornment } from "@mui/materi
 import { AlertCircle, Circle } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency, formatDate } from "../../utils/format";
-import { useSystemParams } from "../../../../shared/hooks/useSystemParams";
 import type { ClientPreview } from "../../../clients/types";
 import type { OrderItem } from "../../hooks/useCreateOrder";
 
@@ -48,8 +47,6 @@ const OrderSummaryPanel = ({
   isLoading,
   onSubmit,
 }: OrderSummaryPanelProps) => {
-  const { RETEFUENTE_RATE } = useSystemParams();
-  const retefuentePct = `${(RETEFUENTE_RATE * 100).toFixed(1).replace(/\.0$/, "")}%`;
 
   return (
     <Box className="lg:col-span-1 sticky top-4">
@@ -112,7 +109,8 @@ const OrderSummaryPanel = ({
             <SummaryRow label="IVA (19%)" value={tax} />
             {discount > 0 && <SummaryRow label="Descuento comercial" value={discount} negative />}
             {additionalDiscount > 0 && <SummaryRow label="Otros descuentos" value={additionalDiscount} negative />}
-            {retefuente > 0 && <SummaryRow label={`Retefuente (${retefuentePct})`} value={retefuente} negative />}
+            {retefuente > 0 && <SummaryRow label="Retefuente (3.5%)" value={retefuente} negative />}
+
 
             {/* Flete — editable */}
             <Box className="flex items-center justify-between gap-2">

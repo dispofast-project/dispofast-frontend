@@ -13,9 +13,7 @@ import {
 } from "@mui/material";
 import { Search, Package } from "lucide-react";
 import { Button } from "../Button/Button";
-import { getAllInventoryProducts } from "../../../modules/inventory/api/inventory.api";
 import { getPriceListItems } from "../../../modules/pricelist/api/pricelist.api";
-import type { InventoryItem } from "../../../modules/inventory/api/inventory.api";
 import type { PriceListProductItem } from "../../../modules/pricelist/api/pricelist.api";
 
 export interface LineItemResult {
@@ -48,11 +46,10 @@ const AddLineItemDialog = ({
   priceEditable = true,
   title = "Agregar Producto",
 }: AddLineItemDialogProps) => {
-  const [products, setProducts] = useState<InventoryItem[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<InventoryItem[]>([]);
-  const [priceMap, setPriceMap] = useState<Record<string, number>>({});
+  const [products, setProducts] = useState<PriceListProductItem[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<PriceListProductItem[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<PriceListProductItem | null>(null);
   const [quantity, setQuantity] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -60,19 +57,16 @@ const AddLineItemDialog = ({
 
   useEffect(() => {
     if (!open) return;
+    if (!priceListId) {
+      setProducts([]);
+      setError("Selecciona una lista de precios para ver los productos disponibles.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
-    Promise.all([
-      getAllInventoryProducts(0, 100),
-      priceListId ? getPriceListItems(priceListId) : Promise.resolve([] as PriceListProductItem[]),
-    ])
-      .then(([inventory, priceItems]) => {
-        setProducts(inventory.content);
-        const map: Record<string, number> = {};
-        priceItems.forEach((pi) => { map[pi.productId] = pi.unitPrice; });
-        setPriceMap(map);
-      })
-      .catch(() => setError("No se pudieron cargar los productos"))
+    getPriceListItems(priceListId)
+      .then((items) => setProducts(items))
+      .catch(() => setError("No se pudieron cargar los productos de la lista de precios."))
       .finally(() => setIsLoading(false));
   }, [open, priceListId]);
 
@@ -81,7 +75,13 @@ const AddLineItemDialog = ({
       setFilteredProducts(products);
     } else {
       const lower = search.toLowerCase();
-      setFilteredProducts(products.filter((p) => p.productName.toLowerCase().includes(lower)));
+      setFilteredProducts(
+        products.filter(
+          (p) =>
+            p.productName.toLowerCase().includes(lower) ||
+            p.productReference.toLowerCase().includes(lower),
+        ),
+      );
     }
   }, [search, products]);
 
@@ -95,11 +95,10 @@ const AddLineItemDialog = ({
     }
   }, [open]);
 
-  const handleSelectProduct = (product: InventoryItem) => {
+  const handleSelectProduct = (product: PriceListProductItem) => {
     setSelectedProduct(product);
     setError(null);
-    const priceFromList = priceMap[product.productId];
-    setUnitPrice(priceFromList !== undefined ? String(priceFromList) : "");
+    setUnitPrice(String(product.unitPrice));
   };
 
   const qty = parseFloat(quantity) || 0;
@@ -143,9 +142,10 @@ const AddLineItemDialog = ({
           <TextField
             size="small"
             fullWidth
-            placeholder="Buscar producto por nombre..."
+            placeholder="Buscar producto por nombre o referencia..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            disabled={!priceListId}
             slotProps={{
               input: {
                 startAdornment: (
@@ -164,59 +164,54 @@ const AddLineItemDialog = ({
                 <CircularProgress size={24} />
               </Box>
             ) : error && products.length === 0 ? (
-              <Box className="flex items-center justify-center py-10">
-                <Typography variant="body2" color="error">{error}</Typography>
+              <Box className="flex items-center justify-center py-10 px-4">
+                <Typography variant="body2" color={priceListId ? "error" : "textSecondary"}>
+                  {error}
+                </Typography>
               </Box>
             ) : filteredProducts.length === 0 ? (
               <Box className="flex items-center justify-center py-10">
                 <Typography variant="body2" color="textSecondary">
-                  No se encontraron productos
+                  No hay productos en esta lista de precios
                 </Typography>
               </Box>
             ) : (
               <Box className="max-h-52 overflow-y-auto">
-                {filteredProducts.map((product) => {
-                  const hasPrice = priceMap[product.productId] !== undefined;
-                  return (
-                    <Box
-                      key={product.productId}
-                      onClick={() => handleSelectProduct(product)}
-                      className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
-                        selectedProduct?.productId === product.productId
-                          ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <Box className="flex items-center gap-3">
-                        <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <Package className="w-4 h-4 text-gray-500" />
-                        </Box>
-                        <Box>
-                          <Typography variant="body2" className="font-medium text-gray-800">
-                            {product.productName}
-                          </Typography>
-                          <Typography variant="caption" className="text-gray-400">
-                            {product.productReference}
-                          </Typography>
-                        </Box>
+                {filteredProducts.map((product) => (
+                  <Box
+                    key={product.productId}
+                    onClick={() => handleSelectProduct(product)}
+                    className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
+                      selectedProduct?.productId === product.productId
+                        ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <Box className="flex items-center gap-3">
+                      <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <Package className="w-4 h-4 text-gray-500" />
                       </Box>
-                      <Box className="text-right">
-                        {hasPrice ? (
-                          <Typography variant="caption" className="text-dispofast-primary font-semibold">
-                            ${priceMap[product.productId].toLocaleString("es-CO")}
-                          </Typography>
-                        ) : (
-                          <Typography variant="caption" className="text-amber-500">
-                            Sin precio
-                          </Typography>
-                        )}
-                        <Typography variant="caption" className="text-gray-400 block">
-                          Stock: {product.quantityAvailable}
+                      <Box>
+                        <Typography variant="body2" className="font-medium text-gray-800">
+                          {product.productName}
+                        </Typography>
+                        <Typography variant="caption" className="text-gray-400">
+                          {product.productReference}
                         </Typography>
                       </Box>
                     </Box>
-                  );
-                })}
+                    <Box className="text-right">
+                      <Typography variant="caption" className="text-dispofast-primary font-semibold">
+                        ${product.unitPrice.toLocaleString("es-CO")}
+                      </Typography>
+                      {product.quantityAvailable !== null && (
+                        <Typography variant="caption" className="text-gray-400 block">
+                          Stock: {product.quantityAvailable}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
               </Box>
             )}
           </Box>
@@ -230,7 +225,10 @@ const AddLineItemDialog = ({
                   {selectedProduct.productName}
                 </Typography>
                 <Typography variant="caption" className="text-gray-500">
-                  {selectedProduct.productReference} · Disponible: {selectedProduct.quantityAvailable} unidades
+                  {selectedProduct.productReference}
+                  {selectedProduct.quantityAvailable !== null
+                    ? ` · Disponible: ${selectedProduct.quantityAvailable} unidades`
+                    : ""}
                 </Typography>
               </Box>
 

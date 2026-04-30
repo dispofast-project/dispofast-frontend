@@ -2,6 +2,7 @@ import { Box, Typography, Select, MenuItem } from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { PaymentCondition, OfferValidity } from "../types";
 import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
+import CommercialDiscountSelect from "../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
 import type { PaymentCondition as PaymentConditionType, OfferValidity as OfferValidityType } from "../types";
 import SectionTitle from "./SectionTitle";
 
@@ -61,7 +62,7 @@ const QuoteTermsCard = ({
       </Box>
       <Box>
         <Typography variant="body2" className="text-gray-500 mb-1">Descuento comercial</Typography>
-        <PercentageInput value={commercialRate} onChange={onCommercialRateChange} fullWidth />
+        <CommercialDiscountSelect value={commercialRate} onChange={onCommercialRateChange} />
       </Box>
       <Box>
         <Typography variant="body2" className="text-gray-500 mb-1">Otros descuentos</Typography>

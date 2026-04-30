@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import type { Quote, PaymentCondition, OfferValidity } from "../types";
 import type { User } from "../../iam/types";
 import { updateQuoteService } from "../api/quotes.api";
+import { COMMERCIAL_DISCOUNT_OPTIONS } from "../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
+
+const VALID_COMMERCIAL_RATES = COMMERCIAL_DISCOUNT_OPTIONS.map((o) => o.value);
+
+const snapCommercialRate = (decimalRate: number | null | undefined): string => {
+  const r = String(Math.round((decimalRate ?? 0) * 100));
+  return VALID_COMMERCIAL_RATES.includes(r as (typeof VALID_COMMERCIAL_RATES)[number]) ? r : "0";
+};
 
 interface UseQuoteEditReturn {
   selectedSeller: User | null;
@@ -43,7 +51,7 @@ export function useQuoteEdit(
     }
     setSelectedPaymentCondition(quote.paymentCondition ?? "");
     setSelectedOfferValidity(quote.offerValidity ?? "");
-    setCommercialRate(String(Math.round((quote.commercialDiscountRate ?? 0) * 100)));
+    setCommercialRate(snapCommercialRate(quote.commercialDiscountRate));
     setOtherRate(String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
   }, [quote]);
 
@@ -53,7 +61,7 @@ export function useQuoteEdit(
       selectedPriceListId !== (quote.priceList?.id ?? "") ||
       (selectedPaymentCondition || null) !== (quote.paymentCondition ?? null) ||
       (selectedOfferValidity || null) !== (quote.offerValidity ?? null) ||
-      commercialRate !== String(Math.round((quote.commercialDiscountRate ?? 0) * 100)) ||
+      commercialRate !== snapCommercialRate(quote.commercialDiscountRate) ||
       otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
 
   const handleSaveAll = async (id: string) => {

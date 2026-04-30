@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Typography, TextField, Switch, Box } from "@mui/material";
-import { NumericFormat } from 'react-number-format';
 import type { ClientFormData } from "./types";
 import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete/CityAutocomplete";
 import type { City } from "../../../../shared/types/location";
@@ -10,6 +9,7 @@ import { ClientTypeSelector } from "../../../../shared/components/ClientTypeSele
 import { PriceListAutocomplete } from "../../../../shared/components/PriceListAutocomplete/PriceListAutocomplete";
 import type { User } from "../../../iam/types";
 import { useAuthStore } from "../../../iam/auth.store";
+import CommercialDiscountSelect from "../../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
 
 interface GeneralDataFieldsProps {
   formData: ClientFormData;
@@ -81,24 +81,12 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
             InputProps={{ readOnly: true }}
           />
         )}
-        <NumericFormat
-          customInput={TextField}
-          size="small"
-          fullWidth
-          required
-          label="Descuento por defecto"
-          name="defaultDiscountRate"
+        <CommercialDiscountSelect
+          label="Descuento comercial"
           value={formData.defaultDiscountRate}
-          onValueChange={(values) => {
-            onChange({ target: { name: 'defaultDiscountRate', value: values.value } } as React.ChangeEvent<HTMLInputElement>);
-          }}
-          suffix=" %"
-          decimalScale={0}
-          allowNegative={false}
-          isAllowed={(values) => {
-            const { floatValue } = values;
-            return floatValue === undefined || (floatValue >= 0 && floatValue <= 100);
-          }}
+          onChange={(val) =>
+            onChange({ target: { name: "defaultDiscountRate", value: val } } as React.ChangeEvent<HTMLInputElement>)
+          }
         />
       </div>
 
