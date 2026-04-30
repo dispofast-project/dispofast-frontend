@@ -5,6 +5,7 @@ export interface InventoryItem {
   productId: string;
   productName: string;
   productReference: string;
+  category: string;
   taxFree: boolean;
   quantityAvailable: number;
   quantityReserved: number;

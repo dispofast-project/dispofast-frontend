@@ -21,6 +21,7 @@ export const useInventory = () => {
         id: item.productId,
         productName: item.productName,
         productReference: item.productReference,
+        category: item.category,
         taxFree: item.taxFree,
         quantityAvailable: item.quantityAvailable,
         quantityReserved: item.quantityReserved,

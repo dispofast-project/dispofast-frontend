@@ -35,7 +35,7 @@ const InventoryPage = () => {
         </Box>
       </Box>
 
-      <Box className="flex items-center gap-4 text-sm text-gray-600">
+      <Box className="flex items-center gap-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl w-80">
         <span className="font-medium">Barra de stock:</span>
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full bg-blue-600 inline-block" />
