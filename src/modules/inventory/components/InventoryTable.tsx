@@ -44,6 +44,9 @@ const InventoryTable = ({
     <span key="ref" className="text-xs text-gray-500 font-mono">
       {item.productReference}
     </span>,
+    <span key="category" className="text-xs font-semibold uppercase">
+      {item.category}
+    </span>,
     <span
       key="available"
       className={
@@ -53,9 +56,6 @@ const InventoryTable = ({
       }
     >
       {item.quantityAvailable.toLocaleString("es-CO")}
-    </span>,
-    <span key="category" className="text-xs font-semibold uppercase">
-      {item.category}
     </span>,
     <span key="reserved" className="text-gray-600">
       {item.quantityReserved.toLocaleString("es-CO")}
