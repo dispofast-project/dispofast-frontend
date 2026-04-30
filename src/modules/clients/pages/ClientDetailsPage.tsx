@@ -8,6 +8,7 @@ import ClientDetailsHeader from "../components/ClientDetailsHeader";
 import IndividualFormSections from "../components/detail/IndividualFormSections";
 import OrganizationFormSections from "../components/detail/OrganizationFormSections";
 import CommercialSidebar from "../components/detail/CommercialSidebar";
+import LegalDocumentsSection from "../components/detail/LegalDocumentsSection";
 
 const ClientDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,6 +95,7 @@ const ClientDetailsPage = () => {
             onPriceListChange={handlePriceListChange}
             onAdvisorChange={handleAdvisorChange}
           />
+          <LegalDocumentsSection clientId={id!} />
         </div>
       </div>
     </Box>

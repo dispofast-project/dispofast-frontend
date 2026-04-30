@@ -1,5 +1,23 @@
 import type { City } from "../../shared/types/location";
 
+export interface MediaAsset {
+  id: string;
+  filename: string;
+  storagePath: string;
+  mimeType: string;
+  fileSize: number;
+  type: "INVOICE" | "LEGAL_DOC";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LegalDocument {
+  id: string;
+  fileAttachment: MediaAsset;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UserPreview {
   id: string;
   fullName: string;
@@ -48,7 +66,7 @@ export interface ClientResponse {
   defaultDiscountRate: number;
   priceList: PriceListResponse;
   clientType: ClientType;
-  legalDocuments: unknown[];
+  legalDocuments: LegalDocument[];
 }
 
 export interface IndividualResponse extends ClientResponse {
