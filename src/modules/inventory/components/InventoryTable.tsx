@@ -69,7 +69,7 @@ const InventoryTable = ({
       <Eye
         key="view"
         className="w-4 h-4 text-gray-500 cursor-pointer hover:text-dispofast-primary"
-        onClick={(e) => { e.stopPropagation(); navigate(`/inventario/${item.id}`); }}
+        onClick={(e) => { e.stopPropagation(); navigate(`/inventario/producto/${item.id}`); }}
       />
     </Box>
   ];

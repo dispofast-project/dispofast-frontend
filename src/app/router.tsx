@@ -12,6 +12,7 @@ import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
 import InventoryPage from "../modules/inventory/pages/InventoryPage";
+import InventoryRoutes from "../modules/inventory/inventory.routes";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -54,7 +55,7 @@ const AppRouter = (): ReactElement => {
 
           {/* Inventario */}
           <Route element={<ProtectedRoute requiredAuthorities={["INVENTORY_VIEW"]} />}>
-            <Route path="/inventario" element={<InventoryPage />} />
+            <Route path="/inventario/*" element={<InventoryRoutes />} />
           </Route>
 
           {/* Clientes */}

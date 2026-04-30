@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllInventoryProducts } from "../api/inventory.api";
+import { getAllInventoryProducts } from "../api/inventory.service";
 import type { InventoryTableItem } from "../types";
 
 const PAGE_SIZE = 20;
