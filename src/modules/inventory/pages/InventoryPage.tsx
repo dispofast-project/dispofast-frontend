@@ -5,6 +5,7 @@ import CustomTitle from "../../../shared/components/Title/Title";
 import { useInventory } from "../hooks/useInventory";
 import InventoryFilters from "../components/InventoryFilters";
 import InventoryTable from "../components/InventoryTable";
+import { useNavigate } from "react-router-dom";
 
 const InventoryPage = () => {
   const {
@@ -23,12 +24,14 @@ const InventoryPage = () => {
 
   const breadcrumbs = [{ label: "Inventarios" }];
 
+  const navigate = useNavigate();
+
   return (
     <Box className="flex flex-col gap-6 pb-8">
       <Box className="grid grid-cols-2 flex-shrink-0 items-center justify-between">
         <CustomTitle breadcrumbs={breadcrumbs} />
         <Box className="flex items-center justify-end">
-          <Button variant="primary">
+          <Button variant="primary" onClick={() => navigate("/inventario/nuevo")}>
             <Plus className="w-4 h-4 mr-2" />
             Añadir
           </Button>

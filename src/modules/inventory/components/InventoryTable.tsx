@@ -16,7 +16,7 @@ interface InventoryTableProps {
   onPageChange: (page: number) => void;
 }
 
-const InventoryTable = ({
+const   InventoryTable = ({
   items,
   currentPage,
   itemsPerPage,
