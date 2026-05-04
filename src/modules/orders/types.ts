@@ -38,6 +38,7 @@ export interface SalesOrder {
   shipmentCityId: string;
   shipmentCityName: string;
   shipmentAddress: string;
+  invoiceNumber: string | null;
   zone: string;
   totalValue: number;
   priceListId: string;
