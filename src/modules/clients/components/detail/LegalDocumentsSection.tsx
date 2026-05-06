@@ -82,7 +82,8 @@ const LegalDocumentsSection = ({ clientId }: LegalDocumentsSectionProps) => {
     setDownloadingId(docId);
     setError(null);
     try {
-      await downloadLegalDocumentService(clientId, docId);
+      const doc = documents.find((d) => d.id === docId);
+      await downloadLegalDocumentService(clientId, docId, doc?.fileAttachment?.filename);
     } catch {
       setError("Error al descargar el documento.");
     } finally {

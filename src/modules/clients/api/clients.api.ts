@@ -83,7 +83,8 @@ export const deleteLegalDocumentService = async (
 
 export const downloadLegalDocumentService = async (
   clientId: string,
-  docId: string
+  docId: string,
+  fallbackName?: string
 ): Promise<void> => {
   const response = await apiClient.get(
     `/clients/${clientId}/legal-documents/${docId}/download`,
@@ -91,10 +92,17 @@ export const downloadLegalDocumentService = async (
   );
   const url = URL.createObjectURL(response.data as Blob);
   const disposition = response.headers["content-disposition"] as string | undefined;
-  let fileName = "documento";
+  let fileName = fallbackName ?? "documento";
   if (disposition) {
-    const match = disposition.match(/filename[^;=\n]*=(['"]?)([^'";\n]*)\1/);
-    if (match?.[2]) fileName = match[2];
+    // RFC 5987: filename*=UTF-8''encoded-name (takes priority)
+    const rfc5987Match = disposition.match(/filename\*\s*=\s*UTF-8''([^;\n]+)/i);
+    if (rfc5987Match?.[1]) {
+      fileName = decodeURIComponent(rfc5987Match[1]);
+    } else {
+      // Standard: filename="name" or filename=name
+      const match = disposition.match(/filename[^;=\n]*=(['"]?)([^'";\n]*)\1/);
+      if (match?.[2]) fileName = match[2];
+    }
   }
   const a = document.createElement("a");
   a.href = url;
