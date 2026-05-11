@@ -8,7 +8,7 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import type { Control } from "react-hook-form";
 import SectionCard from "../../../../shared/components/Card/SectionCard";
 import type { ProductFormData } from "../../schema/product.schema";
@@ -19,8 +19,13 @@ interface Props {
   control: Control<ProductFormData> | any;
 }
 
-const ProductInventorySection = ({ control }: Props) => (
-  <SectionCard title="Inventario">
+const   ProductInventorySection = ({ control }: Props) => {
+
+  const watch = useWatch({ control });
+  
+  
+  return(
+    <SectionCard title="Inventario">
     <div className="flex flex-col gap-4">
       <Controller
         name="state"
@@ -32,8 +37,8 @@ const ProductInventorySection = ({ control }: Props) => (
               <MenuItem value="">
                 <em>Elegir</em>
               </MenuItem>
-              <MenuItem value="ACTIVE">Activo</MenuItem>
-              <MenuItem value="INACTIVE">Inactivo</MenuItem>
+              <MenuItem value="ACTIVE">Disponible</MenuItem>
+              <MenuItem value="INACTIVE">No disponible</MenuItem>
             </Select>
             {fieldState.error && (
               <FormHelperText>{fieldState.error.message}</FormHelperText>
@@ -91,21 +96,24 @@ const ProductInventorySection = ({ control }: Props) => (
           </FormControl>
         )}
       />
-      <Controller
-        name="initialStock"
-        control={control}
-        render={({ field, fieldState }) => (
-          <TextField
-            {...field}
-            label="Stock inicial"
-            type="number"
-            size="small"
-            fullWidth
-            error={!!fieldState.error}
-            helperText={fieldState.error?.message}
-          />
-        )}
-      />
+      {(watch.state === "ACTIVE" || watch.state === "") && (
+        <Controller
+          name="initialStock"
+          control={control}
+          render={({ field, fieldState }) => (
+            <TextField
+              {...field}
+              label="Stock inicial"
+              type="number"
+              size="small"
+              fullWidth
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+            />
+          )}
+        />
+      )}
+      
       <Controller
         name="taxFree"
         control={control}
@@ -120,6 +128,7 @@ const ProductInventorySection = ({ control }: Props) => (
       />
     </div>
   </SectionCard>
-);
+  )
+};
 
 export default ProductInventorySection;
