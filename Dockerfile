@@ -31,9 +31,9 @@ COPY --from=build /app/dist ./dist
 # Variables de entorno recomendadas
 ENV NODE_ENV=production
 # Cloud Run inyecta su propia variable de entorno PORT, por defecto es 8080.
-ENV PORT=8080
+ENV PORT=3000
 
-EXPOSE 8080
+EXPOSE 3000
 
 # Iniciar el servidor estático
 # La bandera '-s' (single) permite que las rutas de React Router carguen de forma correcta (reenviando a index.html)
