@@ -1,10 +1,6 @@
 # Etapa 1: Construcción (Build)
 FROM node:20-alpine AS build
 
-# Aceptar la variable de entorno durante el build
-ARG VITE_APP_BASE_URL
-ENV VITE_APP_BASE_URL=$VITE_APP_BASE_URL
-
 # Establecer el directorio de trabajo
 WORKDIR /app
 
@@ -17,7 +13,10 @@ RUN npm ci || npm install
 # Copiar el resto del código
 COPY . .
 
-# Construir la aplicación para producción (Vite crea la carpeta 'dist')
+# Pasamos un "placeholder" o comodín en la etapa de build
+ENV VITE_APP_BASE_URL="VITE_APP_BASE_URL_PLACEHOLDER"
+
+# Construir la aplicación para producción
 RUN npm run build
 
 # Etapa 2: Servidor Ligero de Producción (Serve)
@@ -36,9 +35,11 @@ COPY --from=build /app/dist ./dist
 ENV NODE_ENV=production
 # Cloud Run inyecta su propia variable de entorno PORT, por defecto es 8080.
 ENV PORT=3000
+# URL de fallback (se sobreescribe con lo que pongas en la consola de Google Cloud)
+ENV VITE_APP_BASE_URL="http://localhost:8080/api/v1"
 
-EXPOSE 3000
+EXPOSE 8080
 
 # Iniciar el servidor estático
-# La bandera '-s' (single) permite que las rutas de React Router carguen de forma correcta (reenviando a index.html)
-CMD ["sh", "-c", "serve -s dist -l tcp://0.0.0.0:${PORT}"]
+# Utilizamos "sed" dinámicamente para reemplazar el placeholder con la variable de la consola de Cloud Run
+CMD ["sh", "-c", "find ./dist -type f -name '*.js' -exec sed -i \"s|VITE_APP_BASE_URL_PLACEHOLDER|${VITE_APP_BASE_URL}|g\" {} + && serve -s dist -l tcp://0.0.0.0:${PORT}"]
