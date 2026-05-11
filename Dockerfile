@@ -1,6 +1,10 @@
 # Etapa 1: Construcción (Build)
 FROM node:20-alpine AS build
 
+# Aceptar la variable de entorno durante el build
+ARG VITE_APP_BASE_URL
+ENV VITE_APP_BASE_URL=$VITE_APP_BASE_URL
+
 # Establecer el directorio de trabajo
 WORKDIR /app
 
