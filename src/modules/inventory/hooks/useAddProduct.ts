@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { productSchema, type ProductFormData } from "../schema/product.schema";
 import { createProduct, getCategories, type Category } from "../api/product.service";
+
+type ProductFormInput = z.input<typeof productSchema>;
 
 export const useAddProduct = () => {
   const navigate = useNavigate();
@@ -11,7 +14,7 @@ export const useAddProduct = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useForm<ProductFormData>({
+  const form = useForm<ProductFormInput>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
@@ -37,11 +40,11 @@ export const useAddProduct = () => {
       .catch(() => setCategories([]));
   }, []);
 
-  const onSubmit = form.handleSubmit(async (data: ProductFormData) => {
+  const onSubmit = form.handleSubmit(async (data: ProductFormInput) => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      await createProduct(data);
+      await createProduct(data as ProductFormData);
       navigate("/inventario");
     } catch (err) {
       setSubmitError(

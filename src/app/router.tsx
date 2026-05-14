@@ -11,7 +11,6 @@ import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
-import InventoryPage from "../modules/inventory/pages/InventoryPage";
 import InventoryRoutes from "../modules/inventory/inventory.routes";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
