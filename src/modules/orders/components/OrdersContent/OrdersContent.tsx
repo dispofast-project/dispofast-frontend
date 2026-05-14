@@ -69,6 +69,7 @@ const HEADERS = [
   "Cliente",
   "# Orden",
   "Valor",
+  "# Factura",
   "Ciudad",
   "Fecha",
   "Acciones",
@@ -134,6 +135,9 @@ const OrdersContent = (): JSX.Element => {
       item.clientName,
       item.orderNumber,
       formatCurrency(item.totalValue),
+      <span>
+        {item.invoiceNumber ?? "-"}
+      </span>,
       item.shipmentCityName,
       formatDate(item.orderDate),
       <Box className="flex items-center space-x-3" key="actions">

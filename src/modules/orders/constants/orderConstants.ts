@@ -2,10 +2,10 @@ import type { PaymentCondition } from "../types";
 
 export const PAYMENT_CONDITION_OPTIONS: { value: PaymentCondition; label: string }[] = [
   { value: "CONTADO",         label: "Contado" },
-  { value: "CONTADO_15_DIAS", label: "Contado 15 días" },
-  { value: "CONTADO_30_DIAS", label: "Contado 30 días" },
-  { value: "CONTADO_60_DIAS", label: "Contado 60 días" },
-  { value: "CONTADO_90_DIAS", label: "Contado 90 días" },
+  { value: "CREDITO_15_DIAS", label: "Crédito 15 días" },
+  { value: "CREDITO_30_DIAS", label: "Crédito 30 días" },
+  { value: "CREDITO_60_DIAS", label: "Crédito 60 días" },
+  { value: "CREDITO_90_DIAS", label: "Crédito 90 días" },
   { value: "CONTRAENTREGA",   label: "Contraentrega" },
 ];
 

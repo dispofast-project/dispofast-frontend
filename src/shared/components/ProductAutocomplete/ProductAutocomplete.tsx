@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Autocomplete, TextField, CircularProgress, Box, Typography } from "@mui/material";
-import { getAllInventoryProducts, type InventoryItem } from "../../../modules/inventory/api/inventory.api";
+import { getAllInventoryProducts, type InventoryItem } from "../../../modules/inventory/api/inventory.service";
 
 interface ProductAutocompleteProps {
   value: InventoryItem | null;

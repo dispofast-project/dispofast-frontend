@@ -1,9 +1,9 @@
 export type PaymentCondition =
   | 'CONTADO'
-  | 'CONTADO_15_DIAS'
-  | 'CONTADO_30_DIAS'
-  | 'CONTADO_60_DIAS'
-  | 'CONTADO_90_DIAS'
+  | 'CREDITO_15_DIAS'
+  | 'CREDITO_30_DIAS'
+  | 'CREDITO_60_DIAS'
+  | 'CREDITO_90_DIAS'
   | 'CONTRAENTREGA';
 
 export type OrderState =
@@ -38,6 +38,7 @@ export interface SalesOrder {
   shipmentCityId: string;
   shipmentCityName: string;
   shipmentAddress: string;
+  invoiceNumber: string | null;
   zone: string;
   totalValue: number;
   priceListId: string;
