@@ -18,3 +18,6 @@ export const productSchema = z.object({
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
+
+export const updateProductSchema = productSchema.omit({ initialStock: true });
+export type UpdateProductFormData = z.infer<typeof updateProductSchema>;

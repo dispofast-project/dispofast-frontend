@@ -14,15 +14,16 @@ import type { Category } from "../../api/product.service";
 interface Props {
   control: Control<ProductFormData> | any;
   categories: Category[];
+  disabled?: boolean;
 }
 
-const ProductCategoriesSection = ({ control, categories }: Props) => (
+const ProductCategoriesSection = ({ control, categories, disabled }: Props) => (
   <SectionCard title="Categorías">
     <Controller
       name="categoryId"
       control={control}
       render={({ field, fieldState }) => (
-        <FormControl size="small" fullWidth error={!!fieldState.error}>
+        <FormControl size="small" fullWidth error={!!fieldState.error} disabled={disabled}>
           <InputLabel>Categoría principal</InputLabel>
           <Select {...field} label="Categoría principal">
             <MenuItem value="">

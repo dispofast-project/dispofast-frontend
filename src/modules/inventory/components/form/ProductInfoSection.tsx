@@ -6,9 +6,10 @@ import type { ProductFormData } from "../../schema/product.schema";
 
 interface Props {
   control: Control<ProductFormData> | any;
+  disabled?: boolean;
 }
 
-const ProductInfoSection = ({ control }: Props) => (
+const ProductInfoSection = ({ control, disabled }: Props) => (
   <SectionCard title="Información producto">
     <div className="flex flex-col gap-4">
       <Controller
@@ -20,6 +21,7 @@ const ProductInfoSection = ({ control }: Props) => (
             label="Título"
             size="small"
             fullWidth
+            disabled={disabled}
             error={!!fieldState.error}
             helperText={fieldState.error?.message}
           />
@@ -36,6 +38,7 @@ const ProductInfoSection = ({ control }: Props) => (
             fullWidth
             multiline
             rows={3}
+            disabled={disabled}
             error={!!fieldState.error}
             helperText={fieldState.error?.message}
           />
@@ -52,6 +55,7 @@ const ProductInfoSection = ({ control }: Props) => (
             fullWidth
             multiline
             rows={5}
+            disabled={disabled}
             error={!!fieldState.error}
             helperText={fieldState.error?.message}
           />
@@ -67,6 +71,7 @@ const ProductInfoSection = ({ control }: Props) => (
             size="small"
             fullWidth
             placeholder="https://..."
+            disabled={disabled}
             error={!!fieldState.error}
             helperText={fieldState.error?.message}
           />

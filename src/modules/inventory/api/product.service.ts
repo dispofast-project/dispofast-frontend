@@ -1,5 +1,5 @@
 import apiClient from "../../../shared/api/apiClient";
-import type { ProductFormData } from "../schema/product.schema";
+import type { ProductFormData, UpdateProductFormData } from "../schema/product.schema";
 
 export interface Product {
   id: string;
@@ -34,6 +34,15 @@ export const createProduct = async (payload: ProductFormData): Promise<Product> 
     return data;
   } catch {
     throw new Error("Error al crear el producto");
+  }
+};
+
+export const updateProduct = async (id: string, payload: UpdateProductFormData): Promise<Product> => {
+  try {
+    const { data } = await apiClient.put<Product>(`/products/${id}`, payload);
+    return data;
+  } catch {
+    throw new Error("Error al actualizar el producto");
   }
 };
 
