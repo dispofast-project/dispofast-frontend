@@ -1,9 +1,9 @@
 import axios from "axios";
-import { VITE_APP_BASE_URL } from "../utils/constants";
+import { BASE_URL } from "../utils/constants";
 import { useAuthStore } from "../../modules/iam/auth.store";
 
 const apiClient = axios.create({
-  baseURL: VITE_APP_BASE_URL,
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",
