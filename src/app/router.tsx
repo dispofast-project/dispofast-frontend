@@ -12,6 +12,7 @@ import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
 import InventoryRoutes from "../modules/inventory/inventory.routes";
+import PriceListPage from "../modules/pricelist/pages/PriceListPage";
 
 const NotFound = (): ReactElement => <div>Not Found</div>;
 
@@ -105,16 +106,7 @@ const AppRouter = (): ReactElement => {
           </Route>
           
           <Route element={<ProtectedRoute requiredAuthorities={["PRICE_LISTS_VIEW"]} />}>
-            <Route
-              path="/lista-precios"
-              element={
-                <div className="p-6">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                    Lista de Precios
-                  </h1>
-                </div>
-              }
-            />
+            <Route path="/lista-precios" element={<PriceListPage />} />
           </Route>
 
         
