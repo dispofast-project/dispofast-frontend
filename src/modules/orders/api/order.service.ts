@@ -26,6 +26,7 @@ export const getAllOrders = async (
       params: {
         page,
         size,
+        sort: 'orderDate,desc',
         ...(filters?.state && { state: filters.state }),
         ...(filters?.orderNumber && { orderNumber: filters.orderNumber }),
       },
