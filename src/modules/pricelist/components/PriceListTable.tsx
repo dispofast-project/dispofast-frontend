@@ -43,8 +43,7 @@ const PriceListTable = ({
           e.stopPropagation();
           onView(item);
         }}
-        disabled={!item.hasFile}
-        className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors"
       >
         <Eye size={12} />
         Ver

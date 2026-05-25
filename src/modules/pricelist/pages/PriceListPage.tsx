@@ -5,12 +5,12 @@ import {
   getAllPriceLists,
   createPriceList,
   downloadPriceListFile,
-  viewPriceListFile,
   uploadPriceListFile,
   type PriceListItem,
 } from "../api/pricelist.api";
 import PriceListTable from "../components/PriceListTable";
 import CreatePriceListModal from "../components/CreatePriceListModal";
+import PriceListItemsDrawer from "../components/PriceListItemsDrawer";
 import { Button } from "../../../shared/components/Button/Button";
 
 const ITEMS_PER_PAGE = 10;
@@ -23,6 +23,7 @@ const PriceListPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [drawerPriceList, setDrawerPriceList] = useState<PriceListItem | null>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const uploadingItemRef = useRef<PriceListItem | null>(null);
 
@@ -63,7 +64,7 @@ const PriceListPage = () => {
   };
 
   const handleView = (item: PriceListItem) => {
-    viewPriceListFile(item.id);
+    setDrawerPriceList(item);
   };
 
   const handleDownload = (item: PriceListItem) => {
@@ -152,6 +153,12 @@ const PriceListPage = () => {
         open={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onSubmit={handleCreate}
+      />
+
+      <PriceListItemsDrawer
+        open={drawerPriceList !== null}
+        priceList={drawerPriceList}
+        onClose={() => setDrawerPriceList(null)}
       />
     </Box>
   );
