@@ -108,6 +108,24 @@ export interface Account {
   representativePhone?: string;
 }
 
+export interface QuoteItemProduct {
+  id: string;
+  name: string;
+  reference: string;
+  sku: string;
+  taxFree: boolean;
+}
+
+export interface QuoteItem {
+  id: string;
+  product: QuoteItemProduct;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  taxAmount: number;
+  lineTotal: number;
+}
+
 export interface Quote {
   id: string;
   number: string;
@@ -131,7 +149,5 @@ export interface Quote {
   ivaAmount: number;
   retefuenteRate: number | null;
   retefuenteAmount: number | null;
-  reteicaRate: number | null;
-  reteicaAmount: number | null;
   totalAmount: number;
 }

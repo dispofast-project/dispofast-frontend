@@ -8,7 +8,10 @@ export interface PriceListItem {
 export interface PriceListProductItem {
   productId: string;
   productReference: string;
+  productName: string;
+  taxFree: boolean;
   unitPrice: number;
+  quantityAvailable: number | null;
 }
 
 export const getAllPriceLists = async (): Promise<PriceListItem[]> => {

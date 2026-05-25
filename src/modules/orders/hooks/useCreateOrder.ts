@@ -4,6 +4,7 @@ import { createOrder } from "../api/order.service";
 import { getClientsService, getClientByIdService } from "../../clients/api/clients.api";
 import { getAllPriceLists } from "../../pricelist/api/pricelist.api";
 import { useNotificationStore } from "../../../shared/store";
+import { useSystemParams } from "../../../shared/hooks/useSystemParams";
 import type { ClientPreview, ClientResponse } from "../../clients/types";
 import type { PaymentCondition, CreateOrderItemDTO } from "../types";
 import type { City } from "../../../shared/types/location";
@@ -24,6 +25,7 @@ const generateOrderNumber = (): string => {
 export const useCreateOrder = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotificationStore();
+  const { IVA, RETEFUENTE_RATE, RETEFUENTE_THRESHOLD } = useSystemParams();
 
   // ─── Order metadata ────────────────────────────────────────────────────────
   const [orderNumber] = useState<string>(generateOrderNumber);
@@ -53,7 +55,6 @@ export const useCreateOrder = () => {
 
   // ─── Financial panel ───────────────────────────────────────────────────────
   const [freight, setFreight] = useState(0);
-  const [reteica, setReteica] = useState(0);
 
   // ─── Products ──────────────────────────────────────────────────────────────
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -70,28 +71,26 @@ export const useCreateOrder = () => {
   useEffect(() => {
     let active = true;
 
-    if (clientInputValue.trim().length < 2) {
-      setClientOptions(selectedClient ? [selectedClient] : []);
-      return undefined;
-    }
-
     setIsClientSearching(true);
+
+    const delay = clientInputValue.trim() ? 400 : 0;
+
     const timer = setTimeout(async () => {
       try {
-        const res = await getClientsService(0, 20, clientInputValue);
+        const res = await getClientsService(0, 50, clientInputValue.trim() || undefined);
         if (active) setClientOptions(res.content);
       } catch {
         // ignore
       } finally {
         if (active) setIsClientSearching(false);
       }
-    }, 400);
+    }, delay);
 
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [clientInputValue, selectedClient]);
+  }, [clientInputValue]);
 
   // ─── When client selected, fetch full details to get priceList ────────────
   const handleClientChange = useCallback(
@@ -140,15 +139,15 @@ export const useCreateOrder = () => {
     );
   };
 
-  const IVA_RATE = 0.19;
-  const RETEFUENTE_RATE = 0.035;
-
-  const subtotal           = items.reduce((acc, it) => acc + it.lineTotal, 0);
-  const tax                = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA_RATE), 0);
-  const discountAmt        = subtotal * ((parseInt(discountRate, 10) || 0) / 100);
+  const subtotal              = items.reduce((acc, it) => acc + it.lineTotal, 0);
+  const tax                   = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA), 0);
+  const discountAmt           = subtotal * ((parseInt(discountRate, 10) || 0) / 100);
   const additionalDiscountAmt = subtotal * ((parseFloat(additionalDiscountRate || "0")) / 100);
-  const retefuente         = clientDetail?.retefuenteApplies ? subtotal * RETEFUENTE_RATE : 0;
-  const total              = subtotal + tax - discountAmt - additionalDiscountAmt - retefuente - reteica + freight;
+  const retefuente            =
+    clientDetail?.retefuenteApplies && subtotal > RETEFUENTE_THRESHOLD
+      ? subtotal * RETEFUENTE_RATE
+      : 0;
+  const total              = subtotal + tax - discountAmt - additionalDiscountAmt - retefuente + freight;
 
   // ─── Validation ────────────────────────────────────────────────────────────
   const missingFields: string[] = [];
@@ -180,8 +179,6 @@ export const useCreateOrder = () => {
         paymentCondition: paymentCondition || undefined,
         discountRate: parseInt(discountRate, 10) || 0,
         additionalDiscountRate: additionalDiscountRate ? parseFloat(additionalDiscountRate) : undefined,
-        retefuenteAmount: retefuente > 0 ? retefuente : undefined,
-        reteicaAmount: reteica > 0 ? reteica : undefined,
         freight: freight > 0 ? freight : undefined,
         items: items.map(({ productName: _pn, productReference: _pr, taxFree: _tf, ...rest }) => rest),
       };
@@ -231,8 +228,6 @@ export const useCreateOrder = () => {
     retefuente,
     freight,
     setFreight,
-    reteica,
-    setReteica,
     total,
     missingFields,
     handleClientChange,

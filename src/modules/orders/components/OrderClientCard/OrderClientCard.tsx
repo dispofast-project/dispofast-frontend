@@ -29,7 +29,6 @@ const OrderClientCard = ({
   selectedClient,
   clientDetail,
   clientOptions,
-  clientInputValue,
   isClientSearching,
   onClientInputChange,
   onClientChange,
@@ -66,11 +65,7 @@ const OrderClientCard = ({
           filterSelectedOptions
           value={selectedClient}
           noOptionsText={
-            isClientSearching
-              ? "Buscando..."
-              : clientInputValue.length < 2
-              ? "Escribe al menos 2 caracteres"
-              : "No se encontraron clientes"
+            isClientSearching ? "Buscando..." : "No se encontraron clientes"
           }
           onChange={(_e, newVal) => {
             onClientChange(newVal);

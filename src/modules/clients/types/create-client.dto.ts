@@ -8,7 +8,7 @@ export interface CreateClientRequestDTO {
   isActive?: boolean;
   retefuenteApplies?: boolean;
   address: string;
-  defaultAdvisorId: string;
+  defaultAdvisorId?: string;
   cityCode: string;
   zone: string;
   defaultDiscountRate?: number;

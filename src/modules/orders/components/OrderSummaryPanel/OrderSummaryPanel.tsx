@@ -13,8 +13,6 @@ interface OrderSummaryPanelProps {
   discount: number;
   additionalDiscount: number;
   retefuente: number;
-  reteica: number;
-  onReteicaChange: (v: number) => void;
   freight: number;
   onFreightChange: (v: number) => void;
   total: number;
@@ -41,8 +39,6 @@ const OrderSummaryPanel = ({
   discount,
   additionalDiscount,
   retefuente,
-  reteica,
-  onReteicaChange,
   freight,
   onFreightChange,
   total,
@@ -51,6 +47,7 @@ const OrderSummaryPanel = ({
   isLoading,
   onSubmit,
 }: OrderSummaryPanelProps) => {
+
   return (
     <Box className="lg:col-span-1 sticky top-4">
       <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -114,22 +111,6 @@ const OrderSummaryPanel = ({
             {additionalDiscount > 0 && <SummaryRow label="Otros descuentos" value={additionalDiscount} negative />}
             {retefuente > 0 && <SummaryRow label="Retefuente (3.5%)" value={retefuente} negative />}
 
-            {/* Reteica — editable */}
-            <Box className="flex items-center justify-between gap-2">
-              <Typography variant="body2" className="text-gray-500 shrink-0">Reteica</Typography>
-              <TextField
-                size="small"
-                type="number"
-                value={reteica || ""}
-                onChange={(e) => onReteicaChange(parseFloat(e.target.value) || 0)}
-                placeholder="0"
-                slotProps={{
-                  htmlInput: { min: 0, step: 100 },
-                  input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
-                }}
-                sx={{ width: 130 }}
-              />
-            </Box>
 
             {/* Flete — editable */}
             <Box className="flex items-center justify-between gap-2">

@@ -1,7 +1,8 @@
-import { Box, Typography, Select, MenuItem, TextField } from "@mui/material";
+import { Box, Typography, Select, MenuItem } from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import { NumericFormat } from "react-number-format";
 import { PaymentCondition, OfferValidity } from "../types";
+import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
+import CommercialDiscountSelect from "../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
 import type { PaymentCondition as PaymentConditionType, OfferValidity as OfferValidityType } from "../types";
 import SectionTitle from "./SectionTitle";
 
@@ -61,31 +62,11 @@ const QuoteTermsCard = ({
       </Box>
       <Box>
         <Typography variant="body2" className="text-gray-500 mb-1">Descuento comercial</Typography>
-        <NumericFormat
-          customInput={TextField}
-          size="small"
-          fullWidth
-          value={commercialRate}
-          onValueChange={(values) => onCommercialRateChange(values.value)}
-          suffix=" %"
-          decimalScale={0}
-          allowNegative={false}
-          isAllowed={({ floatValue }) => floatValue === undefined || (floatValue >= 0 && floatValue <= 100)}
-        />
+        <CommercialDiscountSelect value={commercialRate} onChange={onCommercialRateChange} />
       </Box>
       <Box>
         <Typography variant="body2" className="text-gray-500 mb-1">Otros descuentos</Typography>
-        <NumericFormat
-          customInput={TextField}
-          size="small"
-          fullWidth
-          value={otherRate}
-          onValueChange={(values) => onOtherRateChange(values.value)}
-          suffix=" %"
-          decimalScale={0}
-          allowNegative={false}
-          isAllowed={({ floatValue }) => floatValue === undefined || (floatValue >= 0 && floatValue <= 100)}
-        />
+        <PercentageInput value={otherRate} onChange={onOtherRateChange} fullWidth />
       </Box>
     </Box>
   </Box>

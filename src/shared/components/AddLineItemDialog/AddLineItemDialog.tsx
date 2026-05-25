@@ -12,65 +12,79 @@ import {
   Divider,
 } from "@mui/material";
 import { Search, Package } from "lucide-react";
-import { Button } from "../../../../shared/components/Button/Button";
-import { getAllInventoryProducts } from "../../../inventory/api/inventory.api";
-import { getPriceListItems } from "../../../pricelist/api/pricelist.api";
-import type { InventoryItem } from "../../../inventory/api/inventory.api";
-import type { PriceListProductItem } from "../../../pricelist/api/pricelist.api";
-import type { CreateOrderItemDTO } from "../../types";
+import { Button } from "../Button/Button";
+import { getPriceListItems } from "../../../modules/pricelist/api/pricelist.api";
+import type { PriceListProductItem } from "../../../modules/pricelist/api/pricelist.api";
 
-interface AddProductDialogProps {
+export interface LineItemResult {
+  productId: string;
+  productName: string;
+  productReference: string;
+  taxFree: boolean;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+interface AddLineItemDialogProps {
   open: boolean;
   priceListId: string;
   onClose: () => void;
-  onAdd: (item: CreateOrderItemDTO & { productName: string; productReference: string; taxFree: boolean }) => void;
+  onAdd: (item: LineItemResult) => void;
+  /** When false, the unit price field is read-only (preview from price list). Default: true */
+  priceEditable?: boolean;
+  title?: string;
 }
 
-const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialogProps) => {
-  const [products, setProducts] = useState<InventoryItem[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<InventoryItem[]>([]);
-  const [priceMap, setPriceMap] = useState<Record<string, number>>({});
+const IVA = 0.19;
+
+const AddLineItemDialog = ({
+  open,
+  priceListId,
+  onClose,
+  onAdd,
+  priceEditable = true,
+  title = "Agregar Producto",
+}: AddLineItemDialogProps) => {
+  const [products, setProducts] = useState<PriceListProductItem[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<PriceListProductItem[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<PriceListProductItem | null>(null);
   const [quantity, setQuantity] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load inventory + price list items when dialog opens
   useEffect(() => {
     if (!open) return;
-
+    if (!priceListId) {
+      setProducts([]);
+      setError("Selecciona una lista de precios para ver los productos disponibles.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
-
-    Promise.all([
-      getAllInventoryProducts(0, 100),
-      priceListId ? getPriceListItems(priceListId) : Promise.resolve([] as PriceListProductItem[]),
-    ])
-      .then(([inventory, priceItems]) => {
-        setProducts(inventory.content);
-        const map: Record<string, number> = {};
-        priceItems.forEach((pi) => { map[pi.productId] = pi.unitPrice; });
-        setPriceMap(map);
-      })
-      .catch(() => setError("No se pudieron cargar los productos"))
+    getPriceListItems(priceListId)
+      .then((items) => setProducts(items))
+      .catch(() => setError("No se pudieron cargar los productos de la lista de precios."))
       .finally(() => setIsLoading(false));
   }, [open, priceListId]);
 
-  // Filter products by search
   useEffect(() => {
     if (!search.trim()) {
       setFilteredProducts(products);
     } else {
       const lower = search.toLowerCase();
       setFilteredProducts(
-        products.filter((p) => p.productName.toLowerCase().includes(lower))
+        products.filter(
+          (p) =>
+            p.productName.toLowerCase().includes(lower) ||
+            p.productReference.toLowerCase().includes(lower),
+        ),
       );
     }
   }, [search, products]);
 
-  // Reset form when closed
   useEffect(() => {
     if (!open) {
       setSearch("");
@@ -81,19 +95,16 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
     }
   }, [open]);
 
-  // Auto-fill unit price from price list when a product is selected
-  const handleSelectProduct = (product: InventoryItem) => {
+  const handleSelectProduct = (product: PriceListProductItem) => {
     setSelectedProduct(product);
     setError(null);
-    const priceFromList = priceMap[product.productId];
-    setUnitPrice(priceFromList !== undefined ? String(priceFromList) : "");
+    setUnitPrice(String(product.unitPrice));
   };
 
   const qty = parseFloat(quantity) || 0;
   const price = parseFloat(unitPrice) || 0;
   const lineTotal = qty * price;
-  const IVA_RATE = 0.19;
-  const ivaAmount = selectedProduct && !selectedProduct.taxFree ? lineTotal * IVA_RATE : 0;
+  const ivaAmount = selectedProduct && !selectedProduct.taxFree ? lineTotal * IVA : 0;
   const totalWithIva = lineTotal + ivaAmount;
 
   const handleAdd = () => {
@@ -124,16 +135,17 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle className="font-bold">Agregar Producto</DialogTitle>
+      <DialogTitle className="font-bold">{title}</DialogTitle>
       <DialogContent>
         <Box className="flex flex-col gap-4 pt-1">
           {/* Search */}
           <TextField
             size="small"
             fullWidth
-            placeholder="Buscar producto por nombre..."
+            placeholder="Buscar producto por nombre o referencia..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            disabled={!priceListId}
             slotProps={{
               input: {
                 startAdornment: (
@@ -152,59 +164,54 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
                 <CircularProgress size={24} />
               </Box>
             ) : error && products.length === 0 ? (
-              <Box className="flex items-center justify-center py-10">
-                <Typography variant="body2" color="error">{error}</Typography>
+              <Box className="flex items-center justify-center py-10 px-4">
+                <Typography variant="body2" color={priceListId ? "error" : "textSecondary"}>
+                  {error}
+                </Typography>
               </Box>
             ) : filteredProducts.length === 0 ? (
               <Box className="flex items-center justify-center py-10">
                 <Typography variant="body2" color="textSecondary">
-                  No se encontraron productos
+                  No hay productos en esta lista de precios
                 </Typography>
               </Box>
             ) : (
               <Box className="max-h-52 overflow-y-auto">
-                {filteredProducts.map((product) => {
-                  const hasPrice = priceMap[product.productId] !== undefined;
-                  return (
-                    <Box
-                      key={product.productId}
-                      onClick={() => handleSelectProduct(product)}
-                      className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
-                        selectedProduct?.productId === product.productId
-                          ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <Box className="flex items-center gap-3">
-                        <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <Package className="w-4 h-4 text-gray-500" />
-                        </Box>
-                        <Box>
-                          <Typography variant="body2" className="font-medium text-gray-800">
-                            {product.productName}
-                          </Typography>
-                          <Typography variant="caption" className="text-gray-400">
-                            {product.productReference}
-                          </Typography>
-                        </Box>
+                {filteredProducts.map((product) => (
+                  <Box
+                    key={product.productId}
+                    onClick={() => handleSelectProduct(product)}
+                    className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
+                      selectedProduct?.productId === product.productId
+                        ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <Box className="flex items-center gap-3">
+                      <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <Package className="w-4 h-4 text-gray-500" />
                       </Box>
-                      <Box className="text-right">
-                        {hasPrice ? (
-                          <Typography variant="caption" className="text-dispofast-primary font-semibold">
-                            ${priceMap[product.productId].toLocaleString("es-CO")}
-                          </Typography>
-                        ) : (
-                          <Typography variant="caption" className="text-amber-500">
-                            Sin precio
-                          </Typography>
-                        )}
-                        <Typography variant="caption" className="text-gray-400 block">
-                          Stock: {product.quantityAvailable}
+                      <Box>
+                        <Typography variant="body2" className="font-medium text-gray-800">
+                          {product.productName}
+                        </Typography>
+                        <Typography variant="caption" className="text-gray-400">
+                          {product.productReference}
                         </Typography>
                       </Box>
                     </Box>
-                  );
-                })}
+                    <Box className="text-right">
+                      <Typography variant="caption" className="text-dispofast-primary font-semibold">
+                        ${product.unitPrice.toLocaleString("es-CO")}
+                      </Typography>
+                      {product.quantityAvailable !== null && (
+                        <Typography variant="caption" className="text-gray-400 block">
+                          Stock: {product.quantityAvailable}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
               </Box>
             )}
           </Box>
@@ -218,7 +225,10 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
                   {selectedProduct.productName}
                 </Typography>
                 <Typography variant="caption" className="text-gray-500">
-                  {selectedProduct.productReference} · Disponible: {selectedProduct.quantityAvailable} unidades
+                  {selectedProduct.productReference}
+                  {selectedProduct.quantityAvailable !== null
+                    ? ` · Disponible: ${selectedProduct.quantityAvailable} unidades`
+                    : ""}
                 </Typography>
               </Box>
 
@@ -237,11 +247,13 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
                   label="Valor unitario"
                   type="number"
                   value={unitPrice}
-                  onChange={(e) => setUnitPrice(e.target.value)}
+                  onChange={priceEditable ? (e) => setUnitPrice(e.target.value) : undefined}
+                  disabled={!priceEditable}
                   slotProps={{
                     htmlInput: { min: 0, step: 0.01 },
                     input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
                   }}
+                  helperText={!priceEditable ? "Definido por la lista de precios" : undefined}
                   required
                 />
               </Box>
@@ -256,6 +268,7 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
                 <Box className="flex items-center justify-between">
                   <Typography variant="body2" className="text-gray-500">
                     IVA (19%){selectedProduct?.taxFree ? " — Exento" : ""}
+                    {!priceEditable && " (estimado)"}
                   </Typography>
                   <Typography variant="body2" className="font-medium text-gray-700">
                     ${ivaAmount.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
@@ -293,4 +306,4 @@ const AddProductDialog = ({ open, priceListId, onClose, onAdd }: AddProductDialo
   );
 };
 
-export default AddProductDialog;
+export default AddLineItemDialog;

@@ -99,7 +99,7 @@ const CreateClientPage = () => {
         zone: formData.zone,
         clientTypeId: finalClientTypeId,
         priceListId: formData.priceListId,
-        defaultAdvisorId: formData.defaultAdvisorId,
+        defaultAdvisorId: formData.defaultAdvisorId || undefined,
       };
 
       if (entityType === LegalEntityType.NATURAL) {

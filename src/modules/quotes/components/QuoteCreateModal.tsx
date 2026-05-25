@@ -207,7 +207,7 @@ const QuoteCreateModal = ({ open, onClose, onSubmit }: QuoteCreateModalProps) =>
             style={{ backgroundColor: "var(--dispofast-primary)" }}
           >
             {isSubmitting && <CircularProgress size={14} color="inherit" />}
-            {isSubmitting ? "Creando..." : "Crear Cotización"}
+            {isSubmitting ? "Cargando..." : "Crear Cotización"}
           </button>
         </div>
       </Box>

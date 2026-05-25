@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Typography, TextField, Switch, Box } from "@mui/material";
-import { NumericFormat } from 'react-number-format';
 import type { ClientFormData } from "./types";
 import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete/CityAutocomplete";
 import type { City } from "../../../../shared/types/location";
@@ -9,6 +8,8 @@ import { AdvisorAutocomplete } from "../../../../shared/components/AdvisorAutoco
 import { ClientTypeSelector } from "../../../../shared/components/ClientTypeSelector/ClientTypeSelector";
 import { PriceListAutocomplete } from "../../../../shared/components/PriceListAutocomplete/PriceListAutocomplete";
 import type { User } from "../../../iam/types";
+import { useAuthStore } from "../../../iam/auth.store";
+import CommercialDiscountSelect from "../../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
 
 interface GeneralDataFieldsProps {
   formData: ClientFormData;
@@ -19,6 +20,9 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedAdvisor, setSelectedAdvisor] = useState<User | null>(null);
   const [selectedPriceList, setSelectedPriceList] = useState<{ id: string; name: string } | null>(null);
+  const authorities = useAuthStore((state) => state.authorities);
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = authorities.includes("ROLE_ADMIN");
 
   return ( 
     <>
@@ -56,34 +60,33 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
             } as React.ChangeEvent<HTMLInputElement>);
           }}
         />
-        <AdvisorAutocomplete
-          required
-          value={selectedAdvisor}
-          onChange={(advisor) => {
-            setSelectedAdvisor(advisor);
-            onChange({
-              target: { name: "defaultAdvisorId", value: advisor?.id || "" },
-            } as React.ChangeEvent<HTMLInputElement>);
-          }}
-        />
-        <NumericFormat
-          customInput={TextField}
-          size="small"
-          fullWidth
-          required
-          label="Descuento por defecto"
-          name="defaultDiscountRate"
+        {isAdmin ? (
+          <AdvisorAutocomplete
+            required
+            value={selectedAdvisor}
+            onChange={(advisor) => {
+              setSelectedAdvisor(advisor);
+              onChange({
+                target: { name: "defaultAdvisorId", value: advisor?.id || "" },
+              } as React.ChangeEvent<HTMLInputElement>);
+            }}
+          />
+        ) : (
+          <TextField
+            size="small"
+            fullWidth
+            label="Asesor"
+            value={user?.name ?? ""}
+            disabled
+            InputProps={{ readOnly: true }}
+          />
+        )}
+        <CommercialDiscountSelect
+          label="Descuento comercial"
           value={formData.defaultDiscountRate}
-          onValueChange={(values) => {
-            onChange({ target: { name: 'defaultDiscountRate', value: values.value } } as React.ChangeEvent<HTMLInputElement>);
-          }}
-          suffix=" %"
-          decimalScale={0}
-          allowNegative={false}
-          isAllowed={(values) => {
-            const { floatValue } = values;
-            return floatValue === undefined || (floatValue >= 0 && floatValue <= 100);
-          }}
+          onChange={(val) =>
+            onChange({ target: { name: "defaultDiscountRate", value: val } } as React.ChangeEvent<HTMLInputElement>)
+          }
         />
       </div>
 
