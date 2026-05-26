@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import type { SalesOrder } from "../../types";
-import logo from "@/assets/dispofast-logo.png";
+import logo from "../../../../assets/dispofast-logo.png";
 
 const PRIMARY = "#4676B8";
 const IVA_RATE = 0.19;
@@ -77,7 +77,6 @@ const OrderPrintTemplate = forwardRef<HTMLDivElement, OrderPrintTemplateProps>(
       discountAmt,
       additionalDiscountAmt,
       retefuenteAmount,
-      reteicaAmount,
       freight,
     },
     ref
@@ -91,9 +90,7 @@ const OrderPrintTemplate = forwardRef<HTMLDivElement, OrderPrintTemplateProps>(
       ["Subtotal", fmt(subtotal)],
       ["IVA", fmt(tax)],
       ["Retefuente", fmt(retefuenteAmount)],
-      ["Reteica", fmt(reteicaAmount)],
       ["Descuento", fmt(discountAmt)],
-      ["Pronto pago", fmt(0)],
       ["Otros descuentos", fmt(additionalDiscountAmt)],
       ["Flete", fmt(freight)],
     ];
