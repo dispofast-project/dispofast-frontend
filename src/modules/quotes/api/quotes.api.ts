@@ -9,7 +9,7 @@ export const getQuotesService = async (
   text?: string,
   key?: string,
 ): Promise<PagedResponse<QuotePreview>> => {
-  const params: Record<string, unknown> = { page, size };
+  const params: Record<string, unknown> = { page, size, sort: 'createdAt,desc' };
   if (text && text.trim()) {
     params.text = text.trim();
     if (key) params.key = key;

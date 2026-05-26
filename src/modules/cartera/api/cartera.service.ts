@@ -18,6 +18,7 @@ export const getArEntries = async (
     params: {
       page,
       size,
+      sort: 'createdAt,desc',
       ...(filters?.state && { state: filters.state }),
     },
   });
