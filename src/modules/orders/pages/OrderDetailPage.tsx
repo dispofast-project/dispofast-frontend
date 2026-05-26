@@ -16,6 +16,7 @@ import OrderDeliveryCard from "../components/OrderDeliveryCard/OrderDeliveryCard
 import OrderItemsTable from "../components/OrderItemsTable/OrderItemsTable";
 import OrderPaymentPanel from "../components/OrderPaymentPanel/OrderPaymentPanel";
 import AttachInvoiceDialog from "../components/AttachInvoiceDialog/AttachInvoiceDialog";
+import OrderPrintTemplate from "../components/OrderPrintTemplate/OrderPrintTemplate";
 
 const NEXT_STATES: Record<OrderState, OrderState[]> = {
   PENDING: ["CANCELLED"],
@@ -49,6 +50,7 @@ const OrderDetailPage = () => {
   const [downloadLoading, setDownloadLoading] = useState(false);
 
   const orderRef = useRef<HTMLDivElement>(null);
+  const printTemplateRef = useRef<HTMLDivElement>(null);
 
   const handleAttachInvoice = async () => {
     if (!id || !invoiceNumber.trim() || !invoiceFile) return;
@@ -84,10 +86,10 @@ const OrderDetailPage = () => {
   const [downloadOrderLoading, setDownloadOrderLoading] = useState(false);
 
   const handleDownloadOrder = async () => {
-    if (!orderRef.current) return;
+    if (!printTemplateRef.current) return;
     setDownloadOrderLoading(true);
     try {
-      await downloadElementAsPdf(orderRef.current, `orden_${order?.orderNumber}.pdf`);
+      await downloadElementAsPdf(printTemplateRef.current, `orden_${order?.orderNumber}.pdf`);
     } finally {
       setDownloadOrderLoading(false);
     }
@@ -207,6 +209,24 @@ const OrderDetailPage = () => {
         isLoading={invoiceLoading}
         error={invoiceError}
       />
+
+      {/* Hidden print template — off-screen but fully rendered for PDF capture */}
+      <div
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", top: 0, width: "794px" }}
+      >
+        <OrderPrintTemplate
+          ref={printTemplateRef}
+          order={order}
+          subtotal={subtotal}
+          tax={tax}
+          discountAmt={discountAmt}
+          additionalDiscountAmt={additionalDiscountAmt}
+          retefuenteAmount={retefuenteAmount}
+          reteicaAmount={order.reteicaAmount ?? 0}
+          freight={freight}
+        />
+      </div>
     </Box>
   );
 };

@@ -23,16 +23,21 @@ export async function downloadElementAsPdf(
       .join("\n");
 
     const clone = element.cloneNode(true) as HTMLElement;
-    // Strip interactive controls — they have no place in a printed document
-    clone
-      .querySelectorAll("button, select, input, [role=button]")
-      .forEach((el) => el.remove());
+
+    // Resolve image src to absolute URLs so they load correctly from about:blank
+    const origImgs = element.querySelectorAll<HTMLImageElement>("img");
+    const cloneImgs = clone.querySelectorAll<HTMLImageElement>("img");
+    origImgs.forEach((orig, i) => {
+      const resolved = orig.currentSrc || orig.src;
+      if (resolved && cloneImgs[i]) cloneImgs[i].setAttribute("src", resolved);
+    });
 
     printWindow.document.write(`<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <title>${filename}</title>
+  <base href="${window.location.origin}/" />
   ${styles}
   <style>
     body {
@@ -45,7 +50,8 @@ export async function downloadElementAsPdf(
       print-color-adjust: exact !important;
     }
     @media print {
-      @page { margin: 10mm; }
+      @page { margin: 12mm; size: A4 portrait; }
+      body { padding: 0; }
     }
   </style>
 </head>
@@ -62,9 +68,9 @@ export async function downloadElementAsPdf(
     };
 
     if (printWindow.document.readyState === "complete") {
-      setTimeout(doPrint, 500);
+      setTimeout(doPrint, 600);
     } else {
-      printWindow.addEventListener("load", () => setTimeout(doPrint, 500));
+      printWindow.addEventListener("load", () => setTimeout(doPrint, 600));
     }
   });
 }
