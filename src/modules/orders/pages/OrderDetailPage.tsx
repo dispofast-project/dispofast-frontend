@@ -7,6 +7,8 @@ import { Button } from "../../../shared/components/Button/Button";
 import { attachInvoice, downloadInvoice, updateOrder } from "../api/order.service";
 import { getInvoiceByOrderId } from "../../invoices/api/invoice.service";
 import type { Invoice } from "../../invoices/types";
+import { getClientByIdService } from "../../clients/api/clients.api";
+import type { ClientResponse } from "../../clients/types";
 import { downloadElementAsPdf } from "../../../shared/utils/downloadAsPdf";
 
 import OrderDetailHeader from "../components/OrderDetailHeader/OrderDetailHeader";
@@ -33,6 +35,14 @@ const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { order, loading, error, refetch } = useOrderDetail(id);
+
+  // ── Client ──────────────────────────────────────────────────────────────────
+  const [client, setClient] = useState<ClientResponse | null>(null);
+
+  useEffect(() => {
+    if (!order?.clientId) return;
+    getClientByIdService(order.clientId).then(setClient).catch(() => setClient(null));
+  }, [order?.clientId]);
 
   // ── Invoice ─────────────────────────────────────────────────────────────────
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -89,7 +99,8 @@ const OrderDetailPage = () => {
     if (!printTemplateRef.current) return;
     setDownloadOrderLoading(true);
     try {
-      await downloadElementAsPdf(printTemplateRef.current, `orden_${order?.orderNumber}.pdf`);
+      const clientLabel = order?.clientName.toUpperCase().replace(/\s+/g, "_") ?? "CLIENTE";
+      await downloadElementAsPdf(printTemplateRef.current, `${order?.orderNumber}-${clientLabel}.pdf`);
     } finally {
       setDownloadOrderLoading(false);
     }
@@ -218,12 +229,12 @@ const OrderDetailPage = () => {
         <OrderPrintTemplate
           ref={printTemplateRef}
           order={order}
+          client={client}
           subtotal={subtotal}
           tax={tax}
           discountAmt={discountAmt}
           additionalDiscountAmt={additionalDiscountAmt}
           retefuenteAmount={retefuenteAmount}
-          reteicaAmount={order.reteicaAmount ?? 0}
           freight={freight}
         />
       </div>

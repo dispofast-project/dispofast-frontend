@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import type { SalesOrder } from "../../types";
+import type { ClientResponse } from "../../../clients/types";
 import logo from "../../../../assets/dispofast-logo.png";
 
 const PRIMARY = "#4676B8";
@@ -23,7 +24,8 @@ const fmt = (n: number | null | undefined): string => {
 };
 
 const fmtDate = (dateStr: string): string => {
-  const d = new Date(dateStr + "T00:00:00");
+  // Full ISO timestamp already has "T"; date-only strings need local midnight to avoid UTC offset
+  const d = dateStr.includes("T") ? new Date(dateStr) : new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("es-CO", {
     day: "numeric",
     month: "long",
@@ -59,12 +61,12 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 
 export interface OrderPrintTemplateProps {
   order: SalesOrder;
+  client: ClientResponse | null;
   subtotal: number;
   tax: number;
   discountAmt: number;
   additionalDiscountAmt: number;
   retefuenteAmount: number;
-  reteicaAmount: number;
   freight: number;
 }
 
@@ -72,6 +74,7 @@ const OrderPrintTemplate = forwardRef<HTMLDivElement, OrderPrintTemplateProps>(
   (
     {
       order,
+      client,
       subtotal,
       tax,
       discountAmt,
@@ -176,28 +179,19 @@ const OrderPrintTemplate = forwardRef<HTMLDivElement, OrderPrintTemplateProps>(
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <tbody>
               <tr>
-                <InfoCell label="Tipo cliente" value="-" />
+                <InfoCell label="Tipo cliente" value={client?.clientType?.name ?? "-"} />
                 <InfoCell label="Nombre Cliente" value={order.clientName} />
-                <InfoCell label="NIT" value="-" />
+                <InfoCell label="NIT" value={client?.identificationNumber ?? "-"} />
               </tr>
               <tr>
-                <InfoCell label="Departamento" value="-" />
-                <InfoCell
-                  label="Ciudad"
-                  value={order.shipmentCityName ?? "-"}
-                />
-                <InfoCell label="Teléfono" value="-" />
+                <InfoCell label="Departamento" value={client?.city?.department?.name ?? "-"} />
+                <InfoCell label="Ciudad" value={client?.city?.name ?? "-"} />
+                <InfoCell label="Teléfono" value={client?.phone ?? "-"} />
               </tr>
               <tr>
-                <InfoCell label="Correo" value="-" />
-                <InfoCell
-                  label="Ciudad (Despacho)"
-                  value={order.shipmentCityName ?? "-"}
-                />
-                <InfoCell
-                  label="Dirección (Despacho)"
-                  value={order.shipmentAddress ?? "-"}
-                />
+                <InfoCell label="Correo" value={client?.email ?? "-"} />
+                <InfoCell label="Ciudad (Despacho)" value={order.shipmentCityName ?? "-"} />
+                <InfoCell label="Dirección (Despacho)" value={order.shipmentAddress ?? "-"} />
               </tr>
             </tbody>
           </table>
