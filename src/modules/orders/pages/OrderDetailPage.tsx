@@ -81,9 +81,16 @@ const OrderDetailPage = () => {
     try { await downloadInvoice(id); } finally { setDownloadLoading(false); }
   };
 
+  const [downloadOrderLoading, setDownloadOrderLoading] = useState(false);
+
   const handleDownloadOrder = async () => {
     if (!orderRef.current) return;
-    await downloadElementAsPdf(orderRef.current, `orden_${order?.orderNumber}.pdf`);
+    setDownloadOrderLoading(true);
+    try {
+      await downloadElementAsPdf(orderRef.current, `orden_${order?.orderNumber}.pdf`);
+    } finally {
+      setDownloadOrderLoading(false);
+    }
   };
 
   // ── State change ────────────────────────────────────────────────────────────
@@ -184,6 +191,7 @@ const OrderDetailPage = () => {
             additionalDiscountAmt={additionalDiscountAmt}
             totalValue={order.totalValue}
             handleDownload={handleDownloadOrder}
+            downloadLoading={downloadOrderLoading}
           />
         </Box>
       </Box>
