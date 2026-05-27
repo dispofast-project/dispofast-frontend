@@ -45,10 +45,10 @@ export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus];
 
 export const PaymentCondition = {
   CONTADO: "Contado",
-  CONTADO_15_DIAS: "Contado 15 días",
-  CONTADO_30_DIAS: "Contado 30 días",
-  CONTADO_60_DIAS: "Contado 60 días",
-  CONTADO_90_DIAS: "Contado 90 días",
+  CREDITO_15_DIAS: "Crédito 15 días",
+  CREDITO_30_DIAS: "Crédito 30 días",
+  CREDITO_60_DIAS: "Crédito 60 días",
+  CREDITO_90_DIAS: "Crédito 90 días",
   CONTRAENTREGA: "Contraentrega",
 } as const;
 

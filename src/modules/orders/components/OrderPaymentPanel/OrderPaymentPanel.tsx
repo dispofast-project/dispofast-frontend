@@ -52,6 +52,7 @@ interface OrderPaymentPanelProps {
   additionalDiscountAmt: number;
   totalValue: number;
   handleDownload: () => void;
+  downloadLoading?: boolean;
 }
 
 const OrderPaymentPanel = ({
@@ -66,6 +67,7 @@ const OrderPaymentPanel = ({
   additionalDiscountAmt,
   totalValue,
   handleDownload,
+  downloadLoading = false,
 }: OrderPaymentPanelProps) => {
   const conditionLabel =
     PAYMENT_CONDITION_OPTIONS.find((o) => o.value === paymentCondition)?.label ?? "-";
@@ -120,7 +122,7 @@ const OrderPaymentPanel = ({
         <Divider />
 
         <Box>
-          <Button variant="primary" className="w-full flex items-center justify-center gap-2" onClick={handleDownload}>
+          <Button variant="primary" className="w-full flex items-center justify-center gap-2" onClick={handleDownload} isLoading={downloadLoading}>
             <Download/> Descargar orden de compra
           </Button>
         </Box>
