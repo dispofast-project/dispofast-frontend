@@ -7,6 +7,8 @@ import { Button } from "../../../shared/components/Button/Button";
 import { attachInvoice, downloadInvoice, updateOrder } from "../api/order.service";
 import { getInvoiceByOrderId } from "../../invoices/api/invoice.service";
 import type { Invoice } from "../../invoices/types";
+import { getClientByIdService } from "../../clients/api/clients.api";
+import type { ClientResponse } from "../../clients/types";
 import { downloadElementAsPdf } from "../../../shared/utils/downloadAsPdf";
 
 import OrderDetailHeader from "../components/OrderDetailHeader/OrderDetailHeader";
@@ -16,6 +18,7 @@ import OrderDeliveryCard from "../components/OrderDeliveryCard/OrderDeliveryCard
 import OrderItemsTable from "../components/OrderItemsTable/OrderItemsTable";
 import OrderPaymentPanel from "../components/OrderPaymentPanel/OrderPaymentPanel";
 import AttachInvoiceDialog from "../components/AttachInvoiceDialog/AttachInvoiceDialog";
+import OrderPrintTemplate from "../components/OrderPrintTemplate/OrderPrintTemplate";
 
 const NEXT_STATES: Record<OrderState, OrderState[]> = {
   PENDING: ["CANCELLED"],
@@ -33,6 +36,14 @@ const OrderDetailPage = () => {
   const navigate = useNavigate();
   const { order, loading, error, refetch } = useOrderDetail(id);
 
+  // ── Client ──────────────────────────────────────────────────────────────────
+  const [client, setClient] = useState<ClientResponse | null>(null);
+
+  useEffect(() => {
+    if (!order?.clientId) return;
+    getClientByIdService(order.clientId).then(setClient).catch(() => setClient(null));
+  }, [order?.clientId]);
+
   // ── Invoice ─────────────────────────────────────────────────────────────────
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
@@ -49,6 +60,7 @@ const OrderDetailPage = () => {
   const [downloadLoading, setDownloadLoading] = useState(false);
 
   const orderRef = useRef<HTMLDivElement>(null);
+  const printTemplateRef = useRef<HTMLDivElement>(null);
 
   const handleAttachInvoice = async () => {
     if (!id || !invoiceNumber.trim() || !invoiceFile) return;
@@ -81,9 +93,17 @@ const OrderDetailPage = () => {
     try { await downloadInvoice(id); } finally { setDownloadLoading(false); }
   };
 
+  const [downloadOrderLoading, setDownloadOrderLoading] = useState(false);
+
   const handleDownloadOrder = async () => {
-    if (!orderRef.current) return;
-    await downloadElementAsPdf(orderRef.current, `orden_${order?.orderNumber}.pdf`);
+    if (!printTemplateRef.current) return;
+    setDownloadOrderLoading(true);
+    try {
+      const clientLabel = order?.clientName.toUpperCase().replace(/\s+/g, "_") ?? "CLIENTE";
+      await downloadElementAsPdf(printTemplateRef.current, `${order?.orderNumber}-${clientLabel}.pdf`);
+    } finally {
+      setDownloadOrderLoading(false);
+    }
   };
 
   // ── State change ────────────────────────────────────────────────────────────
@@ -184,6 +204,7 @@ const OrderDetailPage = () => {
             additionalDiscountAmt={additionalDiscountAmt}
             totalValue={order.totalValue}
             handleDownload={handleDownloadOrder}
+            downloadLoading={downloadOrderLoading}
           />
         </Box>
       </Box>
@@ -199,6 +220,24 @@ const OrderDetailPage = () => {
         isLoading={invoiceLoading}
         error={invoiceError}
       />
+
+      {/* Hidden print template — off-screen but fully rendered for PDF capture */}
+      <div
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", top: 0, width: "794px" }}
+      >
+        <OrderPrintTemplate
+          ref={printTemplateRef}
+          order={order}
+          client={client}
+          subtotal={subtotal}
+          tax={tax}
+          discountAmt={discountAmt}
+          additionalDiscountAmt={additionalDiscountAmt}
+          retefuenteAmount={retefuenteAmount}
+          freight={freight}
+        />
+      </div>
     </Box>
   );
 };
