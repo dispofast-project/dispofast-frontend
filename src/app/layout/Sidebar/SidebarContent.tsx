@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import dispofastLogo from "@/assets/dispofast-logo.png";
+import dispofastLogo from "../../../assets/dispofast-logo.png";
 
 interface NavItems {
     label: string;
