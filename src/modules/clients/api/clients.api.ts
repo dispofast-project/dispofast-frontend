@@ -25,17 +25,25 @@ export const getClientByIdService = async (id: string): Promise<ClientResponse> 
 };
 
 export const createClientService = async (
-  payload: CreateClientRequestDTO
+  payload: CreateClientRequestDTO,
+  documents?: File[]
 ): Promise<ClientResponse> => {
-  const response = await apiClient.post<ClientResponse>("/clients", payload);
+  const form = new FormData();
+  form.append("clientData", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+  documents?.forEach((file) => form.append("documents", file));
+  const response = await apiClient.post<ClientResponse>("/clients", form);
   return response.data;
 };
 
 export const updateClientService = async (
   id: string,
-  payload: CreateIndividualRequestDTO | CreateOrganizationRequestDTO
+  payload: CreateIndividualRequestDTO | CreateOrganizationRequestDTO,
+  documents?: File[]
 ): Promise<ClientResponse> => {
-  const response = await apiClient.put<ClientResponse>(`/clients/${id}`, payload);
+  const form = new FormData();
+  form.append("clientData", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+  documents?.forEach((file) => form.append("documents", file));
+  const response = await apiClient.put<ClientResponse>(`/clients/${id}`, form);
   return response.data;
 };
 
