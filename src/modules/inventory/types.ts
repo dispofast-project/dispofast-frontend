@@ -1,7 +1,7 @@
 export interface InventoryTableItem {
   id: string;
   productName: string;
-  productReference: string;
+  sku: string;
   category: string;
   taxFree: boolean;
   quantityAvailable: number;

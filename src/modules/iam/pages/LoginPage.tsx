@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import type { LoginFormData } from "../types";
 import { Box } from "@mui/material";
 import LoginForm from "../components/LoginForm/LoginForm";
-import dispofastLogo from "../../../assets/dispofast-logo.png";
+import dispofastLogo from "../../../assets/dispofast-logo-white.png";
 import heroLoginImage from "../../../assets/hero-login-page.jpg";
 import { loginService } from "../api/auth.service";
 import { useAuth } from "../hooks/useAuth";
@@ -58,7 +58,7 @@ const LoginPage = () => {
             <Box className="relative z-10 w-full min-h-screen flex items-center">
                 <Box className="w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-12 py-12 flex flex-col lg:flex-row items-center lg:items-start justify-between gap-10">
                     <Box className="w-full lg:w-1/2 text-white">
-                        <img src={dispofastLogo} alt="dispofast logo" className="w-38 h-auto mb-8" />
+                        <img src={dispofastLogo} alt="dispofast logo" className="w-60 h-auto mb-8" />
                         <h1 className="text-3xl sm:text-4xl font-semibold leading-tight">
                             Venta rápida, eficiente y segura.
                         </h1>
