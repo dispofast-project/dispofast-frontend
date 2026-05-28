@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Search, Package } from "lucide-react";
 import { Button } from "../Button/Button";
-import { getPriceListItems } from "../../../modules/pricelist/api/pricelist.api";
+import { getProductsCatalog } from "../../../modules/pricelist/api/pricelist.api";
 import type { PriceListProductItem } from "../../../modules/pricelist/api/pricelist.api";
 
 export interface LineItemResult {
@@ -64,9 +64,9 @@ const AddLineItemDialog = ({
     }
     setIsLoading(true);
     setError(null);
-    getPriceListItems(priceListId)
+    getProductsCatalog(priceListId)
       .then((items) => setProducts(items))
-      .catch(() => setError("No se pudieron cargar los productos de la lista de precios."))
+      .catch(() => setError("No se pudieron cargar los productos."))
       .finally(() => setIsLoading(false));
   }, [open, priceListId]);
 
@@ -98,7 +98,7 @@ const AddLineItemDialog = ({
   const handleSelectProduct = (product: PriceListProductItem) => {
     setSelectedProduct(product);
     setError(null);
-    setUnitPrice(String(product.unitPrice));
+    setUnitPrice(product.unitPrice != null ? String(product.unitPrice) : "");
   };
 
   const qty = parseFloat(quantity) || 0;
@@ -172,7 +172,7 @@ const AddLineItemDialog = ({
             ) : filteredProducts.length === 0 ? (
               <Box className="flex items-center justify-center py-10">
                 <Typography variant="body2" color="textSecondary">
-                  No hay productos en esta lista de precios
+                  No hay productos en el inventario
                 </Typography>
               </Box>
             ) : (
@@ -201,9 +201,15 @@ const AddLineItemDialog = ({
                       </Box>
                     </Box>
                     <Box className="text-right">
-                      <Typography variant="caption" className="text-dispofast-primary font-semibold">
-                        ${product.unitPrice.toLocaleString("es-CO")}
-                      </Typography>
+                      {product.unitPrice != null ? (
+                        <Typography variant="caption" className="text-dispofast-primary font-semibold">
+                          ${product.unitPrice.toLocaleString("es-CO")}
+                        </Typography>
+                      ) : (
+                        <Typography variant="caption" className="text-orange-500 font-semibold">
+                          Sin precio
+                        </Typography>
+                      )}
                       {product.quantityAvailable !== null && (
                         <Typography variant="caption" className="text-gray-400 block">
                           Stock: {product.quantityAvailable}
@@ -247,13 +253,19 @@ const AddLineItemDialog = ({
                   label="Valor unitario"
                   type="number"
                   value={unitPrice}
-                  onChange={priceEditable ? (e) => setUnitPrice(e.target.value) : undefined}
-                  disabled={!priceEditable}
+                  onChange={priceEditable || selectedProduct?.unitPrice == null ? (e) => setUnitPrice(e.target.value) : undefined}
+                  disabled={!priceEditable && selectedProduct?.unitPrice != null}
                   slotProps={{
                     htmlInput: { min: 0, step: 0.01 },
                     input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
                   }}
-                  helperText={!priceEditable ? "Definido por la lista de precios" : undefined}
+                  helperText={
+                    !priceEditable && selectedProduct?.unitPrice != null
+                      ? "Definido por la lista de precios"
+                      : selectedProduct?.unitPrice == null
+                      ? "Producto sin precio en lista — ingresa el precio"
+                      : undefined
+                  }
                   required
                 />
               </Box>

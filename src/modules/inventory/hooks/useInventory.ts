@@ -20,7 +20,7 @@ export const useInventory = () => {
       const mapped: InventoryTableItem[] = response.content.map((item) => ({
         id: item.productId,
         productName: item.productName,
-        productReference: item.productReference,
+        sku: item.sku,
         category: item.category,
         taxFree: item.taxFree,
         quantityAvailable: item.quantityAvailable,
@@ -46,7 +46,7 @@ export const useInventory = () => {
       const matchesSearch =
         !search ||
         item.productName.toLowerCase().includes(search.toLowerCase()) ||
-        item.productReference.toLowerCase().includes(search.toLowerCase());
+        item.sku.toLowerCase().includes(search.toLowerCase());
       const matchesState = !stateFilter || item.state === stateFilter;
       return matchesSearch && matchesState;
     });
