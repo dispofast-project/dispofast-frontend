@@ -118,8 +118,9 @@ const PriceListItemsDrawer = ({ open, priceList, onClose }: PriceListItemsDrawer
                   </tr>
                 ) : (
                   filtered.map((item, i) => {
-                    const iva = item.taxFree ? 0 : item.unitPrice * 0.19;
-                    const total = item.unitPrice + iva;
+                    const price = item.unitPrice ?? 0;
+                    const iva = item.taxFree ? 0 : price * 0.19;
+                    const total = price + iva;
                     return (
                       <tr
                         key={item.productId}
@@ -132,7 +133,7 @@ const PriceListItemsDrawer = ({ open, priceList, onClose }: PriceListItemsDrawer
                           {item.productName}
                         </td>
                         <td className="px-4 py-2.5 text-xs text-gray-700 whitespace-nowrap">
-                          {formatCOP(item.unitPrice)}
+                          {item.unitPrice != null ? formatCOP(price) : "—"}
                         </td>
                         <td className="px-4 py-2.5 text-xs text-gray-700 whitespace-nowrap">
                           {item.taxFree ? "Exento" : formatCOP(iva)}

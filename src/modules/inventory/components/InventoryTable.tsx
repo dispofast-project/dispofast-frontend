@@ -26,7 +26,7 @@ const   InventoryTable = ({
   const headers = [
     "Estado",
     "Producto",
-    "SKU / REF.",
+    "SKU.",
     "Categoría",
     "Disponible",
     "Reservado",
@@ -41,8 +41,8 @@ const   InventoryTable = ({
     <Box key="producto">
       <p className="text-sm font-medium text-gray-800">{item.productName}</p>
     </Box>,
-    <span key="ref" className="text-xs text-gray-500 font-mono">
-      {item.productReference}
+    <span key="sku" className="text-xs text-gray-500 font-mono">
+      {item.sku}
     </span>,
     <span key="category" className="text-xs font-semibold uppercase">
       {item.category}

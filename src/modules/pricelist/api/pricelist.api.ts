@@ -11,7 +11,7 @@ export interface PriceListProductItem {
   productReference: string;
   productName: string;
   taxFree: boolean;
-  unitPrice: number;
+  unitPrice: number | null;
   quantityAvailable: number | null;
 }
 
@@ -31,6 +31,11 @@ export const getAllPriceLists = async (): Promise<PriceListItem[]> => {
 
 export const getPriceListItems = async (priceListId: string): Promise<PriceListProductItem[]> => {
   const { data } = await apiClient.get<PriceListProductItem[]>(`/price-lists/${priceListId}/items`);
+  return data;
+};
+
+export const getProductsCatalog = async (priceListId: string): Promise<PriceListProductItem[]> => {
+  const { data } = await apiClient.get<PriceListProductItem[]>(`/price-lists/${priceListId}/catalog`);
   return data;
 };
 
