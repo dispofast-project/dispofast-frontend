@@ -34,7 +34,7 @@ export const ProductAutocomplete = ({
   const filtered = inputValue.trim()
     ? options.filter((o) =>
         o.productName.toLowerCase().includes(inputValue.toLowerCase()) ||
-        o.productReference.toLowerCase().includes(inputValue.toLowerCase()),
+        o.sku.toLowerCase().includes(inputValue.toLowerCase()),
       )
     : options;
 
@@ -43,7 +43,7 @@ export const ProductAutocomplete = ({
       size="small"
       fullWidth
       options={filtered}
-      getOptionLabel={(option) => `${option.productReference} - ${option.productName}`}
+      getOptionLabel={(option) => `${option.sku} - ${option.productName}`}
       filterOptions={(x) => x}
       autoComplete
       includeInputInList
@@ -80,7 +80,7 @@ export const ProductAutocomplete = ({
           <Box>
             <Typography variant="body2">{option.productName}</Typography>
             <Typography variant="caption" color="text.secondary">
-              {option.productReference}
+              {option.sku}
             </Typography>
           </Box>
         </li>
