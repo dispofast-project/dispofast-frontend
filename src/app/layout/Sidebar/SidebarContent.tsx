@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import dispofastLogo from "@/assets/dispofast-logo.png";
 
 interface NavItems {
     label: string;
@@ -39,7 +40,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({
             {/* Header con logo y botón cerrar */}
             <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
                 <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
-                    <img src="src\assets\dispofast-logo.png" alt="Dispofast logo" className="w-15 h-15"/>
+                    <img src={dispofastLogo} alt="Dispofast logo" className="w-15 h-15"/>
                     {!isCollapsed && <span className="text-lg font-semibold">DISPOCOL</span>}
                 </div>
 
