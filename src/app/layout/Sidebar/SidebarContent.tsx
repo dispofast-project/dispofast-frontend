@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import dispofastLogo from "../../../assets/dispofast-logo.png";
+import dispofastLogo from "../../../assets/dispofast-logo-blue.png";
+import dispofastLogoCollapsed from "../../../assets/dispofast-logo.png";
 
 interface NavItems {
     label: string;
@@ -38,10 +39,13 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({
             } lg:translate-x-0 transition-all duration-300 ease-in-out z-50 flex flex-col`}
         >
             {/* Header con logo y botón cerrar */}
-            <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-                <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
-                    <img src={dispofastLogo} alt="Dispofast logo" className="w-15 h-15"/>
-                    {!isCollapsed && <span className="text-lg font-semibold">DISPOCOL</span>}
+            <div className="flex items-center justify-between px-4 py-0 border-b border-sidebar-border h-18 shrink-0 overflow-hidden">
+                <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full h-18" : "w-full justify-center"}`}>
+                    <img 
+                        src={isCollapsed ? dispofastLogoCollapsed : dispofastLogo} 
+                        alt="Dispofast logo" 
+                        className={`object-contain transition-all duration-300 ${isCollapsed ? "w-8 h-8 scale-[2]" : "w-56 h-auto scale-[1.8] origin-center"}`}
+                    />
                 </div>
 
                 {/* Botón cerrar solo visible en móvil */}

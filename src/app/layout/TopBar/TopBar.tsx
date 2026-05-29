@@ -1,5 +1,5 @@
-import { Search, Bell, User } from "lucide-react";
-import type React from "react";
+import { Search, Bell, User, LogOut } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuthStore } from "../../../modules/iam/auth.store";
 
 interface TopBarProps {
@@ -15,12 +15,27 @@ const formatRole = (roles: string[] | string | undefined): string => {
 
 const TopBar: React.FC<TopBarProps> = ({ notificationCount = 0 }) => {
     const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
+
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+                setIsProfileOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const username = user?.name ?? "";
     const role = formatRole(user?.role ?? []);
 
     return (
-        <header className="h-16 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+        <header className="h-18 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
             {/* Search */}
             <div className="flex-1 max-w-lg mr-4">
                 <div className="relative hidden sm:flex items-center">
@@ -60,15 +75,36 @@ const TopBar: React.FC<TopBarProps> = ({ notificationCount = 0 }) => {
                 <div className="hidden sm:block w-px h-6 bg-gray-200 mx-2" />
 
                 {/* User profile */}
-                <button className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="hidden sm:block text-right">
-                        <p className="text-sm font-semibold text-gray-900 leading-tight">{username}</p>
-                        <p className="text-xs text-gray-500 leading-tight">{role}</p>
-                    </div>
-                    <div className="w-9 h-9 rounded-full bg-[#4676B8] flex items-center justify-center shrink-0">
-                        <User className="w-5 h-5 text-white" />
-                    </div>
-                </button>
+                <div className="relative" ref={profileRef}>
+                    <button 
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                        <div className="hidden sm:block text-right">
+                            <p className="text-sm font-semibold text-gray-900 leading-tight">{username}</p>
+                            <p className="text-xs text-gray-500 leading-tight">{role}</p>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-[#4676B8] flex items-center justify-center shrink-0">
+                            <User className="w-5 h-5 text-white" />
+                        </div>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isProfileOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                            <button
+                                onClick={() => {
+                                    setIsProfileOpen(false);
+                                    logout();
+                                }}
+                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Cerrar sesión
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </header>
     );
