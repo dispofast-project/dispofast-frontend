@@ -16,12 +16,8 @@ export const getAllInventoryProducts = async (
   page = 0,
   size = 100,
 ): Promise<PagedResponse<InventoryItem>> => {
-  try {
-    const { data } = await apiClient.get("/inventory", {
-      params: { page, size, sort: 'lastUpdated,desc' },
-    });
-    return data;
-  } catch {
-    throw new Error("Error al cargar los productos");
-  }
+  const { data } = await apiClient.get("/inventory", {
+    params: { page, size, sort: "lastUpdated,desc" },
+  });
+  return data;
 };

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { BASE_URL } from "../utils/constants";
 import { useAuthStore } from "../../modules/iam/auth.store";
 
@@ -22,6 +22,18 @@ apiClient.interceptors.request.use(
     (error) => {
         return Promise.reject(error);
     }
-)
+);
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+        if (!error.response) {
+            return Promise.reject(
+                new Error("No se pudo conectar al servidor. Verifica tu conexión a internet.")
+            );
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default apiClient;

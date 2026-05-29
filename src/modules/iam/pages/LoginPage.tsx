@@ -28,20 +28,14 @@ const LoginPage = () => {
             let message = 'Credenciales inválidas. Por favor, intente de nuevo.';
 
             if (error instanceof Error && error.message === 'TOKEN_MISSING') {
-                message =
-                'La respuesta del servidor no incluyó un token de autenticación.';
+                message = 'La respuesta del servidor no incluyó un token de autenticación.';
             } else if (isAxiosError(error)) {
-                const payload = error.response?.data as
-                | { message?: string }
-                | undefined;
-                const serverMessage =
-                typeof payload?.message === 'string' ? payload.message : undefined;
+                const serverMessage = (error.response?.data as { message?: string })?.message;
                 if (serverMessage) {
-                message = serverMessage;
-                } else if (!error.response) {
-                message =
-                    'No fue posible contactar al servidor. Verifique su conexión.';
+                    message = serverMessage;
                 }
+            } else if (error instanceof Error && error.message) {
+                message = error.message;
             }
 
             showNotification(message, "error")
