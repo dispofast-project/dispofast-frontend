@@ -15,7 +15,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import { Eye, Trash2 } from "lucide-react";
 import type { JSX } from "react";
 import type { OrderState, SalesOrder } from "../../types";
 import { ORDER_STATUS_CONFIG } from "../../config/statusConfig";
@@ -25,7 +24,10 @@ import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import { Button } from "../../../../shared/components/Button/Button";
 import FilterSearchBar from "../../../../shared/components/SearchBar/SearchBar";
 import type { FilterConfig, FilterState } from "../../../../shared/components/SearchBar/types";
-import { deleteOrder } from "../../api/order.service";
+import { deleteOrder, attachInvoice } from "../../api/order.service";
+import AttachInvoiceDialog from "../AttachInvoiceDialog/AttachInvoiceDialog";
+import { Eye, Paperclip, Trash2 } from "lucide-react";
+import { ListItemIcon } from "@mui/material";
 
 const filterConfigs: FilterConfig[] = [
   {
@@ -72,8 +74,8 @@ const HEADERS = [
   "# Factura",
   "Ciudad",
   "Fecha",
-  "Acciones",
 ];
+
 
 const OrdersContent = (): JSX.Element => {
   const navigate = useNavigate();
@@ -94,6 +96,12 @@ const OrdersContent = (): JSX.Element => {
   const [orderToDelete, setOrderToDelete] = useState<SalesOrder | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const [invoiceOrder, setInvoiceOrder] = useState<SalesOrder | null>(null);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [isUploadingInvoice, setIsUploadingInvoice] = useState(false);
+  const [uploadInvoiceError, setUploadInvoiceError] = useState<string | null>(null);
 
   const handleFilterChange = useCallback(
     (state: FilterState) => {
@@ -129,6 +137,48 @@ const OrdersContent = (): JSX.Element => {
     setDeleteError(null);
   };
 
+  const handleCloseInvoiceDialog = () => {
+    if (isUploadingInvoice) return;
+    setInvoiceOrder(null);
+    setInvoiceNumber("");
+    setInvoiceFile(null);
+    setUploadInvoiceError(null);
+  };
+
+  const handleUploadInvoice = async () => {
+    if (!invoiceOrder || !invoiceNumber.trim() || !invoiceFile) return;
+    setIsUploadingInvoice(true);
+    setUploadInvoiceError(null);
+    try {
+      await attachInvoice(invoiceOrder.id, { invoiceNumber, file: invoiceFile });
+      setInvoiceOrder(null);
+      setInvoiceNumber("");
+      setInvoiceFile(null);
+      handleRefresh();
+    } catch (err) {
+      setUploadInvoiceError(err instanceof Error ? err.message : "Error al adjuntar factura.");
+    } finally {
+      setIsUploadingInvoice(false);
+    }
+  };
+
+  const renderOptionsMenu = (item: SalesOrder, closeMenu: () => void) => (
+    <>
+      <MenuItem onClick={() => { closeMenu(); navigate(`/ordenes/${item.id}`); }}>
+        <ListItemIcon><Eye size={16} /></ListItemIcon>
+        Ver detalles
+      </MenuItem>
+      <MenuItem onClick={() => { closeMenu(); setInvoiceOrder(item); }}>
+        <ListItemIcon><Paperclip size={16} /></ListItemIcon>
+        Adjuntar factura
+      </MenuItem>
+      <MenuItem onClick={() => { closeMenu(); setOrderToDelete(item); }} sx={{ color: "error.main" }}>
+        <ListItemIcon sx={{ color: "error.main" }}><Trash2 size={16} /></ListItemIcon>
+        Eliminar orden
+      </MenuItem>
+    </>
+  );
+
   const renderOrderRow = useCallback(
     (item: SalesOrder): (string | JSX.Element)[] => [
       <StatusBadge key="state" status={item.state} configMap={ORDER_STATUS_CONFIG} />,
@@ -140,20 +190,6 @@ const OrdersContent = (): JSX.Element => {
       </span>,
       item.shipmentCityName,
       formatDate(item.orderDate),
-      <Box className="flex items-center space-x-3" key="actions">
-        <Eye
-          key="view"
-          className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600"
-          onClick={(e) => { e.stopPropagation(); navigate(`/ordenes/${item.id}`); }}
-        />
-        {item.state === "PENDING" && (
-          <Trash2
-            key="delete"
-            className="w-4 h-4 text-gray-500 cursor-pointer hover:text-red-600"
-            onClick={(e) => { e.stopPropagation(); setOrderToDelete(item); }}
-          />
-        )}
-      </Box>
     ],
     [navigate]
   );
@@ -203,8 +239,22 @@ const OrdersContent = (): JSX.Element => {
           onPageChange={handlePageChange}
           itemsPerPage={pageSize}
           totalItems={totalElements}
+          onRowClick={(item) => navigate(`/ordenes/${item.id}`)}
+          optionsMenu={renderOptionsMenu}
         />
       </Box>
+
+      <AttachInvoiceDialog
+        open={!!invoiceOrder}
+        onClose={handleCloseInvoiceDialog}
+        onSubmit={handleUploadInvoice}
+        invoiceNumber={invoiceNumber}
+        onInvoiceNumberChange={setInvoiceNumber}
+        invoiceFile={invoiceFile}
+        onInvoiceFileChange={setInvoiceFile}
+        isLoading={isUploadingInvoice}
+        error={uploadInvoiceError}
+      />
 
       <Dialog open={!!orderToDelete} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
         <DialogTitle>Eliminar orden</DialogTitle>

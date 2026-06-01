@@ -76,7 +76,7 @@ const CarteraPage = (): JSX.Element => {
     <Box className="flex flex-col gap-6 pb-8">
       {/* ── Header ────────────────────────────────────────────────────────────── */}
       <Box className="flex items-start justify-between gap-3">
-                <CustomTitle mainTitle="Cartera" description="Gestiona las cuentas por cobrar" />
+        <CustomTitle mainTitle="Cartera" description="Gestiona las cuentas por cobrar" />
 
         <Button variant="secondary" className="flex items-center gap-2 text-sm">
           <Download className="w-4 h-4" />
@@ -182,7 +182,6 @@ const CarteraPage = (): JSX.Element => {
           "Valor",
           "Factura",
           "Fecha Factura",
-          "Vencimiento",
           "Días Cartera",
           "Ciudad",
         ]}

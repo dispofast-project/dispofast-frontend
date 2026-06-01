@@ -43,10 +43,10 @@ export const useCartera = () => {
         const pending = all.filter((e) => e.state === "PENDING");
         const totalCartera = pending.reduce((s, e) => s + (e.value ?? 0), 0);
         const carteraVencida = pending
-          .filter((e) => e.diasVencimiento > 0)
+          .filter((e) => e.diasVencimiento <= 0)
           .reduce((s, e) => s + (e.value ?? 0), 0);
         const alDia = pending
-          .filter((e) => e.diasVencimiento === 0)
+          .filter((e) => e.diasVencimiento > 0)
           .reduce((s, e) => s + (e.value ?? 0), 0);
 
         setStats({ totalCartera, carteraVencida, alDia });
