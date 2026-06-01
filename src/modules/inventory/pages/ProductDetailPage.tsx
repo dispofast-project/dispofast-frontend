@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../../shared/components/Button/Button";
 import CustomTitle from "../../../shared/components/Title/Title";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
@@ -9,6 +9,7 @@ import ProductInventorySection from "../components/form/ProductInventorySection"
 import ProductSeoSection from "../components/form/ProductSeoSection";
 import { useEditProduct } from "../hooks/useEditProduct";
 import { PRODUCT_STATUS_CONFIG } from "../config/statusConfig";
+import { BackButton } from "../../../shared/components/BackButton/BackButton";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,8 +24,9 @@ const ProductDetailPage = () => {
     startEditing,
     cancelEditing,
     onSubmit,
-    onBack,
   } = useEditProduct(id!);
+
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -42,19 +44,19 @@ const ProductDetailPage = () => {
     );
   }
 
-  const breadcrumbs = [
-    { label: "Inventarios", onClick: onBack },
-    { label: product.name },
-  ];
 
   return (
-    <Box className="flex flex-col gap-6 pb-8">
+    <Box className="flex flex-col gap-5 pb-8 justify-start">
+
       <Box className="grid grid-cols-2 items-center">
+
         <Box className="flex items-center gap-4">
-          <CustomTitle breadcrumbs={breadcrumbs} />
+          <BackButton onClick={() => navigate("/inventario")} />
+          <CustomTitle  mainTitle={product.name} />
           <StatusBadge status={product.state} configMap={PRODUCT_STATUS_CONFIG} />
         </Box>
         <Box className="flex items-center justify-end gap-3">
+          
           {isEditing ? (
             <>
               <Button variant="secondary" onClick={cancelEditing} disabled={isSubmitting}>

@@ -1,13 +1,13 @@
-import { Box, Typography } from "@mui/material";
-import { ArrowLeft } from "lucide-react";
+import { Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../../shared/components/Button/Button";
 import { useCreateOrder } from "../hooks/useCreateOrder";
 import OrderClientCard from "../components/OrderClientCard/OrderClientCard";
 import OrderShippingCard from "../components/OrderShippingCard/OrderShippingCard";
 import OrderPaymentTermsCard from "../components/OrderPaymentTermsCard/OrderPaymentTermsCard";
 import OrderItemsCard from "../components/OrderItemsCard/OrderItemsCard";
 import OrderSummaryPanel from "../components/OrderSummaryPanel/OrderSummaryPanel";
+import { BackButton } from "../../../shared/components/BackButton/BackButton";
+import CustomTitle from "../../../shared/components/Title/Title";
 
 const CreateOrderPage = () => {
   const navigate = useNavigate();
@@ -16,12 +16,9 @@ const CreateOrderPage = () => {
   return (
     <Box className="flex flex-col gap-6 pb-10">
       {/* Header */}
-      <Box>
-        <Button variant="tertiary" onClick={() => navigate("/ordenes")} className="flex items-center gap-1.5 text-sm text-gray-500 mb-3">
-          <ArrowLeft className="w-4 h-4" /> Volver
-        </Button>
-        <Typography variant="h5" className="font-bold text-gray-800">Nueva Orden de Compra</Typography>
-        <Typography variant="body2" color="text.secondary">Completa los datos para registrar una nueva orden</Typography>
+      <Box className="flex items-center gap-5">
+        <BackButton onClick={() => navigate("/ordenes")} />
+        <CustomTitle mainTitle="Nueva Orden de Compra" description="Completa los datos para registrar una nueva orden" />
       </Box>
 
       <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">

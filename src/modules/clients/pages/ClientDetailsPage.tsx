@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 import { LegalEntityType } from "../types";
 import { useClientDetails } from "../hooks/useClientDetails";
@@ -9,6 +8,7 @@ import IndividualFormSections from "../components/detail/IndividualFormSections"
 import OrganizationFormSections from "../components/detail/OrganizationFormSections";
 import CommercialSidebar from "../components/detail/CommercialSidebar";
 import LegalDocumentsSection from "../components/detail/LegalDocumentsSection";
+import { BackButton } from "../../../shared/components/BackButton/BackButton";
 
 const ClientDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,14 +45,7 @@ const ClientDetailsPage = () => {
   if (error || !client || !formData) {
     return (
       <Box className="p-6">
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/clientes")}
-          className="mb-6"
-          sx={{ textTransform: "none" }}
-        >
-          Volver a Clientes
-        </Button>
+        <BackButton onClick={() => navigate("/clientes")} />
         <Box className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg text-center shadow-sm">
           <Typography variant="h6" className="font-semibold mb-2">
             Error
