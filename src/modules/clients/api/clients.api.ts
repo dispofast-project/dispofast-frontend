@@ -25,20 +25,9 @@ export const getClientByIdService = async (id: string): Promise<ClientResponse> 
 };
 
 export const createClientService = async (
-  payload: CreateClientRequestDTO,
-  documents?: File[]
+  payload: CreateClientRequestDTO
 ): Promise<ClientResponse> => {
-  const form = new FormData();
-  form.append(
-    "clientData",
-    new Blob([JSON.stringify(payload)], { type: "application/json" })
-  );
-  if (documents && documents.length > 0) {
-    for (const file of documents) {
-      form.append("documents", file);
-    }
-  }
-  const response = await apiClient.post<ClientResponse>("/clients", form);
+  const response = await apiClient.post<ClientResponse>("/clients", payload);
   return response.data;
 };
 

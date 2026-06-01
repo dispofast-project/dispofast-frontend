@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { createClientService } from "../api/clients.api";
+import { createClientService, uploadLegalDocumentService } from "../api/clients.api";
 import { LegalEntityType } from "../types";
 import type { CreateIndividualRequestDTO, CreateOrganizationRequestDTO } from "../types/create-client.dto";
 import { useNotificationStore } from "../../../shared/store";
@@ -114,6 +114,8 @@ const CreateClientPage = () => {
         defaultAdvisorId: formData.defaultAdvisorId || undefined,
       };
 
+      let createdClientId: string;
+
       if (entityType === LegalEntityType.NATURAL) {
         const payload: CreateIndividualRequestDTO = {
           ...basePayload,
@@ -126,7 +128,8 @@ const CreateClientPage = () => {
           representativePhone: cleanValue(formData.representativePhone),
           representativeJobTitle: cleanValue(formData.representativeJobTitle),
         };
-        await createClientService(payload);
+        const created = await createClientService(payload);
+        createdClientId = created.id;
       } else {
         const payload: CreateOrganizationRequestDTO = {
           ...basePayload,
@@ -138,7 +141,11 @@ const CreateClientPage = () => {
           representativeEmail: formData.representativeEmail,
           representativePhone: formData.representativePhone,
         };
-        await createClientService(payload, documents);
+        const created = await createClientService(payload);
+        createdClientId = created.id;
+        for (const file of documents) {
+          await uploadLegalDocumentService(createdClientId, file);
+        }
       }
 
       showNotification("Cliente creado exitosamente", "success");
