@@ -21,11 +21,11 @@ const OrderItemsTable = ({ items }: OrderItemsTableProps) => {
         <h3 className="text-sm font-semibold text-gray-800">Productos</h3>
       </Box>
       <CustomTable<SalesOrderItem>
-        headers={["Producto", "Ref.", "IVA", "Cantidad", "Precio Unit.", "Descuento", "Total Línea"]}
+        headers={["Producto", "SKU", "IVA", "Cantidad", "Precio Unit.", "Descuento", "Total Línea"]}
         data={items}
         renderRow={(item): (string | JSX.Element)[] => [
           item.productName,
-          item.productReference ?? "-",
+          item.productSku ?? "-",
           item.taxFree ? "No aplica" : "19%",
           String(item.quantity),
           formatCurrency(item.unitPrice),
