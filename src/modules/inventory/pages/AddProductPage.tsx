@@ -1,25 +1,19 @@
 import { Box } from "@mui/material";
 import { Button } from "../../../shared/components/Button/Button";
-import CustomTitle from "../../../shared/components/Title/Title";
 import { useAddProduct } from "../hooks/useAddProduct";
 import ProductInfoSection from "../components/form/ProductInfoSection";
 import ProductCategoriesSection from "../components/form/ProductCategoriesSection";
 import ProductInventorySection from "../components/form/ProductInventorySection";
 import ProductSeoSection from "../components/form/ProductSeoSection";
+import CustomTitle from "../../../shared/components/Title/Title";
 
 const AddProductPage = () => {
   const { form, categories, isSubmitting, submitError, onSubmit, onDiscard } =
     useAddProduct();
-
-  const breadcrumbs = [
-    { label: "Inventarios", onClick: onDiscard },
-    { label: "Nuevo producto" },
-  ];
-
   return (
     <Box className="flex flex-col gap-6 pb-8">
       <Box className="grid grid-cols-2 items-center">
-        <CustomTitle breadcrumbs={breadcrumbs} />
+        <CustomTitle mainTitle="Agregar producto" description="Añadir un nuevo producto al inventario"/>
         <Box className="flex items-center justify-end gap-3">
           <Button variant="secondary" onClick={onDiscard} disabled={isSubmitting}>
             Descartar

@@ -1,8 +1,8 @@
-import { Box, Typography, Button, IconButton, Avatar, FormControlLabel, Switch, CircularProgress } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Typography, Button, Avatar, FormControlLabel, Switch, CircularProgress } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router-dom";
 import type { ClientPreview } from "../types";
+import { BackButton } from "../../../shared/components/BackButton/BackButton";
 
 const getInitials = (name: string) => {
   if (!name) return "";
@@ -35,13 +35,8 @@ const ClientDetailsHeader = ({
   return (
     <Box className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
       <Box className="flex items-center gap-4">
-        <IconButton
-          onClick={() => navigate("/clientes")}
-          className="bg-white shadow-sm hover:bg-gray-50 border border-gray-200"
-          size="small"
-        >
-          <ArrowBackIcon fontSize="small" />
-        </IconButton>
+         <BackButton onClick={() => navigate("/clientes")} />
+
 
         <Avatar
           sx={{

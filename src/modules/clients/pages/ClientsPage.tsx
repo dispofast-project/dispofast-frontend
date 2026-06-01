@@ -7,6 +7,7 @@ import type { ClientPreview } from "../types";
 import ClientsTable from "../components/ClientsTable";
 import type { FilterConfig, FilterState } from "../../../shared/components/SearchBar/types";
 import FilterSearchBar from "../../../shared/components/SearchBar/SearchBar";
+import CustomTitle from "../../../shared/components/Title/Title";
 
 const SCOPE_TO_API_KEY: Record<string, string> = {
   name: "text", // The backend takes 'text' for searching generic text which often targets names/ids
@@ -83,14 +84,7 @@ const ClientsPage = () => {
   return (
     <Box className="p-6">
       <Box className="flex justify-between items-center mb-6">
-        <Box>
-          <Typography variant="h4" className="font-bold text-gray-800">
-            Clientes
-          </Typography>
-          <Typography variant="body2" className="text-gray-500 mt-1">
-            Gestiona el portafolio de clientes y prospectos
-          </Typography>
-        </Box>
+        <CustomTitle mainTitle="Clientes" description="Gestiona el portafolio de clientes y prospectos" />
         <Button
           variant="contained"
           startIcon={<AddIcon />}

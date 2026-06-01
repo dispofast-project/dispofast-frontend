@@ -12,6 +12,7 @@ import PriceListTable from "../components/PriceListTable";
 import CreatePriceListModal from "../components/CreatePriceListModal";
 import PriceListItemsDrawer from "../components/PriceListItemsDrawer";
 import { Button } from "../../../shared/components/Button/Button";
+import CustomTitle from "../../../shared/components/Title/Title";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -95,9 +96,8 @@ const PriceListPage = () => {
   return (
     <Box className="p-6">
       <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" className="font-bold text-gray-800">
-          Lista de precios
-        </Typography>
+      <CustomTitle mainTitle="Lista de precios" description="Gestiona las listas de precios de los productos" />
+
         <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
           <Plus size={16} className="mr-1" />
           Crear

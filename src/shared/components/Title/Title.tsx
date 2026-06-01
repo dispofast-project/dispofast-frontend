@@ -1,3 +1,4 @@
+import { Box, Typography } from "@mui/material";
 import type React from "react";
 
 export interface Breadcrumb{
@@ -6,33 +7,20 @@ export interface Breadcrumb{
 }
 
 interface TitleProps {
-    breadcrumbs?: Breadcrumb[];
+    mainTitle?: string;
+    description?: string;
 }
 
-const CustomTitle: React.FC<TitleProps> = ({ breadcrumbs }) => {
+const CustomTitle: React.FC<TitleProps> = ({ mainTitle, description }) => {
     return (
-        <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center space-x-2 text-sm text-gray-500">
-                {breadcrumbs?.map((breadcrumb, index) => (
-                    <li key={index} className="flex items-center">
-                        {index > 0 && (
-                            <span className="mx-2 text-color-gray1-500">
-                                {'>'}
-                            </span>
-                        )}
-                        <span className={`text-3xl font-bold text-gray-800 mb-4 ${
-                            breadcrumb.onClick 
-                            ? "cursor-pointer text-dispocol-main-color hover:underline" 
-                            : "text-black"
-                        }`}
-                            onClick={breadcrumb.onClick}
-                        >
-                            {breadcrumb.label}
-                        </span>
-                    </li>
-                ))}
-            </ol>
-        </nav>
+        <Box>
+          <Typography variant="h4" className="font-bold text-gray-800">
+            {mainTitle}
+          </Typography>
+          <Typography variant="body2" className="text-gray-500 mt-1">
+            {description}
+          </Typography>
+        </Box>
     );
 }
 
