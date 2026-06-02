@@ -11,9 +11,10 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 interface LoginFormProps {
     onSubmit: (data: LoginFormData) => void;
+    isLoading?: boolean;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) => {
     
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -69,9 +70,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     {...register("password")}
                 />
 
-                <Button 
+                <Button
                     type="submit"
-                    disabled={!isValid}
+                    disabled={!isValid || isLoading}
+                    isLoading={isLoading}
                     data-testid="submit-button"
                     className="w-full"
                 >

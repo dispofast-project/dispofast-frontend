@@ -1,11 +1,11 @@
 import type { JSX } from "react";
-import { Box } from "@mui/material";
+import { Box, ListItemIcon, MenuItem } from "@mui/material";
+import { Eye } from "lucide-react";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
 import StockBar from "./StockBar";
 import { INVENTORY_STATUS_CONFIG } from "../config/statusConfig";
 import type { InventoryTableItem } from "../types";
-import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface InventoryTableProps {
@@ -31,7 +31,6 @@ const   InventoryTable = ({
     "Disponible",
     "Reservado",
     "Stock",
-    "Acciones"
   ];
 
   const navigate = useNavigate();
@@ -65,14 +64,14 @@ const   InventoryTable = ({
       available={item.quantityAvailable}
       reserved={item.quantityReserved}
     />,
-    <Box className="flex items-center space-x-3 justify-content" key="actions">
-      <Eye
-        key="view"
-        className="w-4 h-4 text-gray-500 cursor-pointer hover:text-dispofast-primary"
-        onClick={(e) => { e.stopPropagation(); navigate(`/inventario/producto/${item.id}`); }}
-      />
-    </Box>
   ];
+
+  const optionsMenu = (item: InventoryTableItem, closeMenu: () => void) => (
+    <MenuItem onClick={() => { closeMenu(); navigate(`/inventario/producto/${item.id}`); }}>
+      <ListItemIcon><Eye size={16} /></ListItemIcon>
+      Ver producto
+    </MenuItem>
+  );
 
   return (
     <CustomTable
@@ -83,6 +82,8 @@ const   InventoryTable = ({
       itemsPerPage={itemsPerPage}
       totalItems={totalItems}
       onPageChange={onPageChange}
+      onRowClick={(item) => navigate(`/inventario/producto/${item.id}`)}
+      optionsMenu={optionsMenu}
     />
   );
 };

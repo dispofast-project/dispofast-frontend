@@ -21,6 +21,7 @@ import { Button } from "../../../shared/components/Button/Button";
 import { useCartera } from "../hooks/useCartera";
 import { CARTERA_STATUS_CONFIG } from "../config/statusConfig";
 import { type ArEntry, type ArEntryState } from "../types";
+import CustomTitle from "../../../shared/components/Title/Title";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -75,12 +76,8 @@ const CarteraPage = (): JSX.Element => {
     <Box className="flex flex-col gap-6 pb-8">
       {/* ── Header ────────────────────────────────────────────────────────────── */}
       <Box className="flex items-start justify-between gap-3">
-        <Box>
-          <h1 className="text-2xl font-bold text-gray-800">Cartera</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Gestiona las cuentas por cobrar
-          </p>
-        </Box>
+        <CustomTitle mainTitle="Cartera" description="Gestiona las cuentas por cobrar" />
+
         <Button variant="secondary" className="flex items-center gap-2 text-sm">
           <Download className="w-4 h-4" />
           Exportar
@@ -185,7 +182,6 @@ const CarteraPage = (): JSX.Element => {
           "Valor",
           "Factura",
           "Fecha Factura",
-          "Vencimiento",
           "Días Cartera",
           "Ciudad",
         ]}

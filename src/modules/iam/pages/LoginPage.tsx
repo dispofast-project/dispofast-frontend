@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom"
 import type { LoginFormData } from "../types";
 import { Box } from "@mui/material";
@@ -14,37 +15,33 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const {login} = useAuth();
     const {showNotification} = useNotificationStore();
-    
-    const handleSubmit = async (data: LoginFormData) => {
-        
+    const [isLoading, setIsLoading] = useState(false);
 
+    const handleSubmit = async (data: LoginFormData) => {
+        setIsLoading(true);
         try {
            const response = await loginService(data)
 
             login(response)
-            
+
             navigate("/dashboard");
         } catch (error) {
             let message = 'Credenciales inválidas. Por favor, intente de nuevo.';
 
             if (error instanceof Error && error.message === 'TOKEN_MISSING') {
-                message =
-                'La respuesta del servidor no incluyó un token de autenticación.';
+                message = 'La respuesta del servidor no incluyó un token de autenticación.';
             } else if (isAxiosError(error)) {
-                const payload = error.response?.data as
-                | { message?: string }
-                | undefined;
-                const serverMessage =
-                typeof payload?.message === 'string' ? payload.message : undefined;
+                const serverMessage = (error.response?.data as { message?: string })?.message;
                 if (serverMessage) {
-                message = serverMessage;
-                } else if (!error.response) {
-                message =
-                    'No fue posible contactar al servidor. Verifique su conexión.';
+                    message = serverMessage;
                 }
+            } else if (error instanceof Error && error.message) {
+                message = error.message;
             }
 
             showNotification(message, "error")
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -72,7 +69,7 @@ const LoginPage = () => {
                             Inicia sesion para acceder a la informacion de tus clientes.
                         </p>
                         <Box className="mt-6">
-                            <LoginForm onSubmit={handleSubmit} />
+                            <LoginForm onSubmit={handleSubmit} isLoading={isLoading} />
                         </Box>
                     </Box>
                 </Box>

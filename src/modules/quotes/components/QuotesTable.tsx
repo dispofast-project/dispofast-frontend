@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import { Box, ListItemIcon, MenuItem } from "@mui/material";
+import { Eye, ShoppingCart } from "lucide-react";
 import type { QuotePreview } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
@@ -23,6 +24,7 @@ const QuotesTable = ({
   totalItems,
   onPageChange,
   onRowClick,
+  onCreateOrder,
 }: QuotesTableProps) => {
 
   const headers = [
@@ -53,6 +55,19 @@ const QuotesTable = ({
     ];
   };
 
+  const optionsMenu = (quote: QuotePreview, closeMenu: () => void) => (
+    <>
+      <MenuItem onClick={() => { closeMenu(); onRowClick(quote); }}>
+        <ListItemIcon><Eye size={16} /></ListItemIcon>
+        Ver cotización
+      </MenuItem>
+      <MenuItem onClick={() => { closeMenu(); onCreateOrder(quote); }}>
+        <ListItemIcon><ShoppingCart size={16} /></ListItemIcon>
+        Crear orden
+      </MenuItem>
+    </>
+  );
+
   return (
     <Box className="w-full">
       <CustomTable
@@ -64,6 +79,7 @@ const QuotesTable = ({
         itemsPerPage={itemsPerPage}
         totalItems={totalItems}
         onPageChange={onPageChange}
+        optionsMenu={optionsMenu}
       />
     </Box>
   );

@@ -29,28 +29,16 @@ export const getProductById = async (id: string): Promise<Product> => {
 };
 
 export const createProduct = async (payload: ProductFormData): Promise<Product> => {
-  try {
-    const { data } = await apiClient.post("/products", payload);
-    return data;
-  } catch {
-    throw new Error("Error al crear el producto");
-  }
+  const { data } = await apiClient.post("/products", payload);
+  return data;
 };
 
 export const updateProduct = async (id: string, payload: UpdateProductFormData): Promise<Product> => {
-  try {
-    const { data } = await apiClient.put<Product>(`/products/${id}`, payload);
-    return data;
-  } catch {
-    throw new Error("Error al actualizar el producto");
-  }
+  const { data } = await apiClient.put<Product>(`/products/${id}`, payload);
+  return data;
 };
 
 export const getCategories = async (): Promise<Category[]> => {
-  try {
-    const { data } = await apiClient.get<Category[]>("/categories");
-    return data;
-  } catch {
-    throw new Error("Error al cargar las categorías");
-  }
+  const { data } = await apiClient.get<Category[]>("/categories");
+  return data;
 };

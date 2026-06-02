@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { createClientService } from "../api/clients.api";
+import DescriptionIcon from "@mui/icons-material/Description";
+import { createClientService, uploadLegalDocumentService } from "../api/clients.api";
 import { LegalEntityType } from "../types";
 import type { CreateIndividualRequestDTO, CreateOrganizationRequestDTO } from "../types/create-client.dto";
 import { useNotificationStore } from "../../../shared/store";
@@ -12,6 +13,7 @@ import { NaturalPersonFields } from "../components/form/NaturalPersonFields";
 import { OrganizationFields } from "../components/form/OrganizationFields";
 import { RepresentativeFields } from "../components/form/RepresentativeFields";
 import { FormActions } from "../components/form/FormActions";
+import LegalDocumentUploadZone, { type DocumentItem } from "../components/LegalDocumentUploadZone";
 import type { ClientFormData } from "../components/form/types";
 
 const cleanValue = (val: string | undefined): string | undefined => {
@@ -48,12 +50,16 @@ const CreateClientPage = () => {
   const { showNotification } = useNotificationStore();
   const [isLoading, setIsLoading] = useState(false);
   const [entityType, setEntityType] = useState<LegalEntityType | null>(null);
+  const [documents, setDocuments] = useState<File[]>([]);
+  const [documentsError, setDocumentsError] = useState(false);
 
   const [formData, setFormData] = useState<ClientFormData>({ ...initialFormState });
 
   const handleEntityTypeChange = (type: LegalEntityType) => {
     if (entityType !== type) {
       setEntityType(type);
+      setDocuments([]);
+      setDocumentsError(false);
       setFormData(prev => ({
         ...prev,
         firstName: "",
@@ -78,6 +84,12 @@ const CreateClientPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!entityType) return;
+
+    if (entityType === LegalEntityType.LEGAL && documents.length === 0) {
+      setDocumentsError(true);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -102,6 +114,8 @@ const CreateClientPage = () => {
         defaultAdvisorId: formData.defaultAdvisorId || undefined,
       };
 
+      let createdClientId: string;
+
       if (entityType === LegalEntityType.NATURAL) {
         const payload: CreateIndividualRequestDTO = {
           ...basePayload,
@@ -114,7 +128,8 @@ const CreateClientPage = () => {
           representativePhone: cleanValue(formData.representativePhone),
           representativeJobTitle: cleanValue(formData.representativeJobTitle),
         };
-        await createClientService(payload);
+        const created = await createClientService(payload);
+        createdClientId = created.id;
       } else {
         const payload: CreateOrganizationRequestDTO = {
           ...basePayload,
@@ -126,7 +141,11 @@ const CreateClientPage = () => {
           representativeEmail: formData.representativeEmail,
           representativePhone: formData.representativePhone,
         };
-        await createClientService(payload);
+        const created = await createClientService(payload);
+        createdClientId = created.id;
+        for (const file of documents) {
+          await uploadLegalDocumentService(createdClientId, file);
+        }
       }
 
       showNotification("Cliente creado exitosamente", "success");
@@ -177,6 +196,34 @@ const CreateClientPage = () => {
               )}
               
               <RepresentativeFields entityType={entityType} formData={formData} onChange={handleChange} />
+
+              {entityType === LegalEntityType.LEGAL && (
+                <Box className="mt-6 pt-6 border-t border-gray-100">
+                  <Box className="flex items-center gap-2 mb-4">
+                    <DescriptionIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                    <Typography variant="subtitle2" className="font-semibold text-gray-700">
+                      Documentos Legales *
+                    </Typography>
+                  </Box>
+                  <LegalDocumentUploadZone
+                    items={documents.map<DocumentItem>((f, i) => ({
+                      key: String(i),
+                      name: f.name,
+                      meta: f.size < 1024 * 1024
+                        ? `${(f.size / 1024).toFixed(1)} KB`
+                        : `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+                      onDelete: () => setDocuments((prev) => prev.filter((_, idx) => idx !== i)),
+                    }))}
+                    onAdd={(files) => {
+                      setDocumentsError(false);
+                      setDocuments((prev) => [...prev, ...files]);
+                    }}
+                    error={documentsError}
+                    errorMessage="Debe adjuntar al menos un documento legal."
+                  />
+                </Box>
+              )}
+
               <FormActions isLoading={isLoading} onCancel={() => navigate("/clientes")} />
             </Box>
           )}

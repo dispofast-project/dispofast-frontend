@@ -19,6 +19,7 @@ export interface SalesOrderItem {
   productId: string;
   productName: string;
   productReference: string;
+  productSku: string | null;
   taxFree: boolean;
   quantity: number;
   unitPrice: number;

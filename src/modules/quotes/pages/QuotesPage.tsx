@@ -9,6 +9,7 @@ import QuotesTable from "../components/QuotesTable";
 import type { FilterConfig, FilterState } from "../../../shared/components/SearchBar/types";
 import FilterSearchBar from "../../../shared/components/SearchBar/SearchBar";
 import QuoteCreateModal from "../components/QuoteCreateModal";
+import CustomTitle from "../../../shared/components/Title/Title";
 
 /** Maps the FilterSearchBar scope value to the backend `key` query param. */
 const SCOPE_TO_API_KEY: Record<string, string> = {
@@ -116,14 +117,7 @@ const QuotesPage = () => {
   return (
     <Box className="p-6">
       <Box className="flex justify-between items-center mb-6">
-        <Box>
-          <Typography variant="h4" className="font-bold text-gray-800">
-            Cotizaciones
-          </Typography>
-          <Typography variant="body2" className="text-gray-500 mt-1">
-            Gestiona tus cotizaciones de venta
-          </Typography>
-        </Box>
+        <CustomTitle mainTitle="Cotizaciones" description="Gestiona tus cotizaciones de venta" />
         <Button
           variant="contained"
           startIcon={<AddIcon />}

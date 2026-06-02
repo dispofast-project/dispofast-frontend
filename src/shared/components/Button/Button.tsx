@@ -56,7 +56,7 @@ export const Button: React.FC<ButtonProps> = ({
             disabled={isDisabled}
             {...rest}
         >
-            {isLoading ? "Loading..." : children}
+            {isLoading ? "Cargando..." : children}
             {badgeContent !== undefined && badgeContent > 0 && (
                 <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
                     {badgeContent > 9 ? "9+" : badgeContent}
