@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { updateProductSchema, type UpdateProductFormData } from "../schema/product.schema";
+import { updateProductSchema } from "../schema/product.schema";
+import type { UpdateProductFormData } from "../schema/product.schema";
+
+type UpdateProductFormInput = z.input<typeof updateProductSchema>;
 import {
   getProductById,
   updateProduct,
@@ -20,7 +24,7 @@ export const useEditProduct = (id: string) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useForm<UpdateProductFormData>({
+  const form = useForm<UpdateProductFormInput>({
     resolver: zodResolver(updateProductSchema),
     defaultValues: {
       name: "",
@@ -83,7 +87,7 @@ export const useEditProduct = (id: string) => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const updated = await updateProduct(id, data);
+      const updated = await updateProduct(id, data as UpdateProductFormData);
       setProduct(updated);
       populateForm(updated, categories);
       setIsEditing(false);
