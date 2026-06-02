@@ -6,6 +6,7 @@ export interface InventoryItem {
   productName: string;
   sku: string;
   category: string;
+  imageUrl: string | null;
   taxFree: boolean;
   quantityAvailable: number;
   quantityReserved: number;

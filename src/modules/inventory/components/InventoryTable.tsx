@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import { Box, ListItemIcon, MenuItem } from "@mui/material";
-import { Eye } from "lucide-react";
+import { Eye, ImageIcon } from "lucide-react";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
 import StockBar from "./StockBar";
@@ -37,7 +37,23 @@ const   InventoryTable = ({
 
   const renderRow = (item: InventoryTableItem): (string | JSX.Element)[] => [
     <StatusBadge key="estado" status={item.state} configMap={INVENTORY_STATUS_CONFIG} />,
-    <Box key="producto">
+    <Box key="producto" className="flex items-center gap-3">
+      {item.imageUrl ? (
+        <img
+          src={item.imageUrl}
+          alt={item.productName}
+          className="w-9 h-9 rounded-md object-cover shrink-0 border border-gray-100"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+            e.currentTarget.nextElementSibling?.classList.remove("hidden");
+          }}
+        />
+      ) : null}
+      <Box
+        className={`w-9 h-9 rounded-md bg-gray-100 flex items-center justify-center shrink-0 border border-gray-100 ${item.imageUrl ? "hidden" : ""}`}
+      >
+        <ImageIcon size={16} className="text-gray-400" />
+      </Box>
       <p className="text-sm font-medium text-gray-800">{item.productName}</p>
     </Box>,
     <span key="sku" className="text-xs text-gray-500 font-mono">

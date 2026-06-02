@@ -21,6 +21,8 @@ const ProductDetailPage = () => {
     isEditing,
     isSubmitting,
     submitError,
+    imageFile,
+    setImageFile,
     startEditing,
     cancelEditing,
     onSubmit,
@@ -80,7 +82,14 @@ const ProductDetailPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <ProductInfoSection control={form.control} disabled={!isEditing} />
+          <ProductInfoSection
+            control={form.control}
+            disabled={!isEditing}
+            currentImageUrl={product?.imageUrl}
+            imageFile={imageFile}
+            onImageChange={setImageFile}
+            onImageClear={() => setImageFile(null)}
+          />
           <ProductCategoriesSection
             control={form.control}
             categories={categories}
