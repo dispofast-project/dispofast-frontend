@@ -11,6 +11,8 @@ interface OrderPaymentTermsCardProps {
   onDiscountRateChange: (val: string) => void;
   additionalDiscountRate: string;
   onAdditionalDiscountRateChange: (val: string) => void;
+  observations: string;
+  onObservationsChange: (val: string) => void;
 }
 
 const OrderPaymentTermsCard = ({
@@ -20,6 +22,8 @@ const OrderPaymentTermsCard = ({
   onDiscountRateChange,
   additionalDiscountRate,
   onAdditionalDiscountRateChange,
+  observations,
+  onObservationsChange,
 }: OrderPaymentTermsCardProps) => {
   return (
     <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -37,7 +41,7 @@ const OrderPaymentTermsCard = ({
         </Box>
       </Box>
 
-      <Box className="px-6 py-5">
+      <Box className="px-6 py-5 flex flex-col gap-4">
         <Box className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Dropdown
             label="Condiciones de pago"
@@ -66,6 +70,16 @@ const OrderPaymentTermsCard = ({
             inputProps={{ min: 0, max: 100, step: 0.01 }}
           />
         </Box>
+        <TextField
+          size="small"
+          fullWidth
+          multiline
+          rows={3}
+          label="Observaciones"
+          value={observations}
+          onChange={(e) => onObservationsChange(e.target.value)}
+          placeholder="Ingresa observaciones o notas adicionales para esta orden..."
+        />
       </Box>
     </Box>
   );

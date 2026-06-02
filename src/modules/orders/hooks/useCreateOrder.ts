@@ -56,6 +56,9 @@ export const useCreateOrder = () => {
   // ─── Financial panel ───────────────────────────────────────────────────────
   const [freight, setFreight] = useState(0);
 
+  // ─── Observations ──────────────────────────────────────────────────────────
+  const [observations, setObservations] = useState("");
+
   // ─── Products ──────────────────────────────────────────────────────────────
   const [items, setItems] = useState<OrderItem[]>([]);
 
@@ -180,6 +183,7 @@ export const useCreateOrder = () => {
         discountRate: parseInt(discountRate, 10) || 0,
         additionalDiscountRate: additionalDiscountRate ? parseFloat(additionalDiscountRate) : undefined,
         freight: freight > 0 ? freight : undefined,
+        observations: observations.trim() || undefined,
         items: items.map(({ productName: _pn, productReference: _pr, taxFree: _tf, ...rest }) => rest),
       };
 
@@ -228,6 +232,8 @@ export const useCreateOrder = () => {
     retefuente,
     freight,
     setFreight,
+    observations,
+    setObservations,
     total,
     missingFields,
     handleClientChange,

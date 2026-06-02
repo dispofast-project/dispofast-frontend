@@ -31,6 +31,7 @@ interface OrderInfoCardProps {
   invoice: Invoice | null;
   downloadLoading: boolean;
   onDownloadInvoice: () => void;
+  observations?: string | null;
 }
 
 const OrderInfoCard = ({
@@ -41,6 +42,7 @@ const OrderInfoCard = ({
   invoice,
   downloadLoading,
   onDownloadInvoice,
+  observations,
 }: OrderInfoCardProps) => (
   <Box className="bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-5 flex flex-col gap-4">
     <h3 className="text-sm font-semibold text-gray-800">Información de la Orden</h3>
@@ -72,6 +74,13 @@ const OrderInfoCard = ({
         <p className="text-xs text-gray-400 italic">Sin factura adjunta</p>
       )}
     </Box>
+
+    {observations && (
+      <Box>
+        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Observaciones</p>
+        <p className="text-sm text-gray-700 whitespace-pre-wrap">{observations}</p>
+      </Box>
+    )}
   </Box>
 );
 

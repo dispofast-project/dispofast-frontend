@@ -19,6 +19,7 @@ import OrderItemsTable from "../components/OrderItemsTable/OrderItemsTable";
 import OrderPaymentPanel from "../components/OrderPaymentPanel/OrderPaymentPanel";
 import AttachInvoiceDialog from "../components/AttachInvoiceDialog/AttachInvoiceDialog";
 import OrderPrintTemplate from "../components/OrderPrintTemplate/OrderPrintTemplate";
+import OrderClientDetailCard from "../components/OrderClientDetailCard/OrderClientDetailCard";
 
 const NEXT_STATES: Record<OrderState, OrderState[]> = {
   PENDING: ["CANCELLED"],
@@ -170,6 +171,9 @@ const OrderDetailPage = () => {
       <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left: main content */}
         <Box className="lg:col-span-2 flex flex-col gap-5">
+
+          <OrderClientDetailCard client={client} />
+
           <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <OrderInfoCard
               clientName={order.clientName}
@@ -179,6 +183,7 @@ const OrderDetailPage = () => {
               invoice={invoice}
               downloadLoading={downloadLoading}
               onDownloadInvoice={handleDownloadInvoice}
+              observations={order.observations}
             />
             <OrderDeliveryCard
               shipmentCityName={order.shipmentCityName}
@@ -186,6 +191,7 @@ const OrderDetailPage = () => {
               zone={order.zone}
             />
           </Box>
+
 
           <OrderItemsTable items={order.items ?? []} />
         </Box>
