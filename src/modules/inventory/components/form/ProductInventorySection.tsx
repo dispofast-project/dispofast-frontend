@@ -117,6 +117,24 @@ const ProductInventorySection = ({ control, disabled, showInitialStock = true }:
             )}
           />
         )}
+        {!showInitialStock && (
+          <Controller
+            name="stock"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                label="Stock"
+                type="number"
+                size="small"
+                fullWidth
+                disabled={disabled}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
+        )}
         <Controller
           name="taxFree"
           control={control}

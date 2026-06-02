@@ -36,6 +36,7 @@ export const useEditProduct = (id: string) => {
       seoKeywords: "",
       state: "ACTIVE",
       categoryId: "",
+      stock: 0,
     },
   });
 
@@ -55,6 +56,7 @@ export const useEditProduct = (id: string) => {
       seoKeywords: p.seoKeywords,
       state: p.state === "INACTIVE" ? "INACTIVE" : "ACTIVE",
       categoryId: cat?.id ?? "",
+      stock: p.stock ?? 0,
     });
   };
 
