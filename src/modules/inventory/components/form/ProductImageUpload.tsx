@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { ImageIcon, Upload, X } from "lucide-react";
 
 interface ProductImageUploadProps {
