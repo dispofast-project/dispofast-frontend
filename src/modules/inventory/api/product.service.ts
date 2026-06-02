@@ -16,6 +16,7 @@ export interface Product {
   seoKeywords: string;
   state: string;
   categoryName: string;
+  stock: number;
 }
 
 export interface Category {
