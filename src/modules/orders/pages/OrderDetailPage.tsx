@@ -20,6 +20,7 @@ import OrderPaymentPanel from "../components/OrderPaymentPanel/OrderPaymentPanel
 import AttachInvoiceDialog from "../components/AttachInvoiceDialog/AttachInvoiceDialog";
 import OrderPrintTemplate from "../components/OrderPrintTemplate/OrderPrintTemplate";
 import OrderClientDetailCard from "../components/OrderClientDetailCard/OrderClientDetailCard";
+import OrderObservationsCard from "../components/OrderObservationsCard/OrderObservationsCard";
 
 const NEXT_STATES: Record<OrderState, OrderState[]> = {
   PENDING: ["CANCELLED"],
@@ -117,6 +118,13 @@ const OrderDetailPage = () => {
     finally { setStateLoading(false); }
   };
 
+  // ── Observations ────────────────────────────────────────────────────────────
+  const handleSaveObservations = async (value: string) => {
+    if (!id) return;
+    await updateOrder(id, { observations: value });
+    refetch();
+  };
+
   // ── Guards ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -183,7 +191,6 @@ const OrderDetailPage = () => {
               invoice={invoice}
               downloadLoading={downloadLoading}
               onDownloadInvoice={handleDownloadInvoice}
-              observations={order.observations}
             />
             <OrderDeliveryCard
               shipmentCityName={order.shipmentCityName}
@@ -192,6 +199,10 @@ const OrderDetailPage = () => {
             />
           </Box>
 
+          <OrderObservationsCard
+            observations={order.observations}
+            onSave={handleSaveObservations}
+          />
 
           <OrderItemsTable items={order.items ?? []} />
         </Box>
