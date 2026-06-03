@@ -84,11 +84,11 @@ export const useEditProduct = (id: string) => {
     setSubmitError(null);
   };
 
-  const onSubmit = form.handleSubmit(async (data: UpdateProductFormData) => {
+  const onSubmit = form.handleSubmit(async (data: UpdateProductFormInput) => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      let updated = await updateProduct(id, data);
+      let updated = await updateProduct(id, data as UpdateProductFormData);
       if (imageFile) {
         updated = await uploadProductImage(id, imageFile);
         setImageFile(null);
