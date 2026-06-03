@@ -4,6 +4,7 @@ import {
   FormControlLabel,
   FormHelperText,
   InputLabel,
+  ListSubheader,
   MenuItem,
   Select,
   TextField,
@@ -13,7 +14,16 @@ import type { Control } from "react-hook-form";
 import SectionCard from "../../../../shared/components/Card/SectionCard";
 import type { ProductFormData } from "../../schema/product.schema";
 
-const SIZES = ["0.5ml", "1ml", "2ml", "3ml", "5ml", "10ml", "20ml", "50ml", "100ml"];
+const SIZE_GROUPS = [
+  {
+    label: "Jeringas",
+    options: ["1ml", "2ml", "3ml", "5ml", "10ml", "20ml", "50ml", "60ml"],
+  },
+  {
+    label: "Agujas",
+    options: ["16G", "18G", "19G", "20G", "21G", "22G", "23G", "24G", "25G", "26G", "27G", "28G", "29G", "30G"],
+  },
+];
 
 interface Props {
   control: Control<ProductFormData> | any;
@@ -87,11 +97,14 @@ const ProductInventorySection = ({ control, disabled, showInitialStock = true }:
                 <MenuItem value="">
                   <em>Elegir</em>
                 </MenuItem>
-                {SIZES.map((s) => (
-                  <MenuItem key={s} value={s}>
-                    {s}
-                  </MenuItem>
-                ))}
+                {SIZE_GROUPS.map((group) => [
+                  <ListSubheader key={group.label}>{group.label}</ListSubheader>,
+                  ...group.options.map((s) => (
+                    <MenuItem key={s} value={s} sx={{ pl: 3 }}>
+                      {s}
+                    </MenuItem>
+                  )),
+                ])}
               </Select>
               {fieldState.error && (
                 <FormHelperText>{fieldState.error.message}</FormHelperText>
