@@ -8,7 +8,7 @@ import ProductSeoSection from "../components/form/ProductSeoSection";
 import CustomTitle from "../../../shared/components/Title/Title";
 
 const AddProductPage = () => {
-  const { form, categories, isSubmitting, submitError, onSubmit, onDiscard } =
+  const { form, categories, isSubmitting, submitError, imageFile, setImageFile, onSubmit, onDiscard } =
     useAddProduct();
   return (
     <Box className="flex flex-col gap-6 pb-8">
@@ -30,7 +30,12 @@ const AddProductPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <ProductInfoSection control={form.control} />
+          <ProductInfoSection
+            control={form.control}
+            imageFile={imageFile}
+            onImageChange={setImageFile}
+            onImageClear={() => setImageFile(null)}
+          />
           <ProductCategoriesSection
             control={form.control}
             categories={categories}

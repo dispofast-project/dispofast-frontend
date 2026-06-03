@@ -26,13 +26,16 @@ return config;
 
 apiClient.interceptors.response.use(
     (response) => response,
-    (error: AxiosError) => {
+    (error: AxiosError<{ message?: string }>) => {
         if (!error.response) {
             return Promise.reject(
                 new Error("No se pudo conectar al servidor. Verifica tu conexión a internet.")
             );
         }
-        return Promise.reject(error);
+        const backendMessage = error.response.data?.message;
+        return Promise.reject(
+            new Error(backendMessage ?? `Error ${error.response.status}`)
+        );
     }
 );
 

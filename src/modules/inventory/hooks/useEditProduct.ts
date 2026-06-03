@@ -11,6 +11,7 @@ import {
   getProductById,
   updateProduct,
   getCategories,
+  uploadProductImage,
   type Product,
   type Category,
 } from "../api/product.service";
@@ -23,6 +24,7 @@ export const useEditProduct = (id: string) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const form = useForm<UpdateProductFormInput>({
     resolver: zodResolver(updateProductSchema),
@@ -30,7 +32,6 @@ export const useEditProduct = (id: string) => {
       name: "",
       shortDescription: "",
       longDescription: "",
-      imageUrl: "",
       taxFree: false,
       sku: "",
       reference: "",
@@ -50,7 +51,6 @@ export const useEditProduct = (id: string) => {
       name: p.name,
       shortDescription: p.shortDescription,
       longDescription: p.longDescription,
-      imageUrl: p.imageUrl,
       taxFree: p.taxFree,
       sku: p.sku,
       reference: p.reference,
@@ -79,15 +79,20 @@ export const useEditProduct = (id: string) => {
 
   const cancelEditing = () => {
     if (product) populateForm(product, categories);
+    setImageFile(null);
     setIsEditing(false);
     setSubmitError(null);
   };
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = form.handleSubmit(async (data: UpdateProductFormInput) => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const updated = await updateProduct(id, data as UpdateProductFormData);
+      let updated = await updateProduct(id, data as UpdateProductFormData);
+      if (imageFile) {
+        updated = await uploadProductImage(id, imageFile);
+        setImageFile(null);
+      }
       setProduct(updated);
       populateForm(updated, categories);
       setIsEditing(false);
@@ -110,6 +115,8 @@ export const useEditProduct = (id: string) => {
     isEditing,
     isSubmitting,
     submitError,
+    imageFile,
+    setImageFile,
     startEditing,
     cancelEditing,
     onSubmit,

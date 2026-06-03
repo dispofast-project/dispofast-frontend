@@ -4,7 +4,6 @@ export const productSchema = z.object({
   name: z.string().min(1, "Nombre es requerido"),
   shortDescription: z.string().min(1, "Descripción corta es requerida"),
   longDescription: z.string().min(1, "Descripción larga es requerida"),
-  imageUrl: z.string().min(1, "URL de imagen es requerida"),
   taxFree: z.boolean(),
   sku: z.string().min(1, "SKU es requerido"),
   reference: z.string().min(1, "Referencia es requerida"),

@@ -4,7 +4,7 @@ import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { productSchema, type ProductFormData } from "../schema/product.schema";
-import { createProduct, getCategories, type Category } from "../api/product.service";
+import { createProduct, getCategories, uploadProductImage, type Category } from "../api/product.service";
 
 type ProductFormInput = z.input<typeof productSchema>;
 
@@ -13,6 +13,7 @@ export const useAddProduct = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const form = useForm<ProductFormInput>({
     resolver: zodResolver(productSchema),
@@ -20,7 +21,6 @@ export const useAddProduct = () => {
       name: "",
       shortDescription: "",
       longDescription: "",
-      imageUrl: "",
       taxFree: false,
       sku: "",
       reference: "",
@@ -44,7 +44,10 @@ export const useAddProduct = () => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      await createProduct(data as ProductFormData);
+      const created = await createProduct(data as ProductFormData);
+      if (imageFile) {
+        await uploadProductImage(created.id, imageFile);
+      }
       navigate("/inventario");
     } catch (err) {
       setSubmitError(
@@ -62,6 +65,8 @@ export const useAddProduct = () => {
     categories,
     isSubmitting,
     submitError,
+    imageFile,
+    setImageFile,
     onSubmit,
     onDiscard,
   };
