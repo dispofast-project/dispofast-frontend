@@ -9,8 +9,8 @@ export interface Product {
   imageUrl: string;
   taxFree: boolean;
   sku: string;
-  reference: string;
-  size: string;
+  reference?: string | null;
+  size?: string | null;
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string;
