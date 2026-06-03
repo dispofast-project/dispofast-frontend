@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { updateProductSchema, type UpdateProductFormData } from "../schema/product.schema";
+import { updateProductSchema } from "../schema/product.schema";
+import type { UpdateProductFormData } from "../schema/product.schema";
+
+type UpdateProductFormInput = z.input<typeof updateProductSchema>;
 import {
   getProductById,
   updateProduct,
@@ -22,7 +26,7 @@ export const useEditProduct = (id: string) => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const form = useForm<UpdateProductFormData>({
+  const form = useForm<UpdateProductFormInput>({
     resolver: zodResolver(updateProductSchema),
     defaultValues: {
       name: "",
@@ -37,6 +41,7 @@ export const useEditProduct = (id: string) => {
       seoKeywords: "",
       state: "ACTIVE",
       categoryId: "",
+      stock: 0,
     },
   });
 
@@ -55,6 +60,7 @@ export const useEditProduct = (id: string) => {
       seoKeywords: p.seoKeywords,
       state: p.state === "INACTIVE" ? "INACTIVE" : "ACTIVE",
       categoryId: cat?.id ?? "",
+      stock: p.stock ?? 0,
     });
   };
 
