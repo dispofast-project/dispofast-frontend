@@ -9,8 +9,8 @@ export interface Product {
   imageUrl: string;
   taxFree: boolean;
   sku: string;
-  reference: string;
-  size: string;
+  reference?: string | null;
+  size?: string | null;
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string;
@@ -41,5 +41,14 @@ export const updateProduct = async (id: string, payload: UpdateProductFormData):
 
 export const getCategories = async (): Promise<Category[]> => {
   const { data } = await apiClient.get<Category[]>("/categories");
+  return data;
+};
+
+export const uploadProductImage = async (productId: string, file: File): Promise<Product> => {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await apiClient.post<Product>(`/products/${productId}/image`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 };
