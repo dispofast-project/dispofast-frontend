@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import {
   Box,
   InputAdornment,
+  ListItemIcon,
   MenuItem,
   Select,
   TextField,
@@ -13,7 +14,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Wallet,
+  FileText,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import StatCard from "../../../shared/components/Card/StatCard";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
@@ -54,6 +57,7 @@ const DaysBadge = ({ dias }: { dias: number}) => {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 const CarteraPage = (): JSX.Element => {
+  const navigate = useNavigate();
   const {
     entries,
     loading,
@@ -213,6 +217,19 @@ const CarteraPage = (): JSX.Element => {
             entry.cityName ?? "-",
           ];
         }}
+        optionsMenu={(entry, closeMenu) => (
+          <MenuItem
+            onClick={() => {
+              closeMenu();
+              navigate(`/cartera/${entry.id}/recibo`, { state: { entry } });
+            }}
+          >
+            <ListItemIcon>
+              <FileText size={16} />
+            </ListItemIcon>
+            Generar recibo de caja
+          </MenuItem>
+        )}
         currentPage={currentPage}
         itemsPerPage={pageSize}
         totalItems={totalElements}

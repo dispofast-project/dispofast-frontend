@@ -11,6 +11,7 @@ import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
+import PaymentReceiptPage from "../modules/cartera/pages/PaymentReceiptPage";
 import InventoryRoutes from "../modules/inventory/inventory.routes";
 import PriceListPage from "../modules/pricelist/pages/PriceListPage";
 
@@ -51,6 +52,7 @@ const AppRouter = (): ReactElement => {
           {/* Cartera / Cuentas */}
           <Route element={<ProtectedRoute requiredAuthorities={["ACCOUNTS_VIEW"]} />}>
             <Route path="/cartera" element={<CarteraPage />} />
+            <Route path="/cartera/:arEntryId/recibo" element={<PaymentReceiptPage />} />
           </Route>
 
           {/* Inventario */}

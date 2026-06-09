@@ -1,6 +1,11 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponseDTO } from "../../../shared/types/common";
-import type { ArEntry, CarteraFilters } from "../types";
+import type {
+  ArEntry,
+  CarteraFilters,
+  CreatePaymentReceiptRequest,
+  PaymentReceipt,
+} from "../types";
 
 const BASE_URL = "/cartera";
 
@@ -22,5 +27,25 @@ export const getArEntries = async (
       ...(filters?.state && { state: filters.state }),
     },
   });
+  return data;
+};
+
+export const createPaymentReceipt = async (
+  arEntryId: string,
+  request: CreatePaymentReceiptRequest
+): Promise<PaymentReceipt> => {
+  const { data } = await apiClient.post<PaymentReceipt>(
+    `${BASE_URL}/${arEntryId}/recibos`,
+    request
+  );
+  return data;
+};
+
+export const getReceiptsByArEntry = async (
+  arEntryId: string
+): Promise<PaymentReceipt[]> => {
+  const { data } = await apiClient.get<PaymentReceipt[]>(
+    `${BASE_URL}/${arEntryId}/recibos`
+  );
   return data;
 };
