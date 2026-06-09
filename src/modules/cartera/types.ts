@@ -7,11 +7,11 @@ export interface ArEntry {
   id: string;
   state: ArEntryState;
   source: ArEntrySource;
-  clientId: string;
+  clientId?: string;
   clientName: string;
   clientIdentification: string;
   asesorName: string | null;
-  orderId: string | null;
+  orderId?: string | null;
   orderNumber: string | null;
   value: number;
   paidAmount: number;

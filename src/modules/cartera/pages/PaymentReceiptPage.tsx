@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box } from "@mui/material";
-import type { ArEntry, PaymentMethod } from "../types";
+import type { ArEntry, PaymentMethod, PaymentReceipt } from "../types";
 import type { ClientResponse } from "../../clients/types";
 import type { SalesOrder } from "../../orders/types";
-import { createPaymentReceipt } from "../api/cartera.service";
+import {
+  createPaymentReceipt,
+  getReceiptsByArEntry,
+} from "../api/cartera.service";
 import { getClientByIdService } from "../../clients/api/clients.api";
 import { getOrderById } from "../../orders/api/order.service";
 import { useNotificationStore } from "../../../shared/store/notification.store";
@@ -31,19 +34,35 @@ const PaymentReceiptPage = () => {
 
   const [client, setClient] = useState<ClientResponse | null>(null);
   const [order, setOrder] = useState<SalesOrder | null>(null);
+  const [receipts, setReceipts] = useState<PaymentReceipt[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  const loadReceipts = useCallback(async () => {
+    if (!entry) return;
+    try {
+      const data = await getReceiptsByArEntry(entry.id);
+      setReceipts(data);
+    } catch {
+      // Non-critical; show empty list
+    }
+  }, [entry?.id]);
 
   useEffect(() => {
     if (!entry) return;
     const load = async () => {
       try {
         const [clientResult, orderResult] = await Promise.allSettled([
-          getClientByIdService(entry.clientId),
-          entry.orderId ? getOrderById(entry.orderId) : Promise.resolve(null),
+          entry.clientId
+            ? getClientByIdService(entry.clientId)
+            : Promise.resolve(null),
+          entry.orderId
+            ? getOrderById(entry.orderId)
+            : Promise.resolve(null),
         ]);
         if (clientResult.status === "fulfilled") setClient(clientResult.value);
         if (orderResult.status === "fulfilled") setOrder(orderResult.value);
+        await loadReceipts();
       } finally {
         setLoadingData(false);
       }
@@ -60,6 +79,14 @@ const PaymentReceiptPage = () => {
     (s, it) => s + (it.taxFree ? 0 : it.lineTotal * IVA_RATE),
     0
   );
+  const totalValue = order?.totalValue ?? entry.value;
+
+  // Compute live balance from fetched receipts so it updates after payment
+  const paidTotal = receipts
+    .filter((r) => r.state === "ACTIVE")
+    .reduce((s, r) => s + r.value, 0);
+  const liveBalance = Math.max(0, totalValue - paidTotal);
+
   const summaryData: ReceiptSummaryData = {
     diasCartera: entry.diasCartera,
     orderNumber: entry.orderNumber,
@@ -71,8 +98,10 @@ const PaymentReceiptPage = () => {
     discountAmt:
       subtotal * ((order?.discountRate ?? 0) / 100) +
       subtotal * ((order?.additionalDiscountRate ?? 0) / 100),
-    totalValue: order?.totalValue ?? entry.value,
+    totalValue,
     hasOrderData: !loadingData && order !== null,
+    receipts,
+    balance: liveBalance,
   };
 
   const receiptRef = entry.id.replace(/-/g, "").substring(0, 13);
@@ -89,10 +118,11 @@ const PaymentReceiptPage = () => {
         observations: values.observations || undefined,
       });
       showNotification("Recibo de caja registrado exitosamente", "success");
-      navigate("/cartera");
-    } catch {
+      // Stay on the page and refresh receipts to show updated balance
+      await loadReceipts();
+    } catch (error: any) {
       showNotification(
-        "No se pudo registrar el recibo. Intenta de nuevo.",
+        `No se pudo registrar el recibo: ${error.message}`,
         "error"
       );
     } finally {
@@ -128,14 +158,16 @@ const PaymentReceiptPage = () => {
           )}
         </Box>
 
-        {/* Right: summary + payment form */}
+        {/* Right: summary + payment form (hidden when fully paid) */}
         <Box className="lg:col-span-1 sticky top-4 flex flex-col gap-4">
           <ReceiptSummaryPanel data={summaryData} />
-          <ReceiptPaymentForm
-            onSubmit={handleSubmit}
-            onCancel={() => navigate("/cartera")}
-            isLoading={submitting}
-          />
+          {liveBalance > 0 && (
+            <ReceiptPaymentForm
+              onSubmit={handleSubmit}
+              onCancel={() => navigate("/cartera")}
+              isLoading={submitting}
+            />
+          )}
         </Box>
       </Box>
     </Box>

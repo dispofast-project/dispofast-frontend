@@ -49,3 +49,8 @@ export const getReceiptsByArEntry = async (
   );
   return data;
 };
+
+export const getTotalPaidValue = async (): Promise<number> => {
+  const { data } = await apiClient.get<number>(`${BASE_URL}/total-value`);
+  return data;
+};

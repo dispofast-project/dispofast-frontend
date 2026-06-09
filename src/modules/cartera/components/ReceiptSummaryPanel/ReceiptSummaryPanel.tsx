@@ -1,11 +1,16 @@
 import { Box, Divider, Typography } from "@mui/material";
+import type { PaymentReceipt } from "../../types";
 
 const COMMISSION_RATE = 0.015;
 
 const fmt = (v: number) =>
   `$${v.toLocaleString("es-CO", { minimumFractionDigits: 0 })}`;
 
-// Generic money row
+const fmtDate = (iso: string) => {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+};
+
 const MoneyRow = ({
   label,
   value,
@@ -36,7 +41,6 @@ const MoneyRow = ({
   </Box>
 );
 
-// Plain (non-currency) row — for day counts, etc.
 const PlainRow = ({ label, value }: { label: string; value: string }) => (
   <Box className="flex items-center justify-between">
     <Typography variant="body2" className="text-gray-500">
@@ -59,6 +63,8 @@ export interface ReceiptSummaryData {
   discountAmt: number;
   totalValue: number;
   hasOrderData: boolean;
+  receipts: PaymentReceipt[];
+  balance: number;
 }
 
 interface ReceiptSummaryPanelProps {
@@ -67,6 +73,7 @@ interface ReceiptSummaryPanelProps {
 
 const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
   const commission = data.subtotal * COMMISSION_RATE;
+  const activeReceipts = data.receipts.filter((r) => r.state === "ACTIVE");
 
   return (
     <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -109,11 +116,7 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
         {data.hasOrderData ? (
           <Box className="flex flex-col gap-2">
             <MoneyRow label="Sub Total" value={data.subtotal} />
-            <MoneyRow
-              label="IVA"
-              value={data.iva}
-              zero={data.iva === 0}
-            />
+            <MoneyRow label="IVA" value={data.iva} zero={data.iva === 0} />
             <MoneyRow
               label="Retefuente"
               value={data.retefuente}
@@ -143,6 +146,55 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
 
         <MoneyRow label="Total" value={data.totalValue} highlight />
       </Box>
+
+      {/* Payment receipts deductions */}
+      {activeReceipts.length > 0 && (
+        <>
+          <Divider />
+          <Box className="px-5 py-4 flex flex-col gap-2">
+            {activeReceipts.map((r) => (
+              <Box
+                key={r.id}
+                className="flex items-center justify-between gap-2"
+              >
+                <Typography variant="body2" className="text-gray-500 text-xs">
+                  {fmtDate(r.paymentDate)} | Recibo:{" "}
+                  {r.documentNumber ?? r.receiptCode}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  className="font-medium text-xs shrink-0"
+                  sx={{ color: "var(--dispofast-primary)" }}
+                >
+                  -{fmt(r.value)}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+
+          <Divider />
+
+          <Box className="px-5 py-4">
+            <Box className="flex items-center justify-between">
+              <Typography variant="body2" className="font-bold text-gray-800">
+                Saldo Factura
+              </Typography>
+              <Typography
+                variant="body2"
+                className="font-bold text-base"
+                sx={{
+                  color:
+                    data.balance <= 0
+                      ? "success.main"
+                      : "var(--dispofast-primary)",
+                }}
+              >
+                {fmt(Math.max(0, data.balance))}
+              </Typography>
+            </Box>
+          </Box>
+        </>
+      )}
     </Box>
   );
 };

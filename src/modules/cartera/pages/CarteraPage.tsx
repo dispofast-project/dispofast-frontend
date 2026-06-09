@@ -207,7 +207,7 @@ const CarteraPage = (): JSX.Element => {
             </Box>,
             entry.asesorName ?? "-",
             entry.orderNumber ?? "-",
-            formatCurrency(entry.value ?? 0),
+            formatCurrency(entry.balance ?? entry.value ?? 0),
             entry.invoiceNumber ?? "-",
             formatDate(entry.invoiceDate),
             <DaysBadge
@@ -227,7 +227,7 @@ const CarteraPage = (): JSX.Element => {
             <ListItemIcon>
               <FileText size={16} />
             </ListItemIcon>
-            Generar recibo de caja
+            {entry.state === "PENDING" ? "Generar recibo de caja" : "Ver recibo de pago" }
           </MenuItem>
         )}
         currentPage={currentPage}
