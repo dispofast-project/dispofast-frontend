@@ -253,7 +253,7 @@ const CarteraPage = (): JSX.Element => {
               <ListItemIcon>
                 <FileText size={16} />
               </ListItemIcon>
-              Ver recibo de caja
+                {entry.state === "PENDING" ? "Generar recibo de caja" : "Ver recibo de pago" }
             </MenuItem>
           </>
         )}
