@@ -35,10 +35,10 @@ export interface ClientDetails {
 }
 
 export const QuoteStatus = {
-  PENDING: "PENDING",
-  ACCEPTED: "ACCEPTED",
-  REJECTED: "REJECTED",
-  EXPIRED: "EXPIRED",
+  PENDING: "pendiente",
+  ACCEPTED: "aprobada",
+  REJECTED: "rechazada",
+  EXPIRED: "caducada",
 } as const;
 
 export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus];
