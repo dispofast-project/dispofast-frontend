@@ -221,8 +221,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
 
   const createSummary = useMemo(() => {
     const { subtotal, tax } = draftTotals;
-    const commRate = parseFloat(commercialRate ?? "0") / 100;
-    const othRate = parseFloat(otherRate ?? "0") / 100;
+    const commRate = parseFloat(commercialRate || "0") / 100;
+    const othRate = parseFloat(otherRate || "0") / 100;
     const commercialDiscountAmt = subtotal * commRate;
     const otherDiscountAmt = subtotal * othRate;
     const retefuenteAmt = client?.retefuenteApplies ? subtotal * 0.035 : 0;
