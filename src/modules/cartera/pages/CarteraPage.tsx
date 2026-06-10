@@ -24,6 +24,8 @@ import { Button } from "../../../shared/components/Button/Button";
 import { useCartera } from "../hooks/useCartera";
 import { CARTERA_STATUS_CONFIG } from "../config/statusConfig";
 import { type ArEntry, type ArEntryState } from "../types";
+import { downloadInvoicePdf } from "../../invoices/api/invoice.service";
+import { useNotificationStore } from "../../../shared/store/notification.store";
 import CustomTitle from "../../../shared/components/Title/Title";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -58,6 +60,16 @@ const DaysBadge = ({ dias }: { dias: number}) => {
 
 const CarteraPage = (): JSX.Element => {
   const navigate = useNavigate();
+  const { showNotification } = useNotificationStore();
+
+  const handleDownloadInvoice = async (entry: ArEntry) => {
+    if (!entry.invoiceId) return;
+    try {
+      await downloadInvoicePdf(entry.invoiceId);
+    } catch {
+      showNotification("No se pudo descargar la factura", "error");
+    }
+  };
   const {
     entries,
     loading,
@@ -218,17 +230,32 @@ const CarteraPage = (): JSX.Element => {
           ];
         }}
         optionsMenu={(entry, closeMenu) => (
-          <MenuItem
-            onClick={() => {
-              closeMenu();
-              navigate(`/cartera/${entry.id}/recibo`, { state: { entry } });
-            }}
-          >
-            <ListItemIcon>
-              <FileText size={16} />
-            </ListItemIcon>
-            {entry.state === "PENDING" ? "Generar recibo de caja" : "Ver recibo de pago" }
-          </MenuItem>
+          <>
+            {entry.invoiceId && (
+              <MenuItem
+                onClick={() => {
+                  closeMenu();
+                  handleDownloadInvoice(entry);
+                }}
+              >
+                <ListItemIcon>
+                  <Download size={16} />
+                </ListItemIcon>
+                Descargar factura
+              </MenuItem>
+            )}
+            <MenuItem
+              onClick={() => {
+                closeMenu();
+                navigate(`/cartera/${entry.id}/recibo`, { state: { entry } });
+              }}
+            >
+              <ListItemIcon>
+                <FileText size={16} />
+              </ListItemIcon>
+              Ver recibo de caja
+            </MenuItem>
+          </>
         )}
         currentPage={currentPage}
         itemsPerPage={pageSize}
