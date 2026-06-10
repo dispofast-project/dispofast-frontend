@@ -72,6 +72,7 @@ const OrderInfoCard = ({
         <p className="text-xs text-gray-400 italic">Sin factura adjunta</p>
       )}
     </Box>
+
   </Box>
 );
 

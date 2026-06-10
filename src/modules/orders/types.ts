@@ -50,6 +50,7 @@ export interface SalesOrder {
   retefuenteAmount?: number | null;
   reteicaAmount?: number | null;
   freight?: number | null;
+  observations?: string | null;
   items: SalesOrderItem[];
 }
 
@@ -81,6 +82,7 @@ export interface CreateOrderRequestDTO {
   paymentCondition?: PaymentCondition;
   discountRate?: number;
   additionalDiscountRate?: number;
+  observations?: string;
   items: CreateOrderItemDTO[];
 }
 
@@ -92,6 +94,7 @@ export interface UpdateOrderRequestDTO {
   shipmentAddress?: string;
   zone?: string;
   priceListId?: string;
+  observations?: string;
   items?: CreateOrderItemDTO[];
 }
 

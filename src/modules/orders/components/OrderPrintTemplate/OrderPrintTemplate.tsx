@@ -68,6 +68,7 @@ export interface OrderPrintTemplateProps {
   additionalDiscountAmt: number;
   retefuenteAmount: number;
   freight: number;
+  observations?: string;
 }
 
 const OrderPrintTemplate = forwardRef<HTMLDivElement, OrderPrintTemplateProps>(
@@ -302,6 +303,8 @@ const OrderPrintTemplate = forwardRef<HTMLDivElement, OrderPrintTemplateProps>(
                 padding: "8px 10px",
                 minHeight: 110,
               }}
+
+              {...(order.observations ? { children: order.observations } : { children: <span style={{ color: "#777" }}>No hay observaciones</span> }) }
             />
           </div>
 

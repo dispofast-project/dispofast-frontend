@@ -19,6 +19,8 @@ import OrderItemsTable from "../components/OrderItemsTable/OrderItemsTable";
 import OrderPaymentPanel from "../components/OrderPaymentPanel/OrderPaymentPanel";
 import AttachInvoiceDialog from "../components/AttachInvoiceDialog/AttachInvoiceDialog";
 import OrderPrintTemplate from "../components/OrderPrintTemplate/OrderPrintTemplate";
+import OrderClientDetailCard from "../components/OrderClientDetailCard/OrderClientDetailCard";
+import OrderObservationsCard from "../components/OrderObservationsCard/OrderObservationsCard";
 
 const NEXT_STATES: Record<OrderState, OrderState[]> = {
   PENDING: ["CANCELLED"],
@@ -116,6 +118,13 @@ const OrderDetailPage = () => {
     finally { setStateLoading(false); }
   };
 
+  // ── Observations ────────────────────────────────────────────────────────────
+  const handleSaveObservations = async (value: string) => {
+    if (!id) return;
+    await updateOrder(id, { observations: value });
+    refetch();
+  };
+
   // ── Guards ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -170,6 +179,9 @@ const OrderDetailPage = () => {
       <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left: main content */}
         <Box className="lg:col-span-2 flex flex-col gap-5">
+
+          <OrderClientDetailCard client={client} />
+
           <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <OrderInfoCard
               clientName={order.clientName}
@@ -186,6 +198,11 @@ const OrderDetailPage = () => {
               zone={order.zone}
             />
           </Box>
+
+          <OrderObservationsCard
+            observations={order.observations}
+            onSave={handleSaveObservations}
+          />
 
           <OrderItemsTable items={order.items ?? []} />
         </Box>
