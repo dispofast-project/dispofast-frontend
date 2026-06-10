@@ -11,7 +11,7 @@ export const CARTERA_STATUS_CONFIG: Record<ArEntryState, StatusBadgeConfig> = {
   },
   PAID: {
     label: "Pagada",
-    color: "default",
+    color: "success",
     icon: React.createElement(CreditCard, { size: 14 }),
   },
 };

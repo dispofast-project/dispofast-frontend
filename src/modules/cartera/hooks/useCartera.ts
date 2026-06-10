@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ArEntry, ArEntryState, CarteraStats } from "../types";
-import { getArEntries } from "../api/cartera.service";
+import { getArEntries, getTotalPaidValue } from "../api/cartera.service";
 
 const PAGE_SIZE = 10;
 
@@ -39,15 +39,17 @@ export const useCartera = () => {
         ) as string[];
         setAsesorOptions(asesores.sort());
 
-        // Only PENDING entries contribute to the financial totals
+        // Only PENDING entries contribute to the financial totals.
+        // Use balance (= value - paidAmount) so partial payments are reflected.
         const pending = all.filter((e) => e.state === "PENDING");
-        const totalCartera = pending.reduce((s, e) => s + (e.value ?? 0), 0);
+        const bal = (e: (typeof pending)[0]) => e.balance ?? e.value ?? 0;
+        const totalCartera = pending.reduce((s, e) => s + bal(e), 0);
         const carteraVencida = pending
           .filter((e) => e.diasVencimiento <= 0)
-          .reduce((s, e) => s + (e.value ?? 0), 0);
-        const alDia = pending
-          .filter((e) => e.diasVencimiento > 0)
-          .reduce((s, e) => s + (e.value ?? 0), 0);
+          .reduce((s, e) => s + bal(e), 0);
+
+        // "Al Día" = total acumulado pagado en todos los recibos
+        const alDia = await getTotalPaidValue();
 
         setStats({ totalCartera, carteraVencida, alDia });
       } finally {

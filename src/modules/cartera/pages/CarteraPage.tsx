@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import {
   Box,
   InputAdornment,
+  ListItemIcon,
   MenuItem,
   Select,
   TextField,
@@ -13,7 +14,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Wallet,
+  FileText,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import StatCard from "../../../shared/components/Card/StatCard";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
@@ -21,6 +24,8 @@ import { Button } from "../../../shared/components/Button/Button";
 import { useCartera } from "../hooks/useCartera";
 import { CARTERA_STATUS_CONFIG } from "../config/statusConfig";
 import { type ArEntry, type ArEntryState } from "../types";
+import { downloadInvoicePdf } from "../../invoices/api/invoice.service";
+import { useNotificationStore } from "../../../shared/store/notification.store";
 import CustomTitle from "../../../shared/components/Title/Title";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -54,6 +59,17 @@ const DaysBadge = ({ dias }: { dias: number}) => {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 const CarteraPage = (): JSX.Element => {
+  const navigate = useNavigate();
+  const { showNotification } = useNotificationStore();
+
+  const handleDownloadInvoice = async (entry: ArEntry) => {
+    if (!entry.invoiceId) return;
+    try {
+      await downloadInvoicePdf(entry.invoiceId);
+    } catch {
+      showNotification("No se pudo descargar la factura", "error");
+    }
+  };
   const {
     entries,
     loading,
@@ -203,7 +219,7 @@ const CarteraPage = (): JSX.Element => {
             </Box>,
             entry.asesorName ?? "-",
             entry.orderNumber ?? "-",
-            formatCurrency(entry.value ?? 0),
+            formatCurrency(entry.balance ?? entry.value ?? 0),
             entry.invoiceNumber ?? "-",
             formatDate(entry.invoiceDate),
             <DaysBadge
@@ -213,6 +229,34 @@ const CarteraPage = (): JSX.Element => {
             entry.cityName ?? "-",
           ];
         }}
+        optionsMenu={(entry, closeMenu) => (
+          <>
+            {entry.invoiceId && (
+              <MenuItem
+                onClick={() => {
+                  closeMenu();
+                  handleDownloadInvoice(entry);
+                }}
+              >
+                <ListItemIcon>
+                  <Download size={16} />
+                </ListItemIcon>
+                Descargar factura
+              </MenuItem>
+            )}
+            <MenuItem
+              onClick={() => {
+                closeMenu();
+                navigate(`/cartera/${entry.id}/recibo`, { state: { entry } });
+              }}
+            >
+              <ListItemIcon>
+                <FileText size={16} />
+              </ListItemIcon>
+              Ver recibo de caja
+            </MenuItem>
+          </>
+        )}
         currentPage={currentPage}
         itemsPerPage={pageSize}
         totalItems={totalElements}
