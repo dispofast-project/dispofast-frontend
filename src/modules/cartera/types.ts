@@ -45,6 +45,7 @@ export interface CreatePaymentReceiptRequest {
   value: number;
   paymentDate: string;
   paymentMethod: PaymentMethod;
+  voucherS3Key: string;
   documentNumber?: string;
   observations?: string;
 }

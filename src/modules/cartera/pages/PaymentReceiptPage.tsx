@@ -114,6 +114,7 @@ const PaymentReceiptPage = () => {
         value: values.value,
         paymentDate: values.paymentDate,
         paymentMethod: values.paymentMethod as PaymentMethod,
+        voucherS3Key: values.voucherS3Key,
         documentNumber: values.documentNumber || undefined,
         observations: values.observations || undefined,
       });

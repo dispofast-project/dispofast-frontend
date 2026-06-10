@@ -1,5 +1,6 @@
 import {
   Box,
+  CircularProgress,
   Divider,
   FormControl,
   FormControlLabel,
@@ -10,22 +11,24 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { CheckCircle, Paperclip, XCircle } from "lucide-react";
+import { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../../../../shared/components/Button/Button";
+import { uploadPaymentVoucher } from "../../api/cartera.service";
 
 // ── Schema ───────────────────────────────────────────────────────────────────
 
 const schema = z.object({
   documentNumber: z.string().optional(),
   paymentDate: z.string().min(1, "La fecha de pago es obligatoria"),
-  value: z.coerce
-    .number({ invalid_type_error: "El valor debe ser un número" })
-    .positive("El valor debe ser mayor a 0"),
-  paymentMethod: z.enum(["CAJA", "TRANSFERENCIA"] as const, {
-    required_error: "El método de pago es obligatorio",
+  value: z.number({ error: "El valor debe ser un número" }).positive("El valor debe ser mayor a 0"),
+  paymentMethod: z.enum(["CAJA", "TRANSFERENCIA"], {
+    error: "El método de pago es obligatorio",
   }),
+  voucherS3Key: z.string().min(1, "El comprobante de pago es obligatorio"),
   observations: z.string().optional(),
 });
 
@@ -47,6 +50,7 @@ const ReceiptPaymentForm = ({
   const {
     register,
     handleSubmit,
+    setValue,
     control,
     formState: { errors },
   } = useForm<ReceiptFormValues>({
@@ -54,12 +58,45 @@ const ReceiptPaymentForm = ({
     defaultValues: { paymentMethod: "CAJA" },
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingVoucher, setUploadingVoucher] = useState(false);
+  const [voucherFileName, setVoucherFileName] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingVoucher(true);
+    setUploadError(null);
+    try {
+      const key = await uploadPaymentVoucher(file);
+      setValue("voucherS3Key", key, { shouldValidate: true });
+      setVoucherFileName(file.name);
+    } catch {
+      setUploadError("No se pudo subir el archivo. Intenta de nuevo.");
+    } finally {
+      setUploadingVoucher(false);
+      // Reset so the same file can be re-selected if needed
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setValue("voucherS3Key", "", { shouldValidate: true });
+    setVoucherFileName(null);
+    setUploadError(null);
+  };
+
   return (
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
       className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
     >
+      {/* Hidden input wired to RHF — validated by Zod */}
+      <input type="hidden" {...register("voucherS3Key")} />
+
       <Box className="px-5 py-4 border-b border-gray-100">
         <Typography variant="body1" className="font-bold text-gray-800">
           Pagos
@@ -93,8 +130,8 @@ const ReceiptPaymentForm = ({
           type="number"
           size="small"
           fullWidth
-          slotProps={{ htmlInput: { min: 0, step: 1 } }}
-          {...register("value")}
+          slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+          {...register("value", { valueAsNumber: true })}
           error={!!errors.value}
           helperText={errors.value?.message}
         />
@@ -127,6 +164,65 @@ const ReceiptPaymentForm = ({
             <FormHelperText>{errors.paymentMethod.message}</FormHelperText>
           )}
         </FormControl>
+
+        {/* Voucher upload */}
+        <Box className="flex flex-col gap-1">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {voucherFileName ? (
+            <Box
+              className="flex items-center justify-between gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2"
+            >
+              <Box className="flex items-center gap-2 min-w-0">
+                <CheckCircle size={16} className="text-green-600 shrink-0" />
+                <Typography
+                  variant="body2"
+                  className="text-green-700 truncate"
+                  title={voucherFileName}
+                >
+                  {voucherFileName}
+                </Typography>
+              </Box>
+              <button
+                type="button"
+                onClick={handleRemoveVoucher}
+                className="text-gray-400 hover:text-gray-600 shrink-0"
+              >
+                <XCircle size={16} />
+              </button>
+            </Box>
+          ) : (
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={uploadingVoucher || isLoading}
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full justify-center gap-2"
+            >
+              {uploadingVoucher ? (
+                <CircularProgress size={16} />
+              ) : (
+                <Paperclip size={16} />
+              )}
+              <Typography variant="body2" className="font-medium">
+                {uploadingVoucher ? "Subiendo..." : "Adjuntar comprobante"}
+              </Typography>
+            </Button>
+          )}
+
+          {errors.voucherS3Key && (
+            <FormHelperText error>{errors.voucherS3Key.message}</FormHelperText>
+          )}
+          {uploadError && (
+            <FormHelperText error>{uploadError}</FormHelperText>
+          )}
+        </Box>
 
         <TextField
           label="Observaciones"

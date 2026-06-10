@@ -1,4 +1,7 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, IconButton, Tooltip, Typography } from "@mui/material";
+import { Download } from "lucide-react";
+import { useState } from "react";
+import { downloadPaymentVoucher } from "../../api/cartera.service";
 import type { PaymentReceipt } from "../../types";
 
 const COMMISSION_RATE = 0.015;
@@ -74,6 +77,23 @@ interface ReceiptSummaryPanelProps {
 const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
   const commission = data.subtotal * COMMISSION_RATE;
   const activeReceipts = data.receipts.filter((r) => r.state === "ACTIVE");
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownload = async (r: PaymentReceipt) => {
+    if (!r.voucherS3Key) return;
+    setDownloadingId(r.id);
+    try {
+      const { blob, filename } = await downloadPaymentVoucher(r.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -155,19 +175,37 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
             {activeReceipts.map((r) => (
               <Box
                 key={r.id}
-                className="flex items-center justify-between gap-2"
+                className="flex items-center justify-between gap-1"
               >
-                <Typography variant="body2" className="text-gray-500 text-xs">
+                <Typography variant="body2" className="text-gray-500 text-xs min-w-0 truncate">
                   {fmtDate(r.paymentDate)} | Recibo:{" "}
                   {r.documentNumber ?? r.receiptCode}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  className="font-medium text-xs shrink-0"
-                  sx={{ color: "var(--dispofast-primary)" }}
-                >
-                  -{fmt(r.value)}
-                </Typography>
+                <Box className="flex items-center gap-1 shrink-0">
+                  <Typography
+                    variant="body2"
+                    className="font-medium text-xs"
+                    sx={{ color: "var(--dispofast-primary)" }}
+                  >
+                    -{fmt(r.value)}
+                  </Typography>
+                  {r.voucherS3Key && (
+                    <Tooltip title="Descargar comprobante">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDownload(r)}
+                        disabled={downloadingId === r.id}
+                        sx={{ p: 0.25 }}
+                      >
+                        {downloadingId === r.id ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <Download size={14} />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
               </Box>
             ))}
           </Box>
