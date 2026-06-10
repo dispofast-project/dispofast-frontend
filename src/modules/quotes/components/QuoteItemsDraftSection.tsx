@@ -1,4 +1,4 @@
-import { useState, useImperativeHandle, forwardRef } from "react";
+import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
 import {
   Box,
   Button,
@@ -34,8 +34,15 @@ export interface QuoteItemsDraftSectionHandle {
   getItems: () => Array<{ productId: string; quantity: number; unitPrice: number }>;
 }
 
+export interface DraftTotals {
+  subtotal: number;
+  tax: number;
+  itemCount: number;
+}
+
 interface QuoteItemsDraftSectionProps {
   priceListId: string;
+  onTotalsChange?: (totals: DraftTotals) => void;
 }
 
 const IVA = 0.19;
@@ -44,11 +51,25 @@ const fmt = (value: number) =>
   new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
 
 const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteItemsDraftSectionProps>(
-  ({ priceListId }, ref) => {
+  ({ priceListId, onTotalsChange }, ref) => {
     const [items, setItems] = useState<DraftItem[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [pendingQty, setPendingQty] = useState<Record<string, string>>({});
     const [pendingPrice, setPendingPrice] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+      if (!onTotalsChange) return;
+      let subtotal = 0;
+      let tax = 0;
+      for (const item of items) {
+        const qty = parseFloat(pendingQty[item.tempId] ?? String(item.quantity)) || 0;
+        const price = parseFloat(pendingPrice[item.tempId] ?? String(item.unitPrice)) || 0;
+        const lineSubtotal = qty * price;
+        subtotal += lineSubtotal;
+        tax += item.taxFree ? 0 : lineSubtotal * IVA;
+      }
+      onTotalsChange({ subtotal, tax, itemCount: items.length });
+    }, [items, pendingQty, pendingPrice, onTotalsChange]);
 
     useImperativeHandle(ref, () => ({
       getItems: () =>
