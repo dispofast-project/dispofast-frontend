@@ -37,6 +37,7 @@ const PaymentReceiptPage = () => {
   const [receipts, setReceipts] = useState<PaymentReceipt[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [typedPayment, setTypedPayment] = useState(0);
 
   const loadReceipts = useCallback(async () => {
     if (!entry) return;
@@ -70,6 +71,8 @@ const PaymentReceiptPage = () => {
     load();
   }, [entry?.clientId, entry?.orderId]);
 
+  
+
   if (!entry) return null;
 
   // ── Derived financial data ─────────────────────────────────────────────────
@@ -102,6 +105,7 @@ const PaymentReceiptPage = () => {
     hasOrderData: !loadingData && order !== null,
     receipts,
     balance: liveBalance,
+    pendingPayment: typedPayment,
   };
 
   const receiptRef = entry.id.replace(/-/g, "").substring(0, 13);
@@ -167,6 +171,7 @@ const PaymentReceiptPage = () => {
               onSubmit={handleSubmit}
               onCancel={() => navigate("/cartera")}
               isLoading={submitting}
+              onValueChange={setTypedPayment}
             />
           )}
         </Box>

@@ -68,6 +68,8 @@ export interface ReceiptSummaryData {
   hasOrderData: boolean;
   receipts: PaymentReceipt[];
   balance: number;
+  currentPayment?: number;
+  pendingPayment?: number;
 }
 
 interface ReceiptSummaryPanelProps {
@@ -212,7 +214,7 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
 
           <Divider />
 
-          <Box className="px-5 py-4">
+          <Box className="px-5 py-4 flex flex-col gap-2">
             <Box className="flex items-center justify-between">
               <Typography variant="body2" className="font-bold text-gray-800">
                 Saldo Factura
@@ -230,6 +232,36 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
                 {fmt(Math.max(0, data.balance))}
               </Typography>
             </Box>
+
+            {data.pendingPayment != null && data.pendingPayment > 0 && (
+              <Box className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2">
+                <Box className="flex items-center justify-between">
+                  <Typography variant="body2" className="text-gray-500">
+                    Pago
+                  </Typography>
+                  <Typography variant="body2" className="font-medium text-gray-700">
+                    -{fmt(data.pendingPayment)}
+                  </Typography>
+                </Box>
+                <Box className="flex items-center justify-between">
+                  <Typography variant="body2" className="text-gray-500">
+                    Saldo restante
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    className="font-bold"
+                    sx={{
+                      color:
+                        data.balance - data.pendingPayment <= 0
+                          ? "success.main"
+                          : "var(--dispofast-primary)",
+                    }}
+                  >
+                    {fmt(Math.max(0, data.balance - data.pendingPayment))}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
           </Box>
         </>
       )}
