@@ -12,14 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import { CheckCircle, Paperclip, XCircle } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../../../../shared/components/Button/Button";
 import { uploadPaymentVoucher } from "../../api/cartera.service";
 
-// ── Schema ───────────────────────────────────────────────────────────────────
 
 const schema = z.object({
   documentNumber: z.string().optional(),
@@ -34,29 +33,37 @@ const schema = z.object({
 
 export type ReceiptFormValues = z.infer<typeof schema>;
 
-// ── Component ────────────────────────────────────────────────────────────────
+
 
 interface ReceiptPaymentFormProps {
   onSubmit: (values: ReceiptFormValues) => void;
   onCancel: () => void;
   isLoading: boolean;
+  onValueChange?: (v: number) => void;
 }
 
 const ReceiptPaymentForm = ({
   onSubmit,
   onCancel,
   isLoading,
+  onValueChange,
 }: ReceiptPaymentFormProps) => {
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     control,
     formState: { errors },
   } = useForm<ReceiptFormValues>({
     resolver: zodResolver(schema),
     defaultValues: { paymentMethod: "CAJA" },
   });
+
+  const typedValue = watch("value");
+  useEffect(() => {
+    onValueChange?.(Number.isFinite(typedValue) && typedValue > 0 ? typedValue : 0);
+  }, [typedValue]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingVoucher, setUploadingVoucher] = useState(false);
