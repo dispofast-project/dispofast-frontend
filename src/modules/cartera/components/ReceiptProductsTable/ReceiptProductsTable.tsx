@@ -18,20 +18,28 @@ const HEADERS = [
 
 interface ReceiptProductsTableProps {
   orderNumber: string | null;
+  invoiceNumber: string | null;
   items: SalesOrderItem[];
   loading: boolean;
 }
 
 const ReceiptProductsTable = ({
   orderNumber,
+  invoiceNumber,
   items,
   loading,
 }: ReceiptProductsTableProps) => (
   <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-    <Box className="px-6 py-4 border-b border-gray-100">
+    <Box className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
       <Typography variant="body1" className="font-semibold text-gray-800">
         Productos (Orden #{orderNumber ?? "—"})
       </Typography>
+      {invoiceNumber && (
+        <Typography variant="body2" className="text-gray-500">
+          Factura:{" "}
+          <span className="font-semibold text-gray-700">{invoiceNumber}</span>
+        </Typography>
+      )}
     </Box>
 
     {loading ? (

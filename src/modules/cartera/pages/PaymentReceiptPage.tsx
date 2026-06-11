@@ -157,6 +157,7 @@ const PaymentReceiptPage = () => {
           {entry.orderId && (
             <ReceiptProductsTable
               orderNumber={entry.orderNumber}
+              invoiceNumber={entry.invoiceNumber}
               items={items}
               loading={loadingData}
             />

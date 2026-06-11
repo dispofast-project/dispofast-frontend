@@ -125,14 +125,6 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
           >
             Orden #{data.orderNumber ?? "—"}
           </Typography>
-          {data.invoiceNumber && (
-            <Typography variant="body2" className="text-gray-500">
-              Factura:{" "}
-              <span className="font-semibold text-gray-700">
-                {data.invoiceNumber}
-              </span>
-            </Typography>
-          )}
         </Box>
 
         {data.hasOrderData ? (
