@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { QuotePreview, Quote, QuoteItem, ClientPreview, ClientDetails } from "../types";
+import type { QuotePreview, Quote, QuoteItem, ClientPreview, ClientDetails, ProspectDetails } from "../types";
 import type { PriceList } from "../types";
 
 export const getQuotesService = async (
@@ -84,5 +84,12 @@ export const removeQuoteItemService = async (quoteId: string, itemId: string): P
 
 export const changeQuoteStatusService = async (id: string, status: string): Promise<Quote> => {
   const response = await apiClient.patch(`/quotes/${id}/status`, { status });
+  return response.data;
+};
+
+export const createQuoteFromProspectService = async (
+  prospectData: ProspectDetails,
+): Promise<Quote> => {
+  const response = await apiClient.post("/quotes", { prospect: prospectData });
   return response.data;
 };

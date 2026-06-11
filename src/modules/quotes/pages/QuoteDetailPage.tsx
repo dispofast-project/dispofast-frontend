@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Box, Typography, IconButton, CircularProgress, Button, Alert } from "@mui/material";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Box, Typography, IconButton, CircularProgress, Button } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import {
@@ -8,16 +8,18 @@ import {
   getPriceListsService,
   getClientByIdService,
   createQuoteService,
+  createQuoteFromProspectService,
   addQuoteItemService,
 } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
-import type { Quote, PriceList, ClientDetails } from "../types";
-import { QuoteStatus } from "../types";
+import type { Quote, PriceList, ClientDetails, ProspectDetails } from "../types";
+import { QuoteStatus, LegalEntityType } from "../types";
 import { useQuoteEdit } from "../hooks/useQuoteEdit";
 import { useAuth } from "../../iam/hooks/useAuth";
 
 import QuoteDetailsHeaderCard from "../components/QuoteDetailsHeaderCard";
 import QuoteCreateHeaderCard from "../components/QuoteCreateHeaderCard";
+import QuoteProspectHeaderCard from "../components/QuoteProspectHeaderCard";
 import QuoteClientCard from "../components/QuoteClientCard";
 import QuoteAdvisorCard from "../components/QuoteAdvisorCard";
 import QuoteTermsCard from "../components/QuoteTermsCard";
@@ -27,10 +29,11 @@ import QuoteOrderCard from "../components/QuoteOrderCard";
 import QuoteItemsSection from "../components/QuoteItemsSection";
 import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
 import QuoteItemsDraftSection from "../components/QuoteItemsDraftSection";
-import type { QuoteItemsDraftSectionHandle } from "../components/QuoteItemsDraftSection";
+import type { QuoteItemsDraftSectionHandle, DraftTotals } from "../components/QuoteItemsDraftSection";
+import QuoteSummaryPanel from "../components/QuoteSummaryPanel/QuoteSummaryPanel";
 
 interface QuoteDetailPageProps {
-  mode: "create" | "edit";
+  mode: "create" | "create-prospect" | "edit";
 }
 
 interface QuoteState {
@@ -49,6 +52,10 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const { id } = useParams<{ id: string }>();
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Prospect data passed via navigation state
+  const prospectData = (location.state as { prospect?: ProspectDetails } | null)?.prospect ?? null;
 
   const [quoteState, setQuoteState] = useState<QuoteState>({
     data: null,
@@ -66,6 +73,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const [hasItemChanges, setHasItemChanges] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [freight, setFreight] = useState(0);
+  const [draftTotals, setDraftTotals] = useState<DraftTotals>({ subtotal: 0, tax: 0, itemCount: 0 });
 
   const quoteItemsRef = useRef<QuoteItemsSectionHandle>(null);
   const draftItemsRef = useRef<QuoteItemsDraftSectionHandle>(null);
@@ -95,6 +104,42 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   } = useQuoteEdit(quote, (updated) =>
     setQuoteState((prev) => ({ ...prev, data: updated })),
   );
+
+  const handleDraftTotalsChange = useCallback((totals: DraftTotals) => {
+    setDraftTotals(totals);
+  }, []);
+
+  // Financial summary for create modes — computed from draft items + rates
+  const createSummary = useMemo(() => {
+    const { subtotal, tax } = draftTotals;
+    const commRate = parseFloat(commercialRate || "0") / 100;
+    const othRate = parseFloat(otherRate || "0") / 100;
+    const commercialDiscountAmt = subtotal * commRate;
+    const otherDiscountAmt = subtotal * othRate;
+    const isClientEmpresa =
+      client?.retefuenteApplies === true &&
+      client?.legalEntityType !== LegalEntityType.NATURAL;
+    const netBase = subtotal - commercialDiscountAmt - otherDiscountAmt;
+    const retefuenteAmt = isClientEmpresa ? netBase * 0.025 : 0;
+    const total = netBase + tax - retefuenteAmt + freight;
+    return { subtotal, tax, commercialDiscountAmt, otherDiscountAmt, retefuenteAmt, total };
+  }, [draftTotals, commercialRate, otherRate, freight, client]);
+
+  const createMissingFields = useMemo(() => {
+    const missing: string[] = [];
+    if (!selectedPriceListId) missing.push("Lista de precios");
+    return missing;
+  }, [selectedPriceListId]);
+
+  // Create-prospect mode: only needs price lists
+  useEffect(() => {
+    if (mode !== "create-prospect") return;
+    let isMounted = true;
+    getPriceListsService()
+      .then((data) => { if (isMounted) setPriceLists(data); })
+      .catch(console.error);
+    return () => { isMounted = false; };
+  }, [mode]);
 
   // Edit mode: fetch quote + price lists
   useEffect(() => {
@@ -167,12 +212,18 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   }, [client, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = async () => {
-    if (mode === "create") {
-      if (!clientId) return;
+    if (mode === "create" || mode === "create-prospect") {
       setIsCreating(true);
       setCreateError(null);
       try {
-        const newQuote = await createQuoteService(clientId);
+        let newQuote: Quote;
+        if (mode === "create-prospect") {
+          if (!prospectData) return;
+          newQuote = await createQuoteFromProspectService(prospectData);
+        } else {
+          if (!clientId) return;
+          newQuote = await createQuoteService(clientId);
+        }
         await handleSaveAll(newQuote.id);
         const draftItems = draftItemsRef.current?.getItems() ?? [];
         await Promise.all(
@@ -211,8 +262,10 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     }
   };
 
-  const isPageLoading = mode === "edit" ? isQuoteLoading : isClientLoading;
-  const pageError = mode === "edit" ? quoteError : clientError;
+  const isPageLoading =
+    mode === "edit" ? isQuoteLoading : mode === "create" ? isClientLoading : false;
+  const pageError =
+    mode === "edit" ? quoteError : mode === "create" ? clientError : null;
 
   if (isPageLoading) {
     return (
@@ -235,10 +288,24 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     );
   }
 
+  // For create-prospect, redirect if no prospect data was passed
+  if (mode === "create-prospect" && !prospectData) {
+    navigate("/cotizaciones", { replace: true });
+    return null;
+  }
+
+  const isCreateMode = mode === "create" || mode === "create-prospect";
   const isSaveDisabled =
     isCreating || isSaving || (mode === "edit" && !hasChanges && !hasItemChanges);
   const displayError = createError ?? saveError;
-  const pageTitle = mode === "create" ? "Nueva Cotización" : "Detalle de Cotización";
+  const pageTitle = isCreateMode ? "Nueva Cotización" : "Detalle de Cotización";
+
+  // accountInfo for summary panel
+  const accountInfo = isCreateMode
+    ? mode === "create-prospect"
+      ? { name: prospectData!.name }
+      : { name: client!.name, identificationNumber: client!.identificationNumber }
+    : null;
 
   return (
     <Box className="p-4 sm:p-8 max-w-7xl mx-auto" component="div">
@@ -265,8 +332,15 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
                 quote={quote}
                 onUpdated={(updated) => setQuoteState((prev) => ({ ...prev, data: updated }))}
               />
-              <QuoteClientCard account={quote.account} location={quote.location} />
+              {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+              {quote.account ? (
+                <QuoteClientCard account={quote.account} location={quote.location} />
+              ) : quote.prospect ? (
+                <QuoteProspectHeaderCard prospect={quote.prospect} editMode />
+              ) : null}
             </>
+          ) : mode === "create-prospect" ? (
+            <QuoteProspectHeaderCard prospect={prospectData!} />
           ) : (
             <QuoteCreateHeaderCard client={client!} />
           )}
@@ -287,6 +361,16 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             onOtherRateChange={setOtherRate}
           />
 
+          {/* Price list moved to main column in create modes */}
+          {isCreateMode && (
+            <QuotePriceListCard
+              quote={quote}
+              priceLists={priceLists}
+              selectedPriceListId={selectedPriceListId}
+              setSelectedPriceListId={setSelectedPriceListId}
+            />
+          )}
+
           {mode === "edit" && quote ? (
             <QuoteItemsSection
               ref={quoteItemsRef}
@@ -303,54 +387,67 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             <QuoteItemsDraftSection
               ref={draftItemsRef}
               priceListId={selectedPriceListId ?? ""}
+              onTotalsChange={handleDraftTotalsChange}
             />
           )}
         </Box>
 
         {/* ── Columna lateral ── */}
         <Box className="flex flex-col gap-6">
-          {mode === "edit" && quote?.status === QuoteStatus.ACCEPTED && (
-            <QuoteOrderCard
-              isCreatingOrder={isCreatingOrder}
-              orderError={orderError}
-              onCreateOrder={handleCreateOrder}
+          {isCreateMode && accountInfo ? (
+            <QuoteSummaryPanel
+              accountInfo={accountInfo}
+              subtotal={createSummary.subtotal}
+              tax={createSummary.tax}
+              commercialDiscountAmt={createSummary.commercialDiscountAmt}
+              otherDiscountAmt={createSummary.otherDiscountAmt}
+              retefuenteAmt={createSummary.retefuenteAmt}
+              freight={freight}
+              onFreightChange={setFreight}
+              total={createSummary.total}
+              itemCount={draftTotals.itemCount}
+              missingFields={createMissingFields}
+              isSaving={isCreating}
+              error={displayError}
+              onSave={handleSave}
             />
-          )}
-          <QuotePriceListCard
-            quote={quote}
-            priceLists={priceLists}
-            selectedPriceListId={selectedPriceListId}
-            setSelectedPriceListId={setSelectedPriceListId}
-          />
-          {mode === "edit" && quote && (
-            <QuotePaymentDetailsCard
-              quote={quote}
-            />
-          )}
-
-          {/* Guardar */}
-          <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-3">
-            {displayError && (
-              <Alert severity="error" sx={{ fontSize: "0.8rem" }}>
-                {displayError}
-              </Alert>
-            )}
-            <Button
-              variant="contained"
-              fullWidth
-              disabled={isSaveDisabled}
-              onClick={handleSave}
-              sx={{ textTransform: "none", fontWeight: 600 }}
-            >
-              {isCreating || isSaving ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : mode === "create" ? (
-                "Guardar"
-              ) : (
-                "Guardar cambios"
+          ) : (
+            <>
+              {mode === "edit" && quote?.status === QuoteStatus.ACCEPTED && (
+                <QuoteOrderCard
+                  isCreatingOrder={isCreatingOrder}
+                  orderError={orderError}
+                  onCreateOrder={handleCreateOrder}
+                />
               )}
-            </Button>
-          </Box>
+              <QuotePriceListCard
+                quote={quote}
+                priceLists={priceLists}
+                selectedPriceListId={selectedPriceListId}
+                setSelectedPriceListId={setSelectedPriceListId}
+              />
+              {mode === "edit" && quote && (
+                <QuotePaymentDetailsCard quote={quote} />
+              )}
+
+              {/* Guardar (edit mode) */}
+              <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-3">
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disabled={isSaveDisabled}
+                  onClick={handleSave}
+                  sx={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  {isSaving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Guardar cambios"
+                  )}
+                </Button>
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
     </Box>

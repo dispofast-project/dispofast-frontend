@@ -22,12 +22,18 @@ interface QuoteHeaderCardProps {
 
 const QuoteDetailsHeaderCard = ({ quote, onUpdated }: QuoteHeaderCardProps) => {
   const [isSaving, setIsSaving] = useState(false);
-  const isEmpresa = quote.account.legalEntityType === LegalEntityType.EMPRESA;
 
-  const displayName = isEmpresa
-    ? (quote.account.legalName ?? quote.account.name)
-    : `${quote.account.firstName ?? ""} ${quote.account.lastName ?? ""}`.trim() ||
-      quote.account.name;
+  // account can be null at runtime for prospect quotes
+  const account = quote.account as typeof quote.account | null;
+  const isProspect = !account && !!quote.prospect;
+  const isEmpresa = !isProspect && account?.legalEntityType === LegalEntityType.EMPRESA;
+
+  const rawName = account
+    ? (isEmpresa
+        ? (account.legalName ?? account.name)
+        : (`${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || account.name))
+    : null;
+  const displayName = isProspect ? (quote.prospect?.name ?? "Prospecto") : (rawName ?? "—");
 
   const avatarContent = isEmpresa ? (
     <BusinessIcon sx={{ fontSize: "2rem" }} />
@@ -57,19 +63,34 @@ const QuoteDetailsHeaderCard = ({ quote, onUpdated }: QuoteHeaderCardProps) => {
             {displayName || "—"}
           </Typography>
           <Box className="flex items-center flex-wrap gap-2 mt-0.5">
-            <Chip
-              icon={isEmpresa ? <BusinessIcon sx={{ fontSize: "0.9rem !important" }} /> : <PersonIcon sx={{ fontSize: "0.9rem !important" }} />}
-              label={isEmpresa ? "Empresa" : "Persona Natural"}
-              size="small"
-              variant="outlined"
-              sx={{
-                fontSize: "0.7rem",
-                height: 20,
-                borderColor: isEmpresa ? "secondary.light" : "primary.light",
-                color: isEmpresa ? "secondary.dark" : "primary.dark",
-                "& .MuiChip-icon": { color: "inherit" },
-              }}
-            />
+            {isProspect ? (
+              <Chip
+                label="Prospecto"
+                size="small"
+                sx={{
+                  fontSize: "0.7rem",
+                  height: 20,
+                  bgcolor: "#fff7ed",
+                  color: "#c2410c",
+                  border: "1px solid #fed7aa",
+                  fontWeight: 600,
+                }}
+              />
+            ) : (
+              <Chip
+                icon={isEmpresa ? <BusinessIcon sx={{ fontSize: "0.9rem !important" }} /> : <PersonIcon sx={{ fontSize: "0.9rem !important" }} />}
+                label={isEmpresa ? "Empresa" : "Persona Natural"}
+                size="small"
+                variant="outlined"
+                sx={{
+                  fontSize: "0.7rem",
+                  height: 20,
+                  borderColor: isEmpresa ? "secondary.light" : "primary.light",
+                  color: isEmpresa ? "secondary.dark" : "primary.dark",
+                  "& .MuiChip-icon": { color: "inherit" },
+                }}
+              />
+            )}
           </Box>
         </Box>
       </Box>
