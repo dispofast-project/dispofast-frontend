@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { getQuotesService } from "../api/quotes.api";
+import { getQuotesService, changeQuoteStatusService } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
-import type { QuotePreview } from "../types";
+import type { QuotePreview, ProspectDetails } from "../types";
 import QuotesTable from "../components/QuotesTable";
 import type { FilterConfig, FilterState } from "../../../shared/components/SearchBar/types";
 import FilterSearchBar from "../../../shared/components/SearchBar/SearchBar";
@@ -42,7 +42,7 @@ const QuotesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
   const [searchKey, setSearchKey] = useState<string | undefined>(undefined);
-  
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 10;
@@ -84,10 +84,6 @@ const QuotesPage = () => {
     navigate(`/cotizaciones/${quote.id}`);
   };
 
-  /**
-   * Called every time the filter state changes (debounced for text input).
-   * Extracts text + scope from the search filter and fires the API request.
-   */
   const handleFilterChange = (state: FilterState) => {
     const searchFilter = state["search"];
     const term = searchFilter?.term?.trim() || undefined;
@@ -97,11 +93,15 @@ const QuotesPage = () => {
 
     setSearchText(term);
     setSearchKey(apiKey);
-    setCurrentPage(1); // reset to first page on new search
+    setCurrentPage(1);
   };
 
   const handleCreateQuote = async (accountId: string) => {
     navigate(`/cotizaciones/nuevo/${accountId}`);
+  };
+
+  const handleCreateProspect = (prospectData: ProspectDetails) => {
+    navigate("/cotizaciones/nuevo/prospecto", { state: { prospect: prospectData } });
   };
 
   const handleCreateOrder = async (quote: QuotePreview) => {
@@ -110,6 +110,20 @@ const QuotesPage = () => {
       navigate(`/ordenes/${order.id}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al crear la orden.";
+      setError(message);
+    }
+  };
+
+  const handleChangeStatus = async (quoteId: string, newStatus: string) => {
+    try {
+      await changeQuoteStatusService(quoteId, newStatus);
+      setQuotes((prev) =>
+        prev.map((q) =>
+          q.id === quoteId ? { ...q, status: newStatus as QuotePreview["status"] } : q,
+        ),
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error al cambiar el estado.";
       setError(message);
     }
   };
@@ -154,13 +168,15 @@ const QuotesPage = () => {
           onShowActions={handleShowActions}
           onRowClick={handleRowClick}
           onCreateOrder={handleCreateOrder}
+          onChangeStatus={handleChangeStatus}
         />
       )}
-      
+
       <QuoteCreateModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateQuote}
+        onSubmitProspect={handleCreateProspect}
       />
     </Box>
   );
