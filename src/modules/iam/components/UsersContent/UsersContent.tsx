@@ -1,12 +1,15 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import type { JSX } from "react";
+import { Box, MenuItem } from "@mui/material";
+import { ShieldCheck } from "lucide-react";
 import type { User } from "../../types";
-import { Box } from "@mui/material";
 import { useUsers } from "../../hooks/useUsers";
 import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
-import type { JSX } from "react";
 import { Button } from "../../../../shared/components/Button/Button";
 import FilterSearchBar from "../../../../shared/components/SearchBar/SearchBar";
 import type { FilterConfig, FilterState } from "../../../../shared/components/SearchBar/types";
+import UserPermissionsDialog from "../UserPermissionsDialog/UserPermissionsDialog";
+import { formatRole } from "../../utils/formatRole";
 
 const filterConfigs: FilterConfig[] = [
     {
@@ -14,8 +17,8 @@ const filterConfigs: FilterConfig[] = [
         key: "search",
         label: "Buscar",
         scopes: [
-            { value: "all",   label: "Todos los campos" },
-            { value: "name",  label: "Nombre" },
+            { value: "all", label: "Todos los campos" },
+            { value: "name", label: "Nombre" },
             { value: "email", label: "Email" },
         ],
         debounceMs: 400,
@@ -23,7 +26,6 @@ const filterConfigs: FilterConfig[] = [
 ];
 
 const UsersContent = () => {
-
     const {
         users = [],
         loading,
@@ -36,30 +38,19 @@ const UsersContent = () => {
         handleRefresh,
     } = useUsers();
 
-    const handleFilterChange = useCallback((state: FilterState) => {
-        const term = state["search"]?.term ?? "";
-        handleSearchChange(term);
-    }, [handleSearchChange]);
+    const [permDialogUser, setPermDialogUser] = useState<User | null>(null);
 
-    const formatRole = (role: string): string => {
-        if (!role) return '-';
+    const handleFilterChange = useCallback(
+        (state: FilterState) => {
+            const term = state["search"]?.term ?? "";
+            handleSearchChange(term);
+        },
+        [handleSearchChange]
+    );
 
-        const labels: Record<string, string> = {
-            ADMIN: 'Administrador',
-            VENDEDOR: 'Vendedor',
-            BODEGA: 'Bodega',
-        };
-
-        return labels[role] ?? role.charAt(0) + role.slice(1).toLowerCase();
-    };
-
-    const renderUserRow = (item: any): (string | JSX.Element)[] => {
+    const renderUserRow = (item: unknown): (string | JSX.Element)[] => {
         const user = item as User;
-        return [
-            user.name,
-            user.email,
-            formatRole(user.role),
-        ];
+        return [user.name, user.email, formatRole(user.role)];
     };
 
     if (error) {
@@ -92,8 +83,25 @@ const UsersContent = () => {
                     onPageChange={handlePageChange}
                     itemsPerPage={pageSize}
                     totalItems={totalElements}
+                    optionsMenu={(item, closeMenu) => (
+                        <MenuItem
+                            onClick={() => {
+                                setPermDialogUser(item as User);
+                                closeMenu();
+                            }}
+                        >
+                            <ShieldCheck className="w-4 h-4 mr-2 text-gray-500" />
+                            Ver permisos
+                        </MenuItem>
+                    )}
                 />
             </Box>
+
+            <UserPermissionsDialog
+                open={permDialogUser !== null}
+                user={permDialogUser}
+                onClose={() => setPermDialogUser(null)}
+            />
         </Box>
     );
 };

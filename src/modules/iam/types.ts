@@ -41,3 +41,35 @@ export interface User {
     role: string;
     effectivePermissions: string[];
 }
+
+export interface PermissionSummary {
+    id: string;
+    name: string;
+    grantedByRole: boolean;
+}
+
+export interface Role {
+    id: string;
+    name: string;
+    permissions: PermissionSummary[];
+}
+
+export interface PermissionOverride {
+    permissionId: string;
+    permissionName: string;
+    granted: boolean;
+}
+
+export interface UserPermissionsDetail {
+    userId: string;
+    userName: string;
+    role: string;
+    overrides: PermissionOverride[];
+}
+
+export interface CreateUserFormData {
+    name: string;
+    email: string;
+    password: string;
+    roleId: string;
+}

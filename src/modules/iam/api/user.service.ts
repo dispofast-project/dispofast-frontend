@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { User } from "../types";
+import type { CreateUserFormData, PermissionOverride, User, UserPermissionsDetail } from "../types";
 
 export interface UserServiceParams {
     page?: number;
@@ -25,5 +25,26 @@ export const searchUsers = async (
     const { data } = await apiClient.get<PagedResponse<User>>(`${BASE_URL}/search`, {
         params: { q: query, page, size }
     });
+    return data;
+};
+
+export const createUser = async (payload: CreateUserFormData): Promise<User> => {
+    const { data } = await apiClient.post<User>(BASE_URL, payload);
+    return data;
+};
+
+export const getUserPermissions = async (id: string): Promise<UserPermissionsDetail> => {
+    const { data } = await apiClient.get<UserPermissionsDetail>(`${BASE_URL}/${id}/permissions`);
+    return data;
+};
+
+export const updateUserPermissions = async (
+    id: string,
+    permissions: PermissionOverride[]
+): Promise<UserPermissionsDetail> => {
+    const { data } = await apiClient.patch<UserPermissionsDetail>(
+        `${BASE_URL}/${id}/permissions`,
+        { permissions }
+    );
     return data;
 };
