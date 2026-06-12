@@ -8,7 +8,7 @@ import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import { Button } from "../../../../shared/components/Button/Button";
 import FilterSearchBar from "../../../../shared/components/SearchBar/SearchBar";
 import type { FilterConfig, FilterState } from "../../../../shared/components/SearchBar/types";
-import UserPermissionsDialog from "../UserPermissionsDialog/UserPermissionsDialog";
+import EditPermissionsDialog from "../EditPermissionsDialog/EditPermissionsDialog";
 import { formatRole } from "../../utils/formatRole";
 
 const filterConfigs: FilterConfig[] = [
@@ -38,7 +38,7 @@ const UsersContent = () => {
         handleRefresh,
     } = useUsers();
 
-    const [permDialogUser, setPermDialogUser] = useState<User | null>(null);
+    const [editPermUser, setEditPermUser] = useState<User | null>(null);
 
     const handleFilterChange = useCallback(
         (state: FilterState) => {
@@ -86,21 +86,21 @@ const UsersContent = () => {
                     optionsMenu={(item, closeMenu) => (
                         <MenuItem
                             onClick={() => {
-                                setPermDialogUser(item as User);
+                                setEditPermUser(item as User);
                                 closeMenu();
                             }}
                         >
                             <ShieldCheck className="w-4 h-4 mr-2 text-gray-500" />
-                            Ver permisos
+                            Ver / editar permisos
                         </MenuItem>
                     )}
                 />
             </Box>
 
-            <UserPermissionsDialog
-                open={permDialogUser !== null}
-                user={permDialogUser}
-                onClose={() => setPermDialogUser(null)}
+            <EditPermissionsDialog
+                open={editPermUser !== null}
+                user={editPermUser}
+                onClose={() => setEditPermUser(null)}
             />
         </Box>
     );
