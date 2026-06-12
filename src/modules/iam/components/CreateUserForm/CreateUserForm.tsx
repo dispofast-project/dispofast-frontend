@@ -111,7 +111,9 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess, onCancel }) 
         }
     };
 
-    const roleOptions = roles.map((r) => ({ value: r.id, label: formatRole(r.name) }));
+    const roleOptions = roles
+        .filter((r) => r.name !== "ADMIN")
+        .map((r) => ({ value: r.id, label: formatRole(r.name) }));
 
     return (
         <Box
