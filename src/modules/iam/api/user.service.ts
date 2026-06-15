@@ -1,6 +1,14 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { CreateUserFormData, PermissionOverride, User, UserPermissionsDetail } from "../types";
+import type {
+    CreateUserFormData,
+    GoalType,
+    PermissionOverride,
+    UpdateUserFormData,
+    User,
+    UserGoal,
+    UserPermissionsDetail,
+} from "../types";
 
 export interface UserServiceParams {
     page?: number;
@@ -47,4 +55,33 @@ export const updateUserPermissions = async (
         { permissions }
     );
     return data;
+};
+
+export const getUserById = async (id: string): Promise<User> => {
+    const { data } = await apiClient.get<User>(`${BASE_URL}/${id}`);
+    return data;
+};
+
+export const updateUser = async (id: string, payload: UpdateUserFormData): Promise<User> => {
+    const { data } = await apiClient.put<User>(`${BASE_URL}/${id}`, payload);
+    return data;
+};
+
+export const getUserGoals = async (id: string, type: GoalType): Promise<UserGoal[]> => {
+    const { data } = await apiClient.get<UserGoal[]>(`${BASE_URL}/${id}/goals`, {
+        params: { type },
+    });
+    return data;
+};
+
+export const createUserGoal = async (
+    id: string,
+    payload: { type: GoalType; month: number; year: number; value: number }
+): Promise<UserGoal> => {
+    const { data } = await apiClient.post<UserGoal>(`${BASE_URL}/${id}/goals`, payload);
+    return data;
+};
+
+export const deleteUserGoal = async (id: string, goalId: string): Promise<void> => {
+    await apiClient.delete(`${BASE_URL}/${id}/goals/${goalId}`);
 };

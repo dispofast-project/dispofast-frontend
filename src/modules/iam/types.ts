@@ -73,3 +73,19 @@ export interface CreateUserFormData {
     password: string;
     roleId: string;
 }
+
+export interface UpdateUserFormData {
+    name: string;
+    email: string;
+    roleId: string;
+}
+
+export type GoalType = "SALES_QUOTA" | "COLLECTION_QUOTA" | "COMMISSION";
+
+export interface UserGoal {
+    id: string;
+    type: GoalType;
+    month: number;
+    year: number;
+    value: number;
+}

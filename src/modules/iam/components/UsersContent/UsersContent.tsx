@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import type { JSX } from "react";
 import { Box, MenuItem } from "@mui/material";
 import { ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { User } from "../../types";
 import { useUsers } from "../../hooks/useUsers";
 import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
@@ -26,6 +27,7 @@ const filterConfigs: FilterConfig[] = [
 ];
 
 const UsersContent = () => {
+    const navigate = useNavigate();
     const {
         users = [],
         loading,
@@ -83,6 +85,7 @@ const UsersContent = () => {
                     onPageChange={handlePageChange}
                     itemsPerPage={pageSize}
                     totalItems={totalElements}
+                    onRowClick={(item) => navigate(`/usuarios/${(item as User).id}`)}
                     optionsMenu={(item, closeMenu) => (
                         <MenuItem
                             onClick={() => {
