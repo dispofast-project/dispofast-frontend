@@ -7,7 +7,6 @@ export const MODULES = [
     "PRICE_LISTS",
     "QUOTES",
     "ACCOUNTS",
-    "PROSPECTS",
 ] as const;
 
 export const ACTIONS = ["VIEW", "CREATE", "EDIT", "DELETE"] as const;
@@ -28,8 +27,7 @@ export const MODULE_LABELS: Record<PermissionModule, string> = {
     PURCHASE_ORDERS: "Órdenes de compra",
     PRICE_LISTS: "Listas de precios",
     QUOTES: "Cotizaciones",
-    ACCOUNTS: "Cuentas",
-    PROSPECTS: "Prospectos",
+    ACCOUNTS: "Cartera",
 };
 
 export const ACTION_LABELS: Record<PermissionAction, string> = {

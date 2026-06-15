@@ -14,7 +14,8 @@ import { getAllRoles } from "../../api/role.service";
 import { updateUserPermissions } from "../../api/user.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
 import { formatRole } from "../../utils/formatRole";
-import type { PermissionSummary, Role, User } from "../../types";
+import { ACTIONS } from "../../config/permissions";
+import type { PermissionSummary, User } from "../../types";
 
 interface EditPermissionsDialogProps {
     open: boolean;
@@ -29,7 +30,6 @@ const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
 }) => {
     const { showNotification } = useNotificationStore();
 
-    const [roles, setRoles] = useState<Role[]>([]);
     const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -44,7 +44,6 @@ const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
         setLoading(true);
         getAllRoles()
             .then((fetchedRoles) => {
-                setRoles(fetchedRoles);
                 const userRole = fetchedRoles.find(
                     (r) => r.name === user.role
                 );
@@ -61,7 +60,15 @@ const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
     const handleToggle = (permName: string, checked: boolean) => {
         setActivePermissions((prev) => {
             const next = new Set(prev);
-            checked ? next.add(permName) : next.delete(permName);
+            if (checked) {
+                next.add(permName);
+            } else {
+                next.delete(permName);
+                if (permName.endsWith("_VIEW")) {
+                    const module = permName.slice(0, -"_VIEW".length);
+                    ACTIONS.forEach((action) => next.delete(`${module}_${action}`));
+                }
+            }
             return next;
         });
     };
