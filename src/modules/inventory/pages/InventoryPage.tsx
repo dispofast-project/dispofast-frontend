@@ -6,6 +6,7 @@ import { useInventory } from "../hooks/useInventory";
 import InventoryFilters from "../components/InventoryFilters";
 import InventoryTable from "../components/InventoryTable";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../iam/hooks/useAuth";
 
 const InventoryPage = () => {
   const {
@@ -23,16 +24,21 @@ const InventoryPage = () => {
   } = useInventory();
 
   const navigate = useNavigate();
+  
+  const { authorities } = useAuth();
+  const canCreate = authorities.includes("PRODUCTS_CREATE");
 
   return (
     <Box className="flex flex-col gap-6 pb-8">
       <Box className="grid grid-cols-2 flex-shrink-0 items-center justify-between">
         <CustomTitle mainTitle="Inventarios" description="Gestiona el stock de productos" />
         <Box className="flex items-center justify-end">
-          <Button variant="primary" onClick={() => navigate("/inventario/nuevo")}>
-            <Plus className="w-4 h-4 mr-2" />
-            Añadir
-          </Button>
+          {canCreate && (
+            <Button variant="primary" onClick={() => navigate("/inventario/nuevo")}>
+              <Plus className="w-4 h-4 mr-2" />
+              Añadir
+            </Button>
+          )}
         </Box>
       </Box>
 
