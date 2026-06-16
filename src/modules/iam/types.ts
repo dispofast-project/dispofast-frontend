@@ -80,7 +80,7 @@ export interface UpdateUserFormData {
     roleId: string;
 }
 
-export type GoalType = "SALES_QUOTA" | "COLLECTION_QUOTA" | "COMMISSION";
+export type GoalType = "SALES_QUOTA" | "COLLECTION_QUOTA";
 
 export interface UserGoal {
     id: string;
@@ -88,4 +88,16 @@ export interface UserGoal {
     month: number;
     year: number;
     value: number;
+}
+
+export interface Category {
+    id: string;
+    name: string;
+}
+
+export interface UserCommissionRate {
+    id: string;
+    categoryId: string;
+    categoryName: string;
+    rate: number;
 }

@@ -1,11 +1,13 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
 import type {
+    Category,
     CreateUserFormData,
     GoalType,
     PermissionOverride,
     UpdateUserFormData,
     User,
+    UserCommissionRate,
     UserGoal,
     UserPermissionsDetail,
 } from "../types";
@@ -84,4 +86,31 @@ export const createUserGoal = async (
 
 export const deleteUserGoal = async (id: string, goalId: string): Promise<void> => {
     await apiClient.delete(`${BASE_URL}/${id}/goals/${goalId}`);
+};
+
+export const getCategories = async (): Promise<Category[]> => {
+    const { data } = await apiClient.get<Category[]>("/categories");
+    return data;
+};
+
+export const getUserCommissionRates = async (id: string): Promise<UserCommissionRate[]> => {
+    const { data } = await apiClient.get<UserCommissionRate[]>(
+        `${BASE_URL}/${id}/commission-rates`
+    );
+    return data;
+};
+
+export const createUserCommissionRate = async (
+    id: string,
+    payload: { categoryId: string; rate: number }
+): Promise<UserCommissionRate> => {
+    const { data } = await apiClient.post<UserCommissionRate>(
+        `${BASE_URL}/${id}/commission-rates`,
+        payload
+    );
+    return data;
+};
+
+export const deleteUserCommissionRate = async (id: string, rateId: string): Promise<void> => {
+    await apiClient.delete(`${BASE_URL}/${id}/commission-rates/${rateId}`);
 };

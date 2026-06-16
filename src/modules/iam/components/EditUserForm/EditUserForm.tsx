@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Typography } from "@mui/material";
+import { Box, Divider, Typography } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { Input } from "../../../../shared/components/Input/Input";
 import { Button } from "../../../../shared/components/Button/Button";
 import Dropdown from "../../../../shared/components/Dropdown/Dropdown";
@@ -23,6 +25,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSuccess }) => {
     const [roles, setRoles] = useState<Role[]>([]);
     const [rolesLoading, setRolesLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const {
         register,
@@ -83,7 +86,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSuccess }) => {
                 />
             </Box>
 
-            <Box className="flex flex-col gap-1 max-w-xs">
+                <Box className="flex flex-col gap-1 max-w-xs">
                 <Dropdown
                     label="Rol"
                     options={roleOptions}
@@ -99,6 +102,35 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onSuccess }) => {
                         {errors.roleId.message}
                     </Typography>
                 )}
+            </Box>
+
+            <Divider />
+
+            <Box className="flex flex-col gap-1">
+                <Typography variant="body2" color="text.secondary">
+                    Dejar en blanco para mantener la contraseña actual
+                </Typography>
+                <Box className="max-w-xs">
+                    <Input
+                        label="Nueva contraseña"
+                        type={isPasswordVisible ? "text" : "password"}
+                        placeholder="Mínimo 8 caracteres"
+                        error={errors.password?.message}
+                        rightElement={
+                            <button
+                                type="button"
+                                onClick={() => setIsPasswordVisible((v) => !v)}
+                                className="text-gray-500 hover:text-gray-700 focus:outline-none p-1.5"
+                                aria-label={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
+                            >
+                                {isPasswordVisible
+                                    ? <VisibilityOffIcon fontSize="small" />
+                                    : <VisibilityIcon fontSize="small" />}
+                            </button>
+                        }
+                        {...register("password")}
+                    />
+                </Box>
             </Box>
 
             <Box className="flex justify-end pt-2">
