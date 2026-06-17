@@ -35,7 +35,7 @@ export const CarrierAutocomplete = ({
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
       options={options}
-      getOptionLabel={(option) => `${option.name} (${option.plate})`}
+      getOptionLabel={(option) => option.name}
       isOptionEqualToValue={(option, val) => option.id === val.id}
       loading={isSearching}
       disabled={disabled}

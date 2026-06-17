@@ -63,9 +63,9 @@ const ShipmentDetailPage = () => {
             <Typography variant="body1" className="font-semibold">
               {shipment.carrier?.name || "Sin asignar"}
             </Typography>
-            {shipment.carrier && (
+            {shipment.carrier?.website && (
               <Typography variant="caption" color="text.secondary">
-                Placa: {shipment.carrier.plate}
+                {shipment.carrier.website}
               </Typography>
             )}
           </Box>

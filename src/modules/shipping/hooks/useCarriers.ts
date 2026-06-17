@@ -18,10 +18,10 @@ export const useCarriers = () => {
         const response = await getAllCarriers({
           page: page - 1,
           size: PAGE_SIZE_CARRIERS,
-          ...currentFilters,
+          name: currentFilters.name,
         });
-        setCarriers(response.content);
-        setTotalElements(response.totalElements);
+        setCarriers(response.content ?? []);
+        setTotalElements(response.totalElements ?? 0);
       } catch {
         setError("Error al cargar los transportistas");
       } finally {

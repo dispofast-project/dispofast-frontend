@@ -10,7 +10,8 @@ export type ShipmentState =
 export interface Carrier {
   id: string;
   name: string;
-  plate: string;
+  website?: string | null;
+  registeredAt?: string | null;
 }
 
 export interface Shipment {
@@ -33,12 +34,12 @@ export interface Shipment {
 
 export interface CreateCarrierDTO {
   name: string;
-  plate: string;
+  website?: string | null;
 }
 
 export interface UpdateCarrierDTO {
   name?: string;
-  plate?: string;
+  website?: string | null;
 }
 
 export interface UpdateShipmentDTO {
@@ -58,5 +59,4 @@ export interface ShipmentFilters {
 
 export interface CarrierFilters {
   name?: string;
-  plate?: string;
 }

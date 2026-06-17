@@ -18,12 +18,15 @@ export const getAllCarriers = async (params?: {
   size?: number;
   name?: string;
 }): Promise<{ content: Carrier[]; totalElements: number }> => {
-  const { page = 0, size = 15, ...filters } = params || {};
-  const { data } = await apiClient.get<{
-    content: Carrier[];
-    totalElements: number;
-  }>(CARRIERS_BASE_URL, { params: { page, size, ...filters } });
-  return data;
+  const { page = 0, size = 15, name } = params || {};
+  const { data } = await apiClient.get<{ content: Carrier[]; totalElements: number } | Carrier[]>(
+    CARRIERS_BASE_URL,
+    { params: { page, size, ...(name ? { name } : {}) } }
+  );
+  if (Array.isArray(data)) {
+    return { content: data, totalElements: data.length };
+  }
+  return { content: data.content ?? [], totalElements: data.totalElements ?? 0 };
 };
 
 export const getCarrierById = async (id: string): Promise<Carrier> => {

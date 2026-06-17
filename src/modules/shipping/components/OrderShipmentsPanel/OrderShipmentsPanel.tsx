@@ -38,9 +38,9 @@ export const OrderShipmentsPanel = ({ invoiceId }: OrderShipmentsPanelProps) => 
             <Typography variant="subtitle2" className="font-semibold">
               {shipment.carrier?.name || "Sin transportista"}
             </Typography>
-            {shipment.carrier && (
+            {shipment.carrier?.website && (
               <Typography variant="caption" color="text.secondary">
-                Placa: {shipment.carrier.plate}
+                {shipment.carrier.website}
               </Typography>
             )}
             <Typography variant="caption" className="block mt-1">

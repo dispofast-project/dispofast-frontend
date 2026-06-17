@@ -25,6 +25,7 @@ interface ShipmentFilterFormProps {
   onChange: (values: ShipmentFilterValues) => void;
   onFilter: () => void;
   onClear: () => void;
+  onOpenCarriers?: () => void;
 }
 
 export const ShipmentFilterForm = ({
@@ -32,6 +33,7 @@ export const ShipmentFilterForm = ({
   onChange,
   onFilter,
   onClear,
+  onOpenCarriers,
 }: ShipmentFilterFormProps) => {
   const [showFilters, setShowFilters] = useState(true);
   const [configMenuAnchor, setConfigMenuAnchor] = useState<null | HTMLElement>(null);
@@ -66,7 +68,7 @@ export const ShipmentFilterForm = ({
           open={Boolean(configMenuAnchor)}
           onClose={() => setConfigMenuAnchor(null)}
         >
-          <MenuItem onClick={() => setConfigMenuAnchor(null)}>Transportadoras</MenuItem>
+          <MenuItem onClick={() => { setConfigMenuAnchor(null); onOpenCarriers?.(); }}>Transportadoras</MenuItem>
           <MenuItem onClick={() => setConfigMenuAnchor(null)}>Vehículos</MenuItem>
         </Menu>
       </Box>
