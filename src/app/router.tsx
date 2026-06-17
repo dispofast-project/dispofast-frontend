@@ -14,15 +14,15 @@ import CarteraPage from "../modules/cartera/pages/CarteraPage";
 import PaymentReceiptPage from "../modules/cartera/pages/PaymentReceiptPage";
 import InventoryRoutes from "../modules/inventory/inventory.routes";
 import PriceListPage from "../modules/pricelist/pages/PriceListPage";
-
-const NotFound = (): ReactElement => <div>Not Found</div>;
+import NotFoundPage from "../shared/pages/NotFoundPage";
+import ForbiddenPage from "../shared/pages/ForbiddenPage";
 
 const AppRouter = (): ReactElement => {
   return (
     <Routes>
       {/* Rutas públicas */}
       <Route path="/" element={<LoginPage />} />
-      <Route path="/no-access" element={<div>No Access</div>} />
+      <Route path="/no-access" element={<ForbiddenPage />} />
 
       {/* Rutas protegidas con layout */}
       <Route element={<ProtectedRoute />}>
@@ -114,10 +114,11 @@ const AppRouter = (): ReactElement => {
 
         
 
-          <Route path="/404" element={<NotFound />} />
+          
         </Route>
       </Route>
-
+      <Route path="/404" element={<NotFoundPage />} />
+      
       <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
   );
