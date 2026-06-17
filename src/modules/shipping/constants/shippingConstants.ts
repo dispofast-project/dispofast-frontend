@@ -1,4 +1,4 @@
-import type { ShipmentState } from "../types";
+import type { ShipmentState, VehicleState, VehicleType } from "../types";
 
 export const SHIPMENT_STATES_OPTIONS: Array<{
   value: ShipmentState;
@@ -21,3 +21,18 @@ export const PLATE_MAX_LENGTH = 20;
 
 export const CARRIER_NAME_MIN = 2;
 export const CARRIER_NAME_MAX = 100;
+
+export const VEHICLE_STATE_LABELS: Record<VehicleState, string> = {
+  AVAILABLE: "Disponible",
+  IN_MAINTENANCE: "En Mantenimiento",
+};
+
+export const VEHICLE_STATE_COLORS: Record<VehicleState, "success" | "warning"> = {
+  AVAILABLE: "success",
+  IN_MAINTENANCE: "warning",
+};
+
+export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
+  FURGON: "Furgón",
+  MENSAJERIA: "Mensajería",
+};

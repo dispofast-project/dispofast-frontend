@@ -62,11 +62,12 @@ export const deleteCarrier = async (id: string): Promise<void> => {
 export const getAllVehicles = async (params?: {
   page?: number;
   size?: number;
+  plate?: string;
 }): Promise<{ content: Vehicle[]; totalElements: number }> => {
-  const { page = 0, size = 15 } = params || {};
+  const { page = 0, size = 15, plate } = params || {};
   const { data } = await apiClient.get<{ content: Vehicle[]; totalElements: number } | Vehicle[]>(
     VEHICLES_BASE_URL,
-    { params: { page, size } }
+    { params: { page, size, ...(plate ? { plate } : {}) } }
   );
   if (Array.isArray(data)) {
     return { content: data, totalElements: data.length };

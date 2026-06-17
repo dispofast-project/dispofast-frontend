@@ -19,22 +19,8 @@ import {
 import { MoreVertical } from "lucide-react";
 import { deleteVehicle } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
-import type { Vehicle, VehicleState, VehicleType } from "../../types";
-
-const STATE_LABELS: Record<VehicleState, string> = {
-  AVAILABLE: "Disponible",
-  IN_MAINTENANCE: "En Mantenimiento",
-};
-
-const STATE_COLORS: Record<VehicleState, "success" | "warning"> = {
-  AVAILABLE: "success",
-  IN_MAINTENANCE: "warning",
-};
-
-const TYPE_LABELS: Record<VehicleType, string> = {
-  FURGON: "Furgón",
-  MENSAJERIA: "Mensajería",
-};
+import type { Vehicle } from "../../types";
+import { VEHICLE_STATE_LABELS, VEHICLE_STATE_COLORS, VEHICLE_TYPE_LABELS } from "../../constants/shippingConstants";
 
 interface VehicleListProps {
   vehicles: Vehicle[];
@@ -128,13 +114,13 @@ export const VehicleList = ({
                 <TableCell>{vehicle.plate}</TableCell>
                 <TableCell>
                   <Chip
-                    label={STATE_LABELS[vehicle.state]}
-                    color={STATE_COLORS[vehicle.state]}
+                    label={VEHICLE_STATE_LABELS[vehicle.state]}
+                    color={VEHICLE_STATE_COLORS[vehicle.state]}
                     size="small"
                     variant="outlined"
                   />
                 </TableCell>
-                <TableCell>{TYPE_LABELS[vehicle.type]}</TableCell>
+                <TableCell>{VEHICLE_TYPE_LABELS[vehicle.type]}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton
                     size="small"

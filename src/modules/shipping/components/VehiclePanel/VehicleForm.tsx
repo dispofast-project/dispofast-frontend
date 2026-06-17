@@ -13,28 +13,15 @@ import { Button } from "../../../../shared/components/Button/Button";
 import { createVehicle, updateVehicle } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
 import type { Vehicle, VehicleState, VehicleType } from "../../types";
+import { VEHICLE_STATE_LABELS, VEHICLE_TYPE_LABELS } from "../../constants/shippingConstants";
 
 const vehicleSchema = z.object({
   plate: z.string().min(1, "La placa es requerida").max(50, "Máximo 50 caracteres"),
-  state: z.enum(["AVAILABLE", "IN_MAINTENANCE"] as const, {
-    required_error: "El estado es requerido",
-  }),
-  type: z.enum(["FURGON", "MENSAJERIA"] as const, {
-    required_error: "El tipo es requerido",
-  }),
+  state: z.enum(["AVAILABLE", "IN_MAINTENANCE"] as const, "El estado es requerido"),
+  type: z.enum(["FURGON", "MENSAJERIA"] as const, "El tipo es requerido"),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
-
-const STATE_LABELS: Record<VehicleState, string> = {
-  AVAILABLE: "Disponible",
-  IN_MAINTENANCE: "En Mantenimiento",
-};
-
-const TYPE_LABELS: Record<VehicleType, string> = {
-  FURGON: "Furgón",
-  MENSAJERIA: "Mensajería",
-};
 
 interface VehicleFormProps {
   editingVehicle: Vehicle | null;
@@ -120,9 +107,9 @@ export const VehicleForm = ({ editingVehicle, onSuccess }: VehicleFormProps) => 
                 error={!!errors.state}
                 helperText={errors.state?.message}
               >
-                {(Object.keys(STATE_LABELS) as VehicleState[]).map((key) => (
+                {(Object.keys(VEHICLE_STATE_LABELS) as VehicleState[]).map((key) => (
                   <MenuItem key={key} value={key}>
-                    {STATE_LABELS[key]}
+                    {VEHICLE_STATE_LABELS[key]}
                   </MenuItem>
                 ))}
               </TextField>
@@ -146,9 +133,9 @@ export const VehicleForm = ({ editingVehicle, onSuccess }: VehicleFormProps) => 
                 error={!!errors.type}
                 helperText={errors.type?.message}
               >
-                {(Object.keys(TYPE_LABELS) as VehicleType[]).map((key) => (
+                {(Object.keys(VEHICLE_TYPE_LABELS) as VehicleType[]).map((key) => (
                   <MenuItem key={key} value={key}>
-                    {TYPE_LABELS[key]}
+                    {VEHICLE_TYPE_LABELS[key]}
                   </MenuItem>
                 ))}
               </TextField>

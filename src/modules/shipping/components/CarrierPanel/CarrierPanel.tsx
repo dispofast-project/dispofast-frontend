@@ -1,14 +1,7 @@
-import { useState } from "react";
-import {
-  Box,
-  Drawer,
-  IconButton,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { Box, Drawer, IconButton, Tab, Tabs, Typography } from "@mui/material";
 import { X } from "lucide-react";
 import { useCarriers } from "../../hooks/useCarriers";
+import { usePanelTabState } from "../../hooks/usePanelTabState";
 import { CarrierList } from "./CarrierList";
 import { CarrierForm } from "./CarrierForm";
 import type { Carrier } from "../../types";
@@ -19,42 +12,9 @@ interface CarrierPanelProps {
 }
 
 export const CarrierPanel = ({ open, onClose }: CarrierPanelProps) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [editingCarrier, setEditingCarrier] = useState<Carrier | null>(null);
-
-  const {
-    carriers,
-    loading,
-    currentPage,
-    totalElements,
-    pageSize,
-    setCurrentPage,
-    refetch,
-  } = useCarriers();
-
-  const handleEdit = (carrier: Carrier) => {
-    setEditingCarrier(carrier);
-    setActiveTab(1);
-  };
-
-  const handleFormSuccess = () => {
-    setEditingCarrier(null);
-    setActiveTab(0);
-    refetch();
-  };
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-    if (newValue === 1 && activeTab !== 1) {
-      setEditingCarrier(null);
-    }
-  };
-
-  const handleClose = () => {
-    setEditingCarrier(null);
-    setActiveTab(0);
-    onClose();
-  };
+  const { carriers, loading, currentPage, totalElements, pageSize, setCurrentPage, refetch } = useCarriers();
+  const { activeTab, editingItem, handleEdit, handleFormSuccess, handleTabChange, handleClose } =
+    usePanelTabState<Carrier>(onClose);
 
   return (
     <Drawer
@@ -79,7 +39,7 @@ export const CarrierPanel = ({ open, onClose }: CarrierPanelProps) => {
           sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}
         >
           <Tab label="Lista de transportadoras" />
-          <Tab label={editingCarrier ? "Editar Transportadora" : "Registrar Transportadora"} />
+          <Tab label={editingItem ? "Editar Transportadora" : "Registrar Transportadora"} />
         </Tabs>
 
         <Box className="flex-1 overflow-auto p-4">
@@ -97,8 +57,8 @@ export const CarrierPanel = ({ open, onClose }: CarrierPanelProps) => {
           )}
           {activeTab === 1 && (
             <CarrierForm
-              editingCarrier={editingCarrier}
-              onSuccess={handleFormSuccess}
+              editingCarrier={editingItem}
+              onSuccess={() => handleFormSuccess(refetch)}
             />
           )}
         </Box>

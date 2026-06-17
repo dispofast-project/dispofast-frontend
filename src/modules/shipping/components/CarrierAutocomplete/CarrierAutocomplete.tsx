@@ -20,7 +20,7 @@ export const CarrierAutocomplete = ({
   error = false,
   helperText,
 }: CarrierAutocompleteProps) => {
-  const { options, isSearching, open, setOpen, handleInputChange } =
+  const { options, setOptions, isSearching, open, setOpen, handleInputChange } =
     useApiAutocomplete<Carrier>({
       fetchFn: (query) => getAllCarriers({ size: 100, name: query }).then((r) => r.content),
       debounceMs: 300,
@@ -28,15 +28,24 @@ export const CarrierAutocomplete = ({
 
   return (
     <Autocomplete
+      size="small"
       value={value}
-      onChange={(_, newValue) => onChange(newValue)}
+      onChange={(_, newValue) => {
+        setOptions(newValue ? [newValue, ...options] : options);
+        onChange(newValue);
+      }}
       onInputChange={(_, newInputValue, reason) => handleInputChange(newInputValue, reason)}
       open={open}
       onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setOpen(false);
+        setOptions(value ? [value] : []);
+      }}
       options={options}
       getOptionLabel={(option) => option.name}
       isOptionEqualToValue={(option, val) => option.id === val.id}
+      filterOptions={(x) => x}
+      filterSelectedOptions
       loading={isSearching}
       disabled={disabled}
       fullWidth

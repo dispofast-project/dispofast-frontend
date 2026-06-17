@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { Box, Drawer, IconButton, Tab, Tabs, Typography } from "@mui/material";
 import { X } from "lucide-react";
 import { useVehicles } from "../../hooks/useVehicles";
+import { usePanelTabState } from "../../hooks/usePanelTabState";
 import { VehicleList } from "./VehicleList";
 import { VehicleForm } from "./VehicleForm";
 import type { Vehicle } from "../../types";
@@ -12,42 +12,9 @@ interface VehiclePanelProps {
 }
 
 export const VehiclePanel = ({ open, onClose }: VehiclePanelProps) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
-
-  const {
-    vehicles,
-    loading,
-    currentPage,
-    totalElements,
-    pageSize,
-    setCurrentPage,
-    refetch,
-  } = useVehicles();
-
-  const handleEdit = (vehicle: Vehicle) => {
-    setEditingVehicle(vehicle);
-    setActiveTab(1);
-  };
-
-  const handleFormSuccess = () => {
-    setEditingVehicle(null);
-    setActiveTab(0);
-    refetch();
-  };
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-    if (newValue === 1 && activeTab !== 1) {
-      setEditingVehicle(null);
-    }
-  };
-
-  const handleClose = () => {
-    setEditingVehicle(null);
-    setActiveTab(0);
-    onClose();
-  };
+  const { vehicles, loading, currentPage, totalElements, pageSize, setCurrentPage, refetch } = useVehicles();
+  const { activeTab, editingItem, handleEdit, handleFormSuccess, handleTabChange, handleClose } =
+    usePanelTabState<Vehicle>(onClose);
 
   return (
     <Drawer
@@ -72,7 +39,7 @@ export const VehiclePanel = ({ open, onClose }: VehiclePanelProps) => {
           sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}
         >
           <Tab label="Lista de vehículos" />
-          <Tab label={editingVehicle ? "Editar Vehículo" : "Registrar Vehículo"} />
+          <Tab label={editingItem ? "Editar Vehículo" : "Registrar Vehículo"} />
         </Tabs>
 
         <Box className="flex-1 overflow-auto p-4">
@@ -90,8 +57,8 @@ export const VehiclePanel = ({ open, onClose }: VehiclePanelProps) => {
           )}
           {activeTab === 1 && (
             <VehicleForm
-              editingVehicle={editingVehicle}
-              onSuccess={handleFormSuccess}
+              editingVehicle={editingItem}
+              onSuccess={() => handleFormSuccess(refetch)}
             />
           )}
         </Box>

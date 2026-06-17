@@ -1,54 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
 import { getAllCarriers } from "../api/shipping.service";
 import type { Carrier, CarrierFilters } from "../types";
 import { PAGE_SIZE_CARRIERS } from "../constants/shippingConstants";
+import { usePaginatedList } from "../../../shared/hooks/usePaginatedList";
+
+const fetchCarriers = (page: number, filters: CarrierFilters) =>
+  getAllCarriers({ page: page - 1, size: PAGE_SIZE_CARRIERS, name: filters.name });
 
 export const useCarriers = () => {
-  const [carriers, setCarriers] = useState<Carrier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
-  const [filters, setFilters] = useState<CarrierFilters>({});
+  const { items, loading, error, currentPage, totalElements, pageSize, setCurrentPage, setFilters, refetch } =
+    usePaginatedList<Carrier, CarrierFilters>(fetchCarriers, PAGE_SIZE_CARRIERS, {});
 
-  const loadCarriers = useCallback(
-    async (page: number, currentFilters: CarrierFilters) => {
-      try {
-        setError(null);
-        const response = await getAllCarriers({
-          page: page - 1,
-          size: PAGE_SIZE_CARRIERS,
-          name: currentFilters.name,
-        });
-        setCarriers(response.content ?? []);
-        setTotalElements(response.totalElements ?? 0);
-      } catch {
-        setError("Error al cargar los transportistas");
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    setLoading(true);
-    loadCarriers(currentPage, filters);
-  }, [currentPage, filters, loadCarriers]);
-
-  const refetch = useCallback(() => {
-    loadCarriers(currentPage, filters);
-  }, [loadCarriers, currentPage, filters]);
-
-  return {
-    carriers,
-    loading,
-    error,
-    currentPage,
-    totalElements,
-    pageSize: PAGE_SIZE_CARRIERS,
-    setCurrentPage,
-    setFilters,
-    refetch,
-  };
+  return { carriers: items, loading, error, currentPage, totalElements, pageSize, setCurrentPage, setFilters, refetch };
 };
