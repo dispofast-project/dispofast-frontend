@@ -68,6 +68,13 @@ export const formatDate = (isoDate: string | null): string => {
   }
 };
 
+export const formatCOP = (value: number): string =>
+  value.toLocaleString("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  });
+
 export const formatDateTime = (isoDate: string | null): string => {
   if (!isoDate) return "-";
   try {

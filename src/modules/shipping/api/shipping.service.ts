@@ -1,8 +1,10 @@
 import apiClient from "../../../shared/api/apiClient";
 import type {
   Carrier,
-  Shipment,
   CreateCarrierDTO,
+  CreateDriverDTO,
+  Driver,
+  Shipment,
   UpdateCarrierDTO,
   UpdateShipmentDTO,
   ShipmentState,
@@ -155,4 +157,42 @@ export const updateShipmentState = async (
     { params: { state } }
   );
   return data;
+};
+
+export const deleteShipment = async (id: string): Promise<void> => {
+  await apiClient.delete(`${SHIPMENTS_BASE_URL}/${id}`);
+};
+
+// ─── DRIVERS ─────────────────────────────────────────────────────────────────
+
+const DRIVERS_BASE_URL = "/api/v1/drivers";
+
+export const getAllDrivers = async (params?: {
+  page?: number;
+  size?: number;
+  name?: string;
+}): Promise<{ content: Driver[]; totalElements: number }> => {
+  const { page = 0, size = 15, name } = params || {};
+  const { data } = await apiClient.get<{ content: Driver[]; totalElements: number } | Driver[]>(
+    DRIVERS_BASE_URL,
+    { params: { page, size, ...(name ? { name } : {}) } }
+  );
+  if (Array.isArray(data)) {
+    return { content: data, totalElements: data.length };
+  }
+  return { content: data.content ?? [], totalElements: data.totalElements ?? 0 };
+};
+
+export const createDriver = async (payload: CreateDriverDTO): Promise<Driver> => {
+  const { data } = await apiClient.post<Driver>(DRIVERS_BASE_URL, payload);
+  return data;
+};
+
+export const updateDriver = async (id: string, payload: CreateDriverDTO): Promise<Driver> => {
+  const { data } = await apiClient.put<Driver>(`${DRIVERS_BASE_URL}/${id}`, payload);
+  return data;
+};
+
+export const deleteDriver = async (id: string): Promise<void> => {
+  await apiClient.delete(`${DRIVERS_BASE_URL}/${id}`);
 };

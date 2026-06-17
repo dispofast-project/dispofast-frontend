@@ -7,11 +7,37 @@ export type ShipmentState =
   | "DELIVERED"
   | "DELAYED";
 
+export type DeliveryType = "CONDUCTOR" | "TRANSPORTADORA" | "RECOGEN";
+
 export interface Carrier {
   id: string;
   name: string;
   website?: string | null;
   registeredAt?: string | null;
+}
+
+export interface Driver {
+  id: string;
+  name: string;
+  phone?: string | null;
+  cedula?: string | null;
+  createdAt?: string | null;
+}
+
+export interface CreateDriverDTO {
+  name: string;
+  phone?: string | null;
+  cedula?: string | null;
+}
+
+export interface ShipmentItem {
+  id: string;
+  productSku: string | null;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  taxPercent: number | null;
+  total: number;
 }
 
 export interface Shipment {
@@ -24,12 +50,18 @@ export interface Shipment {
   state: ShipmentState;
   stateLabel: string;
   deliveryAddress: string;
+  addressDetail: string | null;
   estimatedDeliveryDate: string | null;
   departureDate: string | null;
   deliveryDate: string | null;
   productCount: number | null;
   carrier: Carrier | null;
+  driver: Driver | null;
   city: City | null;
+  deliveryType: DeliveryType | null;
+  trackingCode: string | null;
+  vehicle: Vehicle | null;
+  items?: ShipmentItem[];
 }
 
 export interface CreateCarrierDTO {
@@ -43,10 +75,15 @@ export interface UpdateCarrierDTO {
 }
 
 export interface UpdateShipmentDTO {
+  deliveryType?: DeliveryType | null;
   deliveryAddress?: string;
-  carrierId?: string;
+  addressDetail?: string | null;
+  carrierId?: string | null;
+  driverId?: string | null;
   cityCode?: string;
   estimatedDeliveryDate?: string | null;
+  trackingCode?: string | null;
+  vehicleId?: string | null;
 }
 
 export interface ShipmentFilters {

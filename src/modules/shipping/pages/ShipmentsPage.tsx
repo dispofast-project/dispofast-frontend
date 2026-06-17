@@ -3,6 +3,8 @@ import {
   Box,
   CircularProgress,
   IconButton,
+  Menu,
+  MenuItem,
   Paper,
   Tab,
   Table,
@@ -16,18 +18,21 @@ import {
   Typography,
 } from "@mui/material";
 import { MoreVertical } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import CustomTitle from "../../../shared/components/Title/Title";
 import { useShipments } from "../hooks/useShipments";
 import { formatDate } from "../utils/shipmentUtils";
 import type { Shipment, ShipmentState } from "../types";
-import { getAllShipments } from "../api/shipping.service";
+import { deleteShipment } from "../api/shipping.service";
+import { useShipmentTabCounts } from "../hooks/useShipmentTabCounts";
+import { useNotificationStore } from "../../../shared/store/notification.store";
+import { ShipmentDetailPanel } from "../components/ShipmentDetailPanel/ShipmentDetailPanel";
 import {
   ShipmentFilterForm,
   type ShipmentFilterValues,
 } from "../components/ShipmentFilterForm/ShipmentFilterForm";
 import { CarrierPanel } from "../components/CarrierPanel/CarrierPanel";
 import { VehiclePanel } from "../components/VehiclePanel/VehiclePanel";
+import { DriverPanel } from "../components/DriverPanel/DriverPanel";
 
 const TAB_STATES: ShipmentState[] = [
   "PENDING",
@@ -91,17 +96,21 @@ const buildColumns = (state: ShipmentState): ColumnDef[] => {
     label: "F. Entregado",
     render: (s) => formatDate(s.deliveryDate),
   };
+  const codigoS: ColumnDef = {
+    label: "Código S",
+    render: (s) => s.trackingCode || "-",
+  };
 
   switch (state) {
     case "PENDING":
       return [invoiceNumber, fechaCreacion, cliente, numProds, direccion, asesor];
     case "ASSIGNED":
     case "IN_ROUTE":
-      return [invoiceNumber, fechaCreacion, cliente, numProds, direccion, fEstEntrega, conductor];
+      return [invoiceNumber, fechaCreacion, cliente, numProds, direccion, fEstEntrega, conductor, codigoS];
     case "DELIVERED":
-      return [fEstEntrega, fEntregado, cliente, numProds, invoiceNumber, fechaCreacion, direccion, conductor];
+      return [fEstEntrega, fEntregado, cliente, numProds, invoiceNumber, fechaCreacion, direccion, conductor, codigoS];
     case "DELAYED":
-      return [fEstEntrega, fechaCreacion, cliente, numProds, direccion, conductor];
+      return [fEstEntrega, fechaCreacion, cliente, numProds, direccion, conductor, codigoS];
   }
 };
 
@@ -113,19 +122,16 @@ const EMPTY_FILTERS: ShipmentFilterValues = {
 };
 
 const ShipmentsPage = () => {
-  const navigate = useNavigate();
-
   const [activeTab, setActiveTab] = useState<ShipmentState>("PENDING");
-  const [tabCounts, setTabCounts] = useState<Record<ShipmentState, number>>({
-    PENDING: 0,
-    ASSIGNED: 0,
-    IN_ROUTE: 0,
-    DELIVERED: 0,
-    DELAYED: 0,
-  });
+  const tabCounts = useShipmentTabCounts();
   const [filterValues, setFilterValues] = useState<ShipmentFilterValues>(EMPTY_FILTERS);
   const [carrierPanelOpen, setCarrierPanelOpen] = useState(false);
   const [vehiclePanelOpen, setVehiclePanelOpen] = useState(false);
+  const [driverPanelOpen, setDriverPanelOpen] = useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
+  const [detailShipmentId, setDetailShipmentId] = useState<string | null>(null);
+  const showNotification = useNotificationStore((s) => s.showNotification);
 
   const {
     shipments,
@@ -137,18 +143,6 @@ const ShipmentsPage = () => {
     handleStateFilter,
     applySearchFilters,
   } = useShipments();
-
-  useEffect(() => {
-    Promise.all(
-      TAB_STATES.map((s) => getAllShipments({ state: s, size: 1, page: 0 }))
-    ).then((results) => {
-      const counts = {} as Record<ShipmentState, number>;
-      TAB_STATES.forEach((s, i) => {
-        counts[s] = results[i].totalElements;
-      });
-      setTabCounts(counts);
-    });
-  }, []);
 
   useEffect(() => {
     handleStateFilter("PENDING");
@@ -178,6 +172,34 @@ const ShipmentsPage = () => {
     setCurrentPage(newPage + 1);
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, shipmentId: string) => {
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedShipmentId(shipmentId);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setSelectedShipmentId(null);
+  };
+
+  const handleViewDetail = () => {
+    if (selectedShipmentId) setDetailShipmentId(selectedShipmentId);
+    handleMenuClose();
+  };
+
+  const handleDelete = async () => {
+    if (selectedShipmentId) {
+      try {
+        await deleteShipment(selectedShipmentId);
+        handleStateFilter(activeTab);
+      } catch {
+        showNotification("Error al eliminar el despacho", "error");
+      }
+    }
+    handleMenuClose();
+  };
+
   const columns = buildColumns(activeTab);
 
   return (
@@ -194,6 +216,7 @@ const ShipmentsPage = () => {
         onClear={handleClearFilters}
         onOpenCarriers={() => setCarrierPanelOpen(true)}
         onOpenVehicles={() => setVehiclePanelOpen(true)}
+        onOpenDrivers={() => setDriverPanelOpen(true)}
       />
 
       <CarrierPanel
@@ -204,6 +227,11 @@ const ShipmentsPage = () => {
       <VehiclePanel
         open={vehiclePanelOpen}
         onClose={() => setVehiclePanelOpen(false)}
+      />
+
+      <DriverPanel
+        open={driverPanelOpen}
+        onClose={() => setDriverPanelOpen(false)}
       />
 
       <Paper variant="outlined">
@@ -256,7 +284,7 @@ const ShipmentsPage = () => {
                     <TableCell padding="checkbox">
                       <IconButton
                         size="small"
-                        onClick={() => navigate(`/despachos/${shipment.id}`)}
+                        onClick={(e) => handleMenuOpen(e, shipment.id)}
                       >
                         <MoreVertical size={16} />
                       </IconButton>
@@ -281,6 +309,21 @@ const ShipmentsPage = () => {
           />
         </TableContainer>
       </Paper>
+
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleViewDetail}>Ver detalle</MenuItem>
+        <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
+      </Menu>
+
+      <ShipmentDetailPanel
+        open={detailShipmentId !== null}
+        onClose={() => setDetailShipmentId(null)}
+        shipmentId={detailShipmentId}
+      />
     </Box>
   );
 };
