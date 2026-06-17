@@ -5,6 +5,7 @@ import { QuoteStatus } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
 import { QuoteStatusBadge } from "./QuoteStatusBadge";
+import { QUOTE_STATUS_UI } from "../constants";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -18,6 +19,12 @@ interface QuotesTableProps {
   onCreateOrder: (quote: QuotePreview) => void;
   onChangeStatus: (quote: QuotePreview, status: string) => void;
 }
+
+const STATUS_OPTIONS = Object.entries(QUOTE_STATUS_UI).map(([value, config]) => ({
+  value,
+  label: config.label,
+  colorClass: config.colorClass,
+}));
 
 const QuotesTable = ({
   quotes,
@@ -47,7 +54,16 @@ const QuotesTable = ({
       />,
 
       <span className="font-medium text-gray-900">{quote.number}</span>,
-      quote.accountName,
+
+      <span key={`client-${quote.id}`}>
+        {quote.accountName}
+        {quote.prospect && (
+          <span className="block text-xs font-bold text-orange-500 uppercase tracking-wide">
+            Prospecto
+          </span>
+        )}
+      </span>,
+
       quote.seller?.fullName ?? "-",
 
       new Date(quote.createdAt).toLocaleDateString("es-CO"),

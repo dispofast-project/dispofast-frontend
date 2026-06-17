@@ -70,11 +70,21 @@ export const LegalEntityType = {
 
 export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType];
 
+export interface ProspectDetails {
+  name: string;
+  legalEntityType: LegalEntityType;
+  clientTypeId?: number;
+  clientTypeName?: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface QuotePreview {
   id: string;
   number: string;
   status: QuoteStatus;
   accountName: string;
+  prospect?: boolean;
   seller: SellerPreview;
   createdAt: string;
   total: number;
@@ -133,6 +143,7 @@ export interface Quote {
   paymentCondition: PaymentCondition | null;
   offerValidity: OfferValidity | null;
   account: Account;
+  prospect?: ProspectDetails | null;
   sellerId: string;
   sellerName: string;
   location: Location;
