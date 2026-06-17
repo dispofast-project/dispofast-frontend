@@ -6,9 +6,12 @@ import type {
   UpdateCarrierDTO,
   UpdateShipmentDTO,
   ShipmentState,
+  Vehicle,
+  CreateVehicleDTO,
 } from "../types";
 
 const CARRIERS_BASE_URL = "/api/v1/carriers";
+const VEHICLES_BASE_URL = "/api/v1/vehicles";
 const SHIPMENTS_BASE_URL = "/api/v1/shipments";
 
 // ─── CARRIERS ───────────────────────────────────────────────────────────────
@@ -52,6 +55,37 @@ export const updateCarrier = async (
 
 export const deleteCarrier = async (id: string): Promise<void> => {
   await apiClient.delete(`${CARRIERS_BASE_URL}/${id}`);
+};
+
+// ─── VEHICLES ────────────────────────────────────────────────────────────────
+
+export const getAllVehicles = async (params?: {
+  page?: number;
+  size?: number;
+}): Promise<{ content: Vehicle[]; totalElements: number }> => {
+  const { page = 0, size = 15 } = params || {};
+  const { data } = await apiClient.get<{ content: Vehicle[]; totalElements: number } | Vehicle[]>(
+    VEHICLES_BASE_URL,
+    { params: { page, size } }
+  );
+  if (Array.isArray(data)) {
+    return { content: data, totalElements: data.length };
+  }
+  return { content: data.content ?? [], totalElements: data.totalElements ?? 0 };
+};
+
+export const createVehicle = async (payload: CreateVehicleDTO): Promise<Vehicle> => {
+  const { data } = await apiClient.post<Vehicle>(VEHICLES_BASE_URL, payload);
+  return data;
+};
+
+export const updateVehicle = async (id: string, payload: CreateVehicleDTO): Promise<Vehicle> => {
+  const { data } = await apiClient.put<Vehicle>(`${VEHICLES_BASE_URL}/${id}`, payload);
+  return data;
+};
+
+export const deleteVehicle = async (id: string): Promise<void> => {
+  await apiClient.delete(`${VEHICLES_BASE_URL}/${id}`);
 };
 
 // ─── SHIPMENTS ──────────────────────────────────────────────────────────────

@@ -60,3 +60,24 @@ export interface ShipmentFilters {
 export interface CarrierFilters {
   name?: string;
 }
+
+export type VehicleState = "AVAILABLE" | "IN_MAINTENANCE";
+export type VehicleType = "FURGON" | "MENSAJERIA";
+
+export interface Vehicle {
+  id: string;
+  plate: string;
+  state: VehicleState;
+  type: VehicleType;
+  createdAt?: string | null;
+}
+
+export interface CreateVehicleDTO {
+  plate: string;
+  state: VehicleState;
+  type: VehicleType;
+}
+
+export interface VehicleFilters {
+  plate?: string;
+}

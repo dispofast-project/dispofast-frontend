@@ -27,6 +27,7 @@ import {
   type ShipmentFilterValues,
 } from "../components/ShipmentFilterForm/ShipmentFilterForm";
 import { CarrierPanel } from "../components/CarrierPanel/CarrierPanel";
+import { VehiclePanel } from "../components/VehiclePanel/VehiclePanel";
 
 const TAB_STATES: ShipmentState[] = [
   "PENDING",
@@ -124,6 +125,7 @@ const ShipmentsPage = () => {
   });
   const [filterValues, setFilterValues] = useState<ShipmentFilterValues>(EMPTY_FILTERS);
   const [carrierPanelOpen, setCarrierPanelOpen] = useState(false);
+  const [vehiclePanelOpen, setVehiclePanelOpen] = useState(false);
 
   const {
     shipments,
@@ -191,11 +193,17 @@ const ShipmentsPage = () => {
         onFilter={handleFilter}
         onClear={handleClearFilters}
         onOpenCarriers={() => setCarrierPanelOpen(true)}
+        onOpenVehicles={() => setVehiclePanelOpen(true)}
       />
 
       <CarrierPanel
         open={carrierPanelOpen}
         onClose={() => setCarrierPanelOpen(false)}
+      />
+
+      <VehiclePanel
+        open={vehiclePanelOpen}
+        onClose={() => setVehiclePanelOpen(false)}
       />
 
       <Paper variant="outlined">

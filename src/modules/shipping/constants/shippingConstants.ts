@@ -13,6 +13,7 @@ export const SHIPMENT_STATES_OPTIONS: Array<{
 
 export const PAGE_SIZE_SHIPMENTS = 10;
 export const PAGE_SIZE_CARRIERS = 15;
+export const PAGE_SIZE_VEHICLES = 15;
 
 export const PLATE_REGEX = /^[A-Z0-9\-]+$/i;
 export const PLATE_MIN_LENGTH = 3;
