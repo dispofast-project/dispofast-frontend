@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Box, Typography, IconButton, CircularProgress, Button, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
@@ -263,29 +263,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     }
   };
 
-  const handleDraftTotalsChange = useCallback((totals: DraftTotals) => {
-    setDraftTotals(totals);
-  }, []);
-
-  const createSummary = useMemo(() => {
-    const { subtotal, tax } = draftTotals;
-    const commRate = parseFloat(commercialRate || "0") / 100;
-    const othRate = parseFloat(otherRate || "0") / 100;
-    const commercialDiscountAmt = subtotal * commRate;
-    const otherDiscountAmt = subtotal * othRate;
-    const retefuenteAmt = client?.retefuenteApplies ? subtotal * 0.035 : 0;
-    const total = subtotal + tax - commercialDiscountAmt - otherDiscountAmt - retefuenteAmt + freight;
-    return { subtotal, tax, commercialDiscountAmt, otherDiscountAmt, retefuenteAmt, total };
-  }, [draftTotals, commercialRate, otherRate, client, freight]);
-
-  const createMissingFields = useMemo(() => {
-    const fields: string[] = [];
-    if (!selectedPriceListId) fields.push("Lista de precios");
-    if (!selectedSeller) fields.push("Asesor");
-    return fields;
-  }, [selectedPriceListId, selectedSeller]);
-
-  const isPageLoading = mode === "edit" ? isQuoteLoading : isClientLoading;
+  const isPageLoading = mode === "edit" ? isQuoteLoading : mode === "create" ? isClientLoading : false;
   const pageError = mode === "edit" ? quoteError : clientError;
 
   if (isPageLoading) {
@@ -382,7 +360,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             onOtherRateChange={setOtherRate}
           />
 
-          {mode === "create" && (
+          {isCreateMode && (
             <QuotePriceListCard
               quote={null}
               priceLists={priceLists}
@@ -414,9 +392,9 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
 
         {/* ── Columna lateral ── */}
         <Box className="flex flex-col gap-6">
-          {mode === "create" && client ? (
+          {isCreateMode ? (
             <QuoteSummaryPanel
-              client={client}
+              accountInfo={accountInfo!}
               subtotal={createSummary.subtotal}
               tax={createSummary.tax}
               commercialDiscountAmt={createSummary.commercialDiscountAmt}

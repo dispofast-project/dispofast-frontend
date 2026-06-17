@@ -2,10 +2,15 @@ import { Box, Typography, Divider, TextField, InputAdornment, Alert } from "@mui
 import { AlertCircle, Circle } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
-import type { ClientDetails } from "../../types";
+
+interface AccountInfo {
+  name: string;
+  identificationNumber?: string;
+  retefuenteApplies?: boolean;
+}
 
 interface QuoteSummaryPanelProps {
-  client: ClientDetails;
+  accountInfo: AccountInfo;
   subtotal: number;
   tax: number;
   commercialDiscountAmt: number;
@@ -44,7 +49,7 @@ const SummaryRow = ({
 );
 
 const QuoteSummaryPanel = ({
-  client,
+  accountInfo,
   subtotal,
   tax,
   commercialDiscountAmt,
@@ -79,10 +84,10 @@ const QuoteSummaryPanel = ({
             </Typography>
             <Box className="mt-1 p-2.5 bg-blue-50 rounded-lg">
               <Typography variant="body2" className="font-semibold text-dispofast-primary">
-                {client.name}
+                {accountInfo.name}
               </Typography>
               <Typography variant="caption" className="text-gray-500">
-                {client.identificationNumber}
+                {accountInfo.identificationNumber}
               </Typography>
             </Box>
           </Box>
@@ -99,7 +104,7 @@ const QuoteSummaryPanel = ({
                 {itemCount} {itemCount === 1 ? "ítem" : "ítems"}
               </Typography>
             </Box>
-            {client.retefuenteApplies && (
+            {accountInfo.retefuenteApplies && (
               <Box className="flex items-center justify-between">
                 <Typography variant="body2" className="text-gray-500">
                   Retefuente
