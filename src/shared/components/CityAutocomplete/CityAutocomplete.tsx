@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
 import { Autocomplete, TextField, CircularProgress, Box, Typography } from "@mui/material";
 import type { City } from "../../../shared/types/location";
 import { searchCitiesService } from "../../../modules/clients/api/locations.api";
+import { useApiAutocomplete } from "../../hooks/useApiAutocomplete";
 
 interface CityAutocompleteProps {
   value: City | null;
@@ -12,57 +12,25 @@ interface CityAutocompleteProps {
   helperText?: string;
 }
 
-export const CityAutocomplete = ({ 
-  value, 
-  onChange, 
-  required = false, 
+export const CityAutocomplete = ({
+  value,
+  onChange,
+  required = false,
   label = "Ciudad",
   error,
-  helperText
+  helperText,
 }: CityAutocompleteProps) => {
-  const [cityOptions, setCityOptions] = useState<City[]>([]);
-  const [cityInputValue, setCityInputValue] = useState("");
-  const [isCitySearching, setIsCitySearching] = useState(false);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    if (!open && cityInputValue === "") {
-      setCityOptions(value ? [value] : []);
-      return undefined;
-    }
-
-    setIsCitySearching(true);
-    const debounce = cityInputValue === "" ? 0 : 400;
-    const timeoutId = setTimeout(async () => {
-      try {
-        const results = await searchCitiesService(cityInputValue);
-        if (active) {
-          setCityOptions(results);
-        }
-      } catch (err) {
-        if (active) {
-          console.error("Error buscando ciudades:", err);
-        }
-      } finally {
-        if (active) {
-          setIsCitySearching(false);
-        }
-      }
-    }, debounce);
-
-    return () => {
-      active = false;
-      clearTimeout(timeoutId);
-    };
-  }, [cityInputValue, value, open]);
+  const { options, setOptions, isSearching, open, setOpen, handleInputChange } =
+    useApiAutocomplete<City>({
+      fetchFn: searchCitiesService,
+      debounceMs: 400,
+    });
 
   return (
     <Autocomplete
       size="small"
       fullWidth
-      options={cityOptions}
+      options={options}
       getOptionLabel={(option) => `${option.name} - ${option.department.name}`}
       filterOptions={(x) => x}
       autoComplete
@@ -71,17 +39,16 @@ export const CityAutocomplete = ({
       value={value}
       open={open}
       onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
-      noOptionsText={isCitySearching ? "Buscando..." : "No se encontraron ciudades"}
+      onClose={() => {
+        setOpen(false);
+        setOptions(value ? [value] : []);
+      }}
+      noOptionsText={isSearching ? "Buscando..." : "No se encontraron ciudades"}
       onChange={(_event, newValue: City | null) => {
-        setCityOptions(newValue ? [newValue, ...cityOptions] : cityOptions);
+        setOptions(newValue ? [newValue, ...options] : options);
         onChange(newValue);
       }}
-      onInputChange={(_event, newInputValue, reason) => {
-        if (reason === 'input' || reason === 'clear') {
-          setCityInputValue(newInputValue);
-        }
-      }}
+      onInputChange={(_event, newInputValue, reason) => handleInputChange(newInputValue, reason)}
       isOptionEqualToValue={(option, val) => option.code === val.code}
       renderInput={(params) => (
         <TextField
@@ -94,7 +61,7 @@ export const CityAutocomplete = ({
             ...params.InputProps,
             endAdornment: (
               <>
-                {isCitySearching ? <CircularProgress color="inherit" size={20} /> : null}
+                {isSearching ? <CircularProgress color="inherit" size={20} /> : null}
                 {params.InputProps.endAdornment}
               </>
             ),

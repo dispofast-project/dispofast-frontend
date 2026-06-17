@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Button,
   CircularProgress,
   IconButton,
-  Menu,
-  MenuItem,
   Paper,
   Tab,
   Table,
@@ -16,19 +13,19 @@ import {
   TablePagination,
   TableRow,
   Tabs,
-  TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
-import { Filter, FilterX, MoreVertical, Settings } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CustomTitle from "../../../shared/components/Title/Title";
-import { AdvisorAutocomplete } from "../../../shared/components/AdvisorAutocomplete/AdvisorAutocomplete";
 import { useShipments } from "../hooks/useShipments";
 import { formatDate } from "../utils/shipmentUtils";
 import type { Shipment, ShipmentState } from "../types";
-import type { User } from "../../iam/types";
 import { getAllShipments } from "../api/shipping.service";
+import {
+  ShipmentFilterForm,
+  type ShipmentFilterValues,
+} from "../components/ShipmentFilterForm/ShipmentFilterForm";
 
 const TAB_STATES: ShipmentState[] = [
   "PENDING",
@@ -106,12 +103,17 @@ const buildColumns = (state: ShipmentState): ColumnDef[] => {
   }
 };
 
+const EMPTY_FILTERS: ShipmentFilterValues = {
+  client: "",
+  advisor: null,
+  dateFrom: "",
+  dateTo: "",
+};
+
 const ShipmentsPage = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<ShipmentState>("PENDING");
-  const [showFilters, setShowFilters] = useState(true);
-  const [configMenuAnchor, setConfigMenuAnchor] = useState<null | HTMLElement>(null);
   const [tabCounts, setTabCounts] = useState<Record<ShipmentState, number>>({
     PENDING: 0,
     ASSIGNED: 0,
@@ -119,12 +121,7 @@ const ShipmentsPage = () => {
     DELIVERED: 0,
     DELAYED: 0,
   });
-
-  // Campos locales del formulario de filtros (no se aplican hasta presionar Filtrar)
-  const [clientInput, setClientInput] = useState("");
-  const [asesorInput, setAsesorInput] = useState<User | null>(null);
-  const [dateFromInput, setDateFromInput] = useState("");
-  const [dateToInput, setDateToInput] = useState("");
+  const [filterValues, setFilterValues] = useState<ShipmentFilterValues>(EMPTY_FILTERS);
 
   const {
     shipments,
@@ -159,21 +156,18 @@ const ShipmentsPage = () => {
     handleStateFilter(newState);
   };
 
-  const handleClearFilters = () => {
-    setClientInput("");
-    setAsesorInput(null);
-    setDateFromInput("");
-    setDateToInput("");
-    applySearchFilters({ clientName: undefined, asesorName: undefined, dateFrom: undefined, dateTo: undefined });
-  };
-
   const handleFilter = () => {
     applySearchFilters({
-      clientName: clientInput || undefined,
-      asesorName: asesorInput?.name || undefined,
-      dateFrom: dateFromInput || undefined,
-      dateTo: dateToInput || undefined,
+      clientName: filterValues.client || undefined,
+      asesorName: filterValues.advisor?.name || undefined,
+      dateFrom: filterValues.dateFrom || undefined,
+      dateTo: filterValues.dateTo || undefined,
     });
+  };
+
+  const handleClearFilters = () => {
+    setFilterValues(EMPTY_FILTERS);
+    applySearchFilters({ clientName: undefined, asesorName: undefined, dateFrom: undefined, dateTo: undefined });
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -189,86 +183,13 @@ const ShipmentsPage = () => {
         description="Seguimiento y gestión de despachos y envíos"
       />
 
-      {/* Barra de filtros */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Box className="flex justify-end gap-1" sx={{ mb: showFilters ? 2 : 0 }}>
-          <Tooltip title="Limpiar filtros">
-            <IconButton size="small" onClick={handleClearFilters}>
-              <FilterX size={18} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={showFilters ? "Ocultar filtros" : "Mostrar filtros"}>
-            <IconButton
-              size="small"
-              onClick={() => setShowFilters((v) => !v)}
-              color={showFilters ? "primary" : "default"}
-            >
-              <Filter size={18} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Opciones de configuración">
-            <IconButton size="small" onClick={(e) => setConfigMenuAnchor(e.currentTarget)}>
-              <Settings size={18} />
-            </IconButton>
-          </Tooltip>
-          <Menu
-            anchorEl={configMenuAnchor}
-            open={Boolean(configMenuAnchor)}
-            onClose={() => setConfigMenuAnchor(null)}
-          >
-            <MenuItem onClick={() => setConfigMenuAnchor(null)}>Transportadoras</MenuItem>
-            <MenuItem onClick={() => setConfigMenuAnchor(null)}>Vehículos</MenuItem>
-          </Menu>
-        </Box>
+      <ShipmentFilterForm
+        values={filterValues}
+        onChange={setFilterValues}
+        onFilter={handleFilter}
+        onClear={handleClearFilters}
+      />
 
-        {showFilters && (
-          <Box className="grid grid-cols-2 gap-3 md:grid-cols-5">
-            <TextField
-              size="small"
-              label="Cliente / Prospecto"
-              value={clientInput}
-              onChange={(e) => setClientInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleFilter()}
-            />
-
-            <AdvisorAutocomplete
-              value={asesorInput}
-              onChange={setAsesorInput}
-              label="Asesor"
-            />
-
-            <TextField
-              size="small"
-              label="Fecha facturación"
-              type="date"
-              value={dateFromInput}
-              onChange={(e) => setDateFromInput(e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-
-            <TextField
-              size="small"
-              label="Fecha entrega"
-              type="date"
-              value={dateToInput}
-              onChange={(e) => setDateToInput(e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<Filter size={15} />}
-              onClick={handleFilter}
-              sx={{ alignSelf: "center" }}
-            >
-              Filtrar
-            </Button>
-          </Box>
-        )}
-      </Paper>
-
-      {/* Tabs + tabla */}
       <Paper variant="outlined">
         <Tabs
           value={activeTab}

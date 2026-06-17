@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getShipmentsByInvoice } from "../api/shipping.service";
 import type { Shipment } from "../types";
 
-export const useShipmentsByOrder = (invoiceId?: string) => {
+export const useShipmentByInvoice = (invoiceId?: string) => {
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

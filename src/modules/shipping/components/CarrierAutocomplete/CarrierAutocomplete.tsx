@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import { getAllCarriers } from "../../api/shipping.service";
 import type { Carrier } from "../../types";
+import { useApiAutocomplete } from "../../../../shared/hooks/useApiAutocomplete";
 
 interface CarrierAutocompleteProps {
   value: Carrier | null;
@@ -20,39 +20,24 @@ export const CarrierAutocomplete = ({
   error = false,
   helperText,
 }: CarrierAutocompleteProps) => {
-  const [options, setOptions] = useState<Carrier[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-
-  useEffect(() => {
-    const loadCarriers = async () => {
-      setLoading(true);
-      try {
-        const response = await getAllCarriers({ size: 100, name: inputValue });
-        setOptions(response.content);
-      } catch {
-        setOptions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const timer = setTimeout(() => {
-      loadCarriers();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [inputValue]);
+  const { options, isSearching, open, setOpen, handleInputChange } =
+    useApiAutocomplete<Carrier>({
+      fetchFn: (query) => getAllCarriers({ size: 100, name: query }).then((r) => r.content),
+      debounceMs: 300,
+    });
 
   return (
     <Autocomplete
       value={value}
       onChange={(_, newValue) => onChange(newValue)}
-      onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
+      onInputChange={(_, newInputValue, reason) => handleInputChange(newInputValue, reason)}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
       options={options}
       getOptionLabel={(option) => `${option.name} (${option.plate})`}
       isOptionEqualToValue={(option, val) => option.id === val.id}
-      loading={loading}
+      loading={isSearching}
       disabled={disabled}
       fullWidth
       renderInput={(params) => (

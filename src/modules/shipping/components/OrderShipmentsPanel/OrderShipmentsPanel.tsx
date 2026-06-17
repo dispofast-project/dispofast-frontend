@@ -1,6 +1,6 @@
 import { Box, Typography, CircularProgress, Card } from "@mui/material";
 import { Truck } from "lucide-react";
-import { useShipmentsByOrder } from "../../hooks/useShipmentsByOrder";
+import { useShipmentByInvoice } from "../../hooks/useShipmentByInvoice";
 import { ShipmentStatusBadge } from "../ShipmentStatusBadge/ShipmentStatusBadge";
 import { formatDate } from "../../utils/shipmentUtils";
 
@@ -9,7 +9,7 @@ interface OrderShipmentsPanelProps {
 }
 
 export const OrderShipmentsPanel = ({ invoiceId }: OrderShipmentsPanelProps) => {
-  const { shipment, loading, error } = useShipmentsByOrder(invoiceId);
+  const { shipment, loading, error } = useShipmentByInvoice(invoiceId);
 
   if (loading) return <CircularProgress size={24} />;
 

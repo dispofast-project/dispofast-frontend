@@ -5,7 +5,7 @@ export { OrderShipmentsPanel } from "./components/OrderShipmentsPanel/OrderShipm
 
 export { useShipments } from "./hooks/useShipments";
 export { useShipmentDetail } from "./hooks/useShipmentDetail";
-export { useShipmentsByOrder } from "./hooks/useShipmentsByOrder";
+export { useShipmentByInvoice } from "./hooks/useShipmentByInvoice";
 export { useShipmentStateChange } from "./hooks/useShipmentStateChange";
 export { useCarriers } from "./hooks/useCarriers";
 

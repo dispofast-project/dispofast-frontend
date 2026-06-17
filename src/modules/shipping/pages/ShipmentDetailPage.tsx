@@ -91,11 +91,7 @@ const ShipmentDetailPage = () => {
               Fecha Est. de Entrega
             </Typography>
             <Typography variant="body1">
-              {shipment.estimatedDeliveryDate
-                ? new Date(shipment.estimatedDeliveryDate + "T00:00:00").toLocaleDateString("es-CO", {
-                    day: "2-digit", month: "short", year: "numeric",
-                  })
-                : "-"}
+              {formatDate(shipment.estimatedDeliveryDate)}
             </Typography>
           </Box>
 
