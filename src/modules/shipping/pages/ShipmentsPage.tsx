@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   Box,
+  Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -33,6 +39,9 @@ import {
 import { CarrierPanel } from "../components/CarrierPanel/CarrierPanel";
 import { VehiclePanel } from "../components/VehiclePanel/VehiclePanel";
 import { DriverPanel } from "../components/DriverPanel/DriverPanel";
+import { useShipmentStateChange } from "../hooks/useShipmentStateChange";
+import { ShipmentStateSelector } from "../components/ShipmentStateSelector/ShipmentStateSelector";
+import { VALID_STATE_TRANSITIONS } from "../config/shipmentStatusConfig";
 
 const TAB_STATES: ShipmentState[] = [
   "PENDING",
@@ -131,7 +140,10 @@ const ShipmentsPage = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
   const [detailShipmentId, setDetailShipmentId] = useState<string | null>(null);
+  const [stateDialogShipment, setStateDialogShipment] = useState<Shipment | null>(null);
+  const [stateDialogNewState, setStateDialogNewState] = useState<ShipmentState | null>(null);
   const showNotification = useNotificationStore((s) => s.showNotification);
+  const { changeState, loading: stateChangeLoading } = useShipmentStateChange();
 
   const {
     shipments,
@@ -199,6 +211,36 @@ const ShipmentsPage = () => {
     }
     handleMenuClose();
   };
+
+  const handleChangeStateOpen = () => {
+    const shipment = shipments.find((s) => s.id === selectedShipmentId);
+    if (shipment) {
+      const validTransitions = VALID_STATE_TRANSITIONS[shipment.state];
+      setStateDialogShipment(shipment);
+      setStateDialogNewState(validTransitions[0] ?? null);
+    }
+    setMenuAnchorEl(null);
+    setSelectedShipmentId(null);
+  };
+
+  const handleChangeStateClose = () => {
+    setStateDialogShipment(null);
+    setStateDialogNewState(null);
+  };
+
+  const handleChangeStateConfirm = async () => {
+    if (!stateDialogShipment || !stateDialogNewState) return;
+    const updated = await changeState(stateDialogShipment, stateDialogNewState);
+    if (updated) {
+      showNotification("Estado actualizado correctamente", "success");
+      handleStateFilter(activeTab);
+      handleChangeStateClose();
+    } else {
+      showNotification("Error al cambiar el estado del despacho", "error");
+    }
+  };
+
+  const selectedShipmentForMenu = shipments.find((s) => s.id === selectedShipmentId);
 
   const columns = buildColumns(activeTab);
 
@@ -316,8 +358,51 @@ const ShipmentsPage = () => {
         onClose={handleMenuClose}
       >
         <MenuItem onClick={handleViewDetail}>Ver detalle</MenuItem>
-        <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={handleChangeStateOpen}
+          disabled={
+            !selectedShipmentForMenu ||
+            VALID_STATE_TRANSITIONS[selectedShipmentForMenu.state].length === 0
+          }
+        >
+          Cambiar estado
+        </MenuItem>
+        <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
+          Eliminar
+        </MenuItem>
       </Menu>
+
+      <Dialog
+        open={stateDialogShipment !== null}
+        onClose={handleChangeStateClose}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Cambiar estado del despacho</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {stateDialogShipment && stateDialogNewState && (
+            <ShipmentStateSelector
+              currentState={stateDialogShipment.state}
+              value={stateDialogNewState}
+              onChange={setStateDialogNewState}
+              disabled={stateChangeLoading}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleChangeStateClose} disabled={stateChangeLoading}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleChangeStateConfirm}
+            disabled={stateChangeLoading || stateDialogNewState === stateDialogShipment?.state}
+          >
+            {stateChangeLoading ? "Guardando..." : "Guardar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <ShipmentDetailPanel
         open={detailShipmentId !== null}
