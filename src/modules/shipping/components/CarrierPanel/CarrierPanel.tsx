@@ -1,5 +1,5 @@
 import { Box, Drawer, IconButton, Tab, Tabs, Typography } from "@mui/material";
-import { X } from "lucide-react";
+import { Truck, X } from "lucide-react";
 import { useCarriers } from "../../hooks/useCarriers";
 import { usePanelTabState } from "../../hooks/usePanelTabState";
 import { CarrierList } from "./CarrierList";
@@ -12,9 +12,13 @@ interface CarrierPanelProps {
 }
 
 export const CarrierPanel = ({ open, onClose }: CarrierPanelProps) => {
-  const { carriers, loading, currentPage, totalElements, pageSize, setCurrentPage, refetch } = useCarriers();
+  const { carriers, loading, currentPage, totalElements, pageSize, setCurrentPage, refetch } =
+    useCarriers();
   const { activeTab, editingItem, handleEdit, handleFormSuccess, handleTabChange, handleClose } =
     usePanelTabState<Carrier>(onClose);
+
+  const handleNew = () => handleTabChange(null as unknown as React.SyntheticEvent, 1);
+  const handleCancel = () => handleTabChange(null as unknown as React.SyntheticEvent, 0);
 
   return (
     <Drawer
@@ -23,26 +27,65 @@ export const CarrierPanel = ({ open, onClose }: CarrierPanelProps) => {
       onClose={handleClose}
       PaperProps={{ sx: { width: { xs: "100%", sm: 680, md: 760 } } }}
     >
-      <Box className="flex flex-col h-full">
-        <Box className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <Typography variant="h6" className="font-semibold">
-            Transportadoras
-          </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 3,
+            py: 2,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "grey.50",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 38,
+                height: 38,
+                borderRadius: 2,
+                bgcolor: "primary.main",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                flexShrink: 0,
+              }}
+            >
+              <Truck size={18} />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={700} lineHeight={1.2}>
+                Transportadoras
+              </Typography>
+              <Typography variant="caption" color="text.secondary" lineHeight={1}>
+                {loading ? "Cargando..." : `${totalElements} registrada${totalElements !== 1 ? "s" : ""}`}
+              </Typography>
+            </Box>
+          </Box>
           <IconButton size="small" onClick={handleClose}>
             <X size={18} />
           </IconButton>
         </Box>
 
+        {/* Tabs */}
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
-          sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}
+          sx={{ borderBottom: 1, borderColor: "divider", px: 2, minHeight: 44 }}
         >
-          <Tab label="Lista de transportadoras" />
-          <Tab label={editingItem ? "Editar Transportadora" : "Registrar Transportadora"} />
+          <Tab label="Lista" sx={{ minHeight: 44, textTransform: "none", fontWeight: 500 }} />
+          <Tab
+            label={editingItem ? "Editar" : "Registrar"}
+            sx={{ minHeight: 44, textTransform: "none", fontWeight: 500 }}
+          />
         </Tabs>
 
-        <Box className="flex-1 overflow-auto p-4">
+        {/* Content */}
+        <Box sx={{ flex: 1, overflowY: "auto", p: 3 }}>
           {activeTab === 0 && (
             <CarrierList
               carriers={carriers}
@@ -53,12 +96,14 @@ export const CarrierPanel = ({ open, onClose }: CarrierPanelProps) => {
               onPageChange={setCurrentPage}
               onEdit={handleEdit}
               onDeleted={refetch}
+              onNew={handleNew}
             />
           )}
           {activeTab === 1 && (
             <CarrierForm
               editingCarrier={editingItem}
               onSuccess={() => handleFormSuccess(refetch)}
+              onCancel={handleCancel}
             />
           )}
         </Box>

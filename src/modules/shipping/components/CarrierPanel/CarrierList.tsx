@@ -2,10 +2,7 @@ import { useState } from "react";
 import {
   Box,
   CircularProgress,
-  Divider,
   IconButton,
-  Menu,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -13,9 +10,10 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { MoreVertical } from "lucide-react";
+import { Globe, Pencil, Trash2, Truck } from "lucide-react";
 import { deleteCarrier } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
 import type { Carrier } from "../../types";
@@ -29,6 +27,7 @@ interface CarrierListProps {
   onPageChange: (page: number) => void;
   onEdit: (carrier: Carrier) => void;
   onDeleted: () => void;
+  onNew: () => void;
 }
 
 export const CarrierList = ({
@@ -42,31 +41,10 @@ export const CarrierList = ({
   onDeleted,
 }: CarrierListProps) => {
   const showNotification = useNotificationStore((s) => s.showNotification);
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [activeCarrier, setActiveCarrier] = useState<Carrier | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleMenuOpen = (e: React.MouseEvent<HTMLButtonElement>, carrier: Carrier) => {
-    e.stopPropagation();
-    setMenuAnchor(e.currentTarget);
-    setActiveCarrier(carrier);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-    setActiveCarrier(null);
-  };
-
-  const handleEdit = () => {
-    if (activeCarrier) onEdit(activeCarrier);
-    handleMenuClose();
-  };
-
-  const handleDelete = async () => {
-    if (!activeCarrier) return;
-    const carrier = activeCarrier;
-    handleMenuClose();
-    setDeleting(true);
+  const handleDelete = async (carrier: Carrier) => {
+    setDeletingId(carrier.id);
     try {
       await deleteCarrier(carrier.id);
       showNotification("Transportadora eliminada correctamente", "success");
@@ -74,13 +52,13 @@ export const CarrierList = ({
     } catch {
       showNotification("Error al eliminar la transportadora", "error");
     } finally {
-      setDeleting(false);
+      setDeletingId(null);
     }
   };
 
   if (loading) {
     return (
-      <Box className="flex justify-center py-8">
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress size={24} />
       </Box>
     );
@@ -88,58 +66,128 @@ export const CarrierList = ({
 
   if (carriers.length === 0) {
     return (
-      <Box className="flex justify-center py-8">
-        <Typography color="text.secondary">No hay transportadoras registradas</Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 10 }}>
+        <Box
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            bgcolor: "action.selected",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "text.disabled",
+          }}
+        >
+          <Truck size={24} />
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="body2" fontWeight={600} gutterBottom>
+            Sin transportadoras registradas
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Registra la primera para comenzar a asignar despachos
+          </Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <>
-      <TableContainer>
+    <Box>
+      <TableContainer sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
         <Table size="small">
           <TableHead>
-            <TableRow className="bg-gray-50">
-              <TableCell className="font-semibold">Nombre</TableCell>
-              <TableCell className="font-semibold">Sitio Web</TableCell>
-              <TableCell className="font-semibold">Fecha de Registro</TableCell>
+            <TableRow sx={{ bgcolor: "grey.50" }}>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", py: 1.5 }}>
+                Nombre
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", py: 1.5 }}>
+                Sitio web
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", py: 1.5 }}>
+                Registro
+              </TableCell>
               <TableCell padding="checkbox" />
             </TableRow>
           </TableHead>
           <TableBody>
             {carriers.map((carrier) => (
-              <TableRow key={carrier.id} hover>
-                <TableCell>{carrier.name}</TableCell>
+              <TableRow
+                key={carrier.id}
+                hover
+                sx={{ "&:last-child td": { borderBottom: 0 } }}
+              >
+                <TableCell>
+                  <Typography variant="body2" fontWeight={600}>
+                    {carrier.name}
+                  </Typography>
+                </TableCell>
                 <TableCell>
                   {carrier.website ? (
-                    <a
-                      href={carrier.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {carrier.website}
-                    </a>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Globe size={12} color="#9e9e9e" />
+                      <Typography
+                        variant="body2"
+                        component="a"
+                        href={carrier.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        sx={{
+                          color: "text.secondary",
+                          textDecoration: "none",
+                          "&:hover": { color: "primary.main", textDecoration: "underline" },
+                          maxWidth: 200,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          display: "block",
+                        }}
+                      >
+                        {carrier.website.replace(/^https?:\/\//, "")}
+                      </Typography>
+                    </Box>
                   ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      -
-                    </Typography>
+                    <Typography variant="body2" color="text.disabled">—</Typography>
                   )}
                 </TableCell>
                 <TableCell>
-                  {carrier.registeredAt
-                    ? new Date(carrier.registeredAt + "T00:00:00").toLocaleDateString("es-CO")
-                    : "-"}
+                  <Typography variant="body2" color="text.secondary">
+                    {carrier.registeredAt
+                      ? new Date(carrier.registeredAt + "T00:00:00").toLocaleDateString("es-CO", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </Typography>
                 </TableCell>
-                <TableCell padding="checkbox">
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuOpen(e, carrier)}
-                    disabled={deleting}
-                  >
-                    <MoreVertical size={16} />
-                  </IconButton>
+                <TableCell padding="checkbox" sx={{ pr: 1 }}>
+                  <Box sx={{ display: "flex", gap: 0.25 }}>
+                    <Tooltip title="Editar">
+                      <IconButton size="small" onClick={() => onEdit(carrier)}>
+                        <Pencil size={14} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDelete(carrier)}
+                        disabled={deletingId === carrier.id}
+                        sx={{
+                          color: "error.light",
+                          "&:hover": { color: "error.main", bgcolor: "rgba(211,47,47,0.06)" },
+                        }}
+                      >
+                        {deletingId === carrier.id ? (
+                          <CircularProgress size={13} color="inherit" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -147,29 +195,17 @@ export const CarrierList = ({
         </Table>
       </TableContainer>
 
-      <TablePagination
-        rowsPerPageOptions={[pageSize]}
-        component="div"
-        count={totalElements}
-        rowsPerPage={pageSize}
-        page={currentPage - 1}
-        onPageChange={(_, newPage) => onPageChange(newPage + 1)}
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-      />
-
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <MenuItem onClick={handleEdit}>Editar</MenuItem>
-        <Divider />
-        <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
-          Eliminar
-        </MenuItem>
-      </Menu>
-    </>
+      {totalElements > pageSize && (
+        <TablePagination
+          rowsPerPageOptions={[pageSize]}
+          component="div"
+          count={totalElements}
+          rowsPerPage={pageSize}
+          page={currentPage - 1}
+          onPageChange={(_, newPage) => onPageChange(newPage + 1)}
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        />
+      )}
+    </Box>
   );
 };

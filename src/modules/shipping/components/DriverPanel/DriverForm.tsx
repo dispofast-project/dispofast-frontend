@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Box, CircularProgress, TextField, Typography } from "@mui/material";
+import { Box, CircularProgress, Paper, TextField, Typography } from "@mui/material";
 import { Button } from "../../../../shared/components/Button/Button";
 import { createDriver, updateDriver } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
@@ -19,12 +19,13 @@ type DriverFormData = z.infer<typeof driverSchema>;
 interface DriverFormProps {
   editingDriver: Driver | null;
   onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export const DriverForm = ({ editingDriver, onSuccess }: DriverFormProps) => {
-  const showNotification = useNotificationStore((s) => s.showNotification);
+const EMPTY_DRIVER: DriverFormData = { name: "", phone: "", cedula: "" };
 
-  const EMPTY_DRIVER: DriverFormData = { name: "", phone: "", cedula: "" };
+export const DriverForm = ({ editingDriver, onSuccess, onCancel }: DriverFormProps) => {
+  const showNotification = useNotificationStore((s) => s.showNotification);
 
   const {
     control,
@@ -69,19 +70,43 @@ export const DriverForm = ({ editingDriver, onSuccess }: DriverFormProps) => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Nombre completo *
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+    >
+      <Paper
+        elevation={0}
+        sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}
+      >
+        <Box
+          sx={{
+            px: 2.5,
+            py: 1.5,
+            bgcolor: "grey.50",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight={700} lineHeight={1.3}>
+            {editingDriver ? "Editar conductor" : "Nuevo conductor"}
           </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {editingDriver
+              ? `Modificando: ${editingDriver.name}`
+              : "Completa los datos para registrar"}
+          </Typography>
+        </Box>
+
+        <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Controller
             name="name"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                placeholder="Nombre del conductor"
+                label="Nombre completo *"
+                placeholder="Juan Pérez García"
                 fullWidth
                 size="small"
                 error={!!errors.name}
@@ -89,54 +114,51 @@ export const DriverForm = ({ editingDriver, onSuccess }: DriverFormProps) => {
               />
             )}
           />
-        </Box>
 
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Cédula
-          </Typography>
-          <Controller
-            name="cedula"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                placeholder="Número de cédula"
-                fullWidth
-                size="small"
-                error={!!errors.cedula}
-                helperText={errors.cedula?.message}
-              />
-            )}
-          />
-        </Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <Controller
+              name="cedula"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Cédula"
+                  placeholder="12345678"
+                  fullWidth
+                  size="small"
+                  error={!!errors.cedula}
+                  helperText={errors.cedula?.message ?? "Opcional"}
+                />
+              )}
+            />
 
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Teléfono
-          </Typography>
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                placeholder="Número de teléfono"
-                fullWidth
-                size="small"
-                error={!!errors.phone}
-                helperText={errors.phone?.message}
-              />
-            )}
-          />
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Teléfono"
+                  placeholder="300 123 4567"
+                  fullWidth
+                  size="small"
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message ?? "Opcional"}
+                />
+              )}
+            />
+          </Box>
         </Box>
+      </Paper>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting && <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />}
-            {editingDriver ? "Guardar cambios" : "Registrar"}
-          </Button>
-        </Box>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
+        <Button type="button" variant="tertiary" onClick={onCancel} disabled={isSubmitting}>
+          Cancelar
+        </Button>
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting && <CircularProgress size={14} color="inherit" sx={{ mr: 1 }} />}
+          {editingDriver ? "Guardar cambios" : "Registrar"}
+        </Button>
       </Box>
     </Box>
   );

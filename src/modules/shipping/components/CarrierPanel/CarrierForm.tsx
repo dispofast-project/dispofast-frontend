@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Box, TextField, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Paper, TextField, Typography } from "@mui/material";
 import { Button } from "../../../../shared/components/Button/Button";
 import { createCarrier, updateCarrier } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
@@ -24,9 +24,12 @@ type CarrierFormData = z.infer<typeof carrierSchema>;
 interface CarrierFormProps {
   editingCarrier: Carrier | null;
   onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export const CarrierForm = ({ editingCarrier, onSuccess }: CarrierFormProps) => {
+const EMPTY: CarrierFormData = { name: "", website: "" };
+
+export const CarrierForm = ({ editingCarrier, onSuccess, onCancel }: CarrierFormProps) => {
   const showNotification = useNotificationStore((s) => s.showNotification);
 
   const {
@@ -36,26 +39,20 @@ export const CarrierForm = ({ editingCarrier, onSuccess }: CarrierFormProps) => 
     formState: { errors, isSubmitting },
   } = useForm<CarrierFormData>({
     resolver: zodResolver(carrierSchema),
-    defaultValues: { name: "", website: "" },
+    defaultValues: EMPTY,
   });
 
   useEffect(() => {
-    if (editingCarrier) {
-      reset({
-        name: editingCarrier.name,
-        website: editingCarrier.website ?? "",
-      });
-    } else {
-      reset({ name: "", website: "" });
-    }
+    reset(
+      editingCarrier
+        ? { name: editingCarrier.name, website: editingCarrier.website ?? "" }
+        : EMPTY
+    );
   }, [editingCarrier, reset]);
 
   const onSubmit = async (data: CarrierFormData) => {
     try {
-      const payload = {
-        name: data.name,
-        website: data.website || null,
-      };
+      const payload = { name: data.name, website: data.website || null };
       if (editingCarrier) {
         await updateCarrier(editingCarrier.id, payload);
         showNotification("Transportadora actualizada correctamente", "success");
@@ -70,19 +67,43 @@ export const CarrierForm = ({ editingCarrier, onSuccess }: CarrierFormProps) => 
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Nombre *
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+    >
+      <Paper
+        elevation={0}
+        sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}
+      >
+        <Box
+          sx={{
+            px: 2.5,
+            py: 1.5,
+            bgcolor: "grey.50",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight={700} lineHeight={1.3}>
+            {editingCarrier ? "Editar transportadora" : "Nueva transportadora"}
           </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {editingCarrier
+              ? `Modificando: ${editingCarrier.name}`
+              : "Completa los datos para registrar"}
+          </Typography>
+        </Box>
+
+        <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Controller
             name="name"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                placeholder="Nombre de la transportadora"
+                label="Nombre *"
+                placeholder="Servientrega, Coordinadora..."
                 fullWidth
                 size="small"
                 error={!!errors.name}
@@ -90,36 +111,33 @@ export const CarrierForm = ({ editingCarrier, onSuccess }: CarrierFormProps) => 
               />
             )}
           />
-        </Box>
 
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Sitio Web
-          </Typography>
           <Controller
             name="website"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
+                label="Sitio web"
                 placeholder="https://ejemplo.com"
                 fullWidth
                 size="small"
                 error={!!errors.website}
-                helperText={errors.website?.message}
+                helperText={errors.website?.message ?? "Opcional"}
               />
             )}
           />
         </Box>
+      </Paper>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
-            ) : null}
-            {editingCarrier ? "Guardar cambios" : "Registrar"}
-          </Button>
-        </Box>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
+        <Button type="button" variant="tertiary" onClick={onCancel} disabled={isSubmitting}>
+          Cancelar
+        </Button>
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting && <CircularProgress size={14} color="inherit" sx={{ mr: 1 }} />}
+          {editingCarrier ? "Guardar cambios" : "Registrar"}
+        </Button>
       </Box>
     </Box>
   );

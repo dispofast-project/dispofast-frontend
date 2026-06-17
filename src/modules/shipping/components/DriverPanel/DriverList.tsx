@@ -2,10 +2,7 @@ import { useState } from "react";
 import {
   Box,
   CircularProgress,
-  Divider,
   IconButton,
-  Menu,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -13,9 +10,10 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { MoreVertical } from "lucide-react";
+import { Pencil, Trash2, UserRound } from "lucide-react";
 import { deleteDriver } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
 import type { Driver } from "../../types";
@@ -29,6 +27,7 @@ interface DriverListProps {
   onPageChange: (page: number) => void;
   onEdit: (driver: Driver) => void;
   onDeleted: () => void;
+  onNew: () => void;
 }
 
 export const DriverList = ({
@@ -42,31 +41,10 @@ export const DriverList = ({
   onDeleted,
 }: DriverListProps) => {
   const showNotification = useNotificationStore((s) => s.showNotification);
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleMenuOpen = (e: React.MouseEvent<HTMLButtonElement>, driver: Driver) => {
-    e.stopPropagation();
-    setMenuAnchor(e.currentTarget);
-    setActiveDriver(driver);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-    setActiveDriver(null);
-  };
-
-  const handleEdit = () => {
-    if (activeDriver) onEdit(activeDriver);
-    handleMenuClose();
-  };
-
-  const handleDelete = async () => {
-    if (!activeDriver) return;
-    const driver = activeDriver;
-    handleMenuClose();
-    setDeleting(true);
+  const handleDelete = async (driver: Driver) => {
+    setDeletingId(driver.id);
     try {
       await deleteDriver(driver.id);
       showNotification("Conductor eliminado correctamente", "success");
@@ -74,13 +52,13 @@ export const DriverList = ({
     } catch {
       showNotification("Error al eliminar el conductor", "error");
     } finally {
-      setDeleting(false);
+      setDeletingId(null);
     }
   };
 
   if (loading) {
     return (
-      <Box className="flex justify-center py-8">
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress size={24} />
       </Box>
     );
@@ -88,38 +66,98 @@ export const DriverList = ({
 
   if (drivers.length === 0) {
     return (
-      <Box className="flex justify-center py-8">
-        <Typography color="text.secondary">No hay conductores registrados</Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 10 }}>
+        <Box
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            bgcolor: "action.selected",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "text.disabled",
+          }}
+        >
+          <UserRound size={24} />
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="body2" fontWeight={600} gutterBottom>
+            Sin conductores registrados
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Registra el primero para asignarlo a los despachos
+          </Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <>
-      <TableContainer>
+    <Box>
+      <TableContainer sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
         <Table size="small">
           <TableHead>
-            <TableRow className="bg-gray-50">
-              <TableCell className="font-semibold">Nombre</TableCell>
-              <TableCell className="font-semibold">Cédula</TableCell>
-              <TableCell className="font-semibold">Teléfono</TableCell>
+            <TableRow sx={{ bgcolor: "grey.50" }}>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", py: 1.5 }}>
+                Nombre
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", py: 1.5 }}>
+                Cédula
+              </TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", py: 1.5 }}>
+                Teléfono
+              </TableCell>
               <TableCell padding="checkbox" />
             </TableRow>
           </TableHead>
           <TableBody>
             {drivers.map((driver) => (
-              <TableRow key={driver.id} hover>
-                <TableCell>{driver.name}</TableCell>
-                <TableCell>{driver.cedula || "-"}</TableCell>
-                <TableCell>{driver.phone || "-"}</TableCell>
-                <TableCell padding="checkbox">
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuOpen(e, driver)}
-                    disabled={deleting}
-                  >
-                    <MoreVertical size={16} />
-                  </IconButton>
+              <TableRow
+                key={driver.id}
+                hover
+                sx={{ "&:last-child td": { borderBottom: 0 } }}
+              >
+                <TableCell>
+                  <Typography variant="body2" fontWeight={600}>
+                    {driver.name}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                    {driver.cedula || "—"}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {driver.phone || "—"}
+                  </Typography>
+                </TableCell>
+                <TableCell padding="checkbox" sx={{ pr: 1 }}>
+                  <Box sx={{ display: "flex", gap: 0.25 }}>
+                    <Tooltip title="Editar">
+                      <IconButton size="small" onClick={() => onEdit(driver)}>
+                        <Pencil size={14} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDelete(driver)}
+                        disabled={deletingId === driver.id}
+                        sx={{
+                          color: "error.light",
+                          "&:hover": { color: "error.main", bgcolor: "rgba(211,47,47,0.06)" },
+                        }}
+                      >
+                        {deletingId === driver.id ? (
+                          <CircularProgress size={13} color="inherit" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -127,29 +165,17 @@ export const DriverList = ({
         </Table>
       </TableContainer>
 
-      <TablePagination
-        rowsPerPageOptions={[pageSize]}
-        component="div"
-        count={totalElements}
-        rowsPerPage={pageSize}
-        page={currentPage - 1}
-        onPageChange={(_, newPage) => onPageChange(newPage + 1)}
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-      />
-
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <MenuItem onClick={handleEdit}>Editar</MenuItem>
-        <Divider />
-        <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
-          Eliminar
-        </MenuItem>
-      </Menu>
-    </>
+      {totalElements > pageSize && (
+        <TablePagination
+          rowsPerPageOptions={[pageSize]}
+          component="div"
+          count={totalElements}
+          rowsPerPage={pageSize}
+          page={currentPage - 1}
+          onPageChange={(_, newPage) => onPageChange(newPage + 1)}
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        />
+      )}
+    </Box>
   );
 };

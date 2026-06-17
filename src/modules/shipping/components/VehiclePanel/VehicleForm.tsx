@@ -5,20 +5,22 @@ import { z } from "zod";
 import {
   Box,
   CircularProgress,
-  MenuItem,
+  Paper,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import { Car, Wrench } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { createVehicle, updateVehicle } from "../../api/shipping.service";
 import { useNotificationStore } from "../../../../shared/store/notification.store";
 import type { Vehicle, VehicleState, VehicleType } from "../../types";
-import { VEHICLE_STATE_LABELS, VEHICLE_TYPE_LABELS } from "../../constants/shippingConstants";
 
 const vehicleSchema = z.object({
   plate: z.string().min(1, "La placa es requerida").max(50, "Máximo 50 caracteres"),
-  state: z.enum(["AVAILABLE", "IN_MAINTENANCE"] as const, "El estado es requerido"),
-  type: z.enum(["FURGON", "MENSAJERIA"] as const, "El tipo es requerido"),
+  state: z.enum(["AVAILABLE", "IN_MAINTENANCE"] as const),
+  type: z.enum(["FURGON", "MENSAJERIA"] as const),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -26,9 +28,32 @@ type VehicleFormData = z.infer<typeof vehicleSchema>;
 interface VehicleFormProps {
   editingVehicle: Vehicle | null;
   onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export const VehicleForm = ({ editingVehicle, onSuccess }: VehicleFormProps) => {
+const EMPTY: VehicleFormData = { plate: "", state: "AVAILABLE", type: "FURGON" };
+
+const VEHICLE_STATES: { value: VehicleState; label: string; color: string }[] = [
+  { value: "AVAILABLE", label: "Disponible", color: "#2e7d32" },
+  { value: "IN_MAINTENANCE", label: "En mantenimiento", color: "#e65100" },
+];
+
+const VEHICLE_TYPES: { value: VehicleType; label: string }[] = [
+  { value: "FURGON", label: "Furgón" },
+  { value: "MENSAJERIA", label: "Mensajería" },
+];
+
+const toggleSx = {
+  "& .MuiToggleButton-root": {
+    textTransform: "none",
+    fontSize: "0.8125rem",
+    fontWeight: 500,
+    flex: 1,
+    py: 0.875,
+  },
+};
+
+export const VehicleForm = ({ editingVehicle, onSuccess, onCancel }: VehicleFormProps) => {
   const showNotification = useNotificationStore((s) => s.showNotification);
 
   const {
@@ -38,19 +63,15 @@ export const VehicleForm = ({ editingVehicle, onSuccess }: VehicleFormProps) => 
     formState: { errors, isSubmitting },
   } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
-    defaultValues: { plate: "", state: "AVAILABLE", type: "FURGON" },
+    defaultValues: EMPTY,
   });
 
   useEffect(() => {
-    if (editingVehicle) {
-      reset({
-        plate: editingVehicle.plate,
-        state: editingVehicle.state,
-        type: editingVehicle.type,
-      });
-    } else {
-      reset({ plate: "", state: "AVAILABLE", type: "FURGON" });
-    }
+    reset(
+      editingVehicle
+        ? { plate: editingVehicle.plate, state: editingVehicle.state, type: editingVehicle.type }
+        : EMPTY
+    );
   }, [editingVehicle, reset]);
 
   const onSubmit = async (data: VehicleFormData) => {
@@ -69,88 +90,143 @@ export const VehicleForm = ({ editingVehicle, onSuccess }: VehicleFormProps) => 
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Placa *
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+    >
+      <Paper
+        elevation={0}
+        sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}
+      >
+        <Box
+          sx={{
+            px: 2.5,
+            py: 1.5,
+            bgcolor: "grey.50",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight={700} lineHeight={1.3}>
+            {editingVehicle ? "Editar vehículo" : "Nuevo vehículo"}
           </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {editingVehicle
+              ? `Modificando: ${editingVehicle.plate}`
+              : "Completa los datos para registrar"}
+          </Typography>
+        </Box>
+
+        <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
+          {/* Placa */}
           <Controller
             name="plate"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                placeholder="Nombre del propietario / placa"
+                label="Placa *"
+                placeholder="ABC-123D"
                 fullWidth
                 size="small"
                 error={!!errors.plate}
                 helperText={errors.plate?.message}
+                inputProps={{ style: { textTransform: "uppercase", letterSpacing: "1px", fontFamily: "monospace" } }}
+                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
               />
             )}
           />
-        </Box>
 
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Estado *
-          </Typography>
-          <Controller
-            name="state"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                select
-                fullWidth
-                size="small"
-                error={!!errors.state}
-                helperText={errors.state?.message}
-              >
-                {(Object.keys(VEHICLE_STATE_LABELS) as VehicleState[]).map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {VEHICLE_STATE_LABELS[key]}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
-          />
-        </Box>
+          {/* Tipo */}
+          <Box>
+            <Typography
+              variant="caption"
+              fontWeight={600}
+              color="text.secondary"
+              sx={{ display: "block", mb: 1, textTransform: "uppercase", letterSpacing: "0.5px", fontSize: "0.7rem" }}
+            >
+              Tipo de vehículo
+            </Typography>
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <ToggleButtonGroup
+                  value={field.value}
+                  exclusive
+                  onChange={(_, v) => v && field.onChange(v)}
+                  fullWidth
+                  size="small"
+                  sx={toggleSx}
+                >
+                  {VEHICLE_TYPES.map((opt) => (
+                    <ToggleButton key={opt.value} value={opt.value}>
+                      <Car size={14} style={{ marginRight: 6 }} />
+                      {opt.label}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+              )}
+            />
+          </Box>
 
-        <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-            Tipo de Vehículo *
-          </Typography>
-          <Controller
-            name="type"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                select
-                fullWidth
-                size="small"
-                error={!!errors.type}
-                helperText={errors.type?.message}
-              >
-                {(Object.keys(VEHICLE_TYPE_LABELS) as VehicleType[]).map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {VEHICLE_TYPE_LABELS[key]}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
-          />
+          {/* Estado */}
+          <Box>
+            <Typography
+              variant="caption"
+              fontWeight={600}
+              color="text.secondary"
+              sx={{ display: "block", mb: 1, textTransform: "uppercase", letterSpacing: "0.5px", fontSize: "0.7rem" }}
+            >
+              Estado
+            </Typography>
+            <Controller
+              name="state"
+              control={control}
+              render={({ field }) => (
+                <ToggleButtonGroup
+                  value={field.value}
+                  exclusive
+                  onChange={(_, v) => v && field.onChange(v)}
+                  fullWidth
+                  size="small"
+                  sx={toggleSx}
+                >
+                  {VEHICLE_STATES.map((opt) => (
+                    <ToggleButton
+                      key={opt.value}
+                      value={opt.value}
+                      sx={{
+                        "&.Mui-selected": {
+                          color: opt.color,
+                          borderColor: opt.color,
+                          bgcolor: `${opt.color}14`,
+                          "&:hover": { bgcolor: `${opt.color}1e` },
+                        },
+                      }}
+                    >
+                      {opt.value === "IN_MAINTENANCE" && (
+                        <Wrench size={14} style={{ marginRight: 6 }} />
+                      )}
+                      {opt.label}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+              )}
+            />
+          </Box>
         </Box>
+      </Paper>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
-            ) : null}
-            {editingVehicle ? "Guardar cambios" : "Registrar"}
-          </Button>
-        </Box>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
+        <Button type="button" variant="tertiary" onClick={onCancel} disabled={isSubmitting}>
+          Cancelar
+        </Button>
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting && <CircularProgress size={14} color="inherit" sx={{ mr: 1 }} />}
+          {editingVehicle ? "Guardar cambios" : "Registrar"}
+        </Button>
       </Box>
     </Box>
   );
