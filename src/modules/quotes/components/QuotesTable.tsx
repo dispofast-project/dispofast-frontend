@@ -5,7 +5,6 @@ import { QuoteStatus } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
 import { QuoteStatusBadge } from "./QuoteStatusBadge";
-import { QUOTE_STATUS_UI } from "../constants";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -19,12 +18,6 @@ interface QuotesTableProps {
   onCreateOrder: (quote: QuotePreview) => void;
   onChangeStatus: (quote: QuotePreview, status: string) => void;
 }
-
-const STATUS_OPTIONS = Object.entries(QUOTE_STATUS_UI).map(([value, config]) => ({
-  value,
-  label: config.label,
-  colorClass: config.colorClass,
-}));
 
 const QuotesTable = ({
   quotes,
