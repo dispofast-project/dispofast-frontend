@@ -21,6 +21,7 @@ import AttachInvoiceDialog from "../components/AttachInvoiceDialog/AttachInvoice
 import OrderPrintTemplate from "../components/OrderPrintTemplate/OrderPrintTemplate";
 import OrderClientDetailCard from "../components/OrderClientDetailCard/OrderClientDetailCard";
 import OrderObservationsCard from "../components/OrderObservationsCard/OrderObservationsCard";
+import { OrderShipmentsPanel } from "../../shipping/components/OrderShipmentsPanel/OrderShipmentsPanel";
 
 const NEXT_STATES: Record<OrderState, OrderState[]> = {
   PENDING: ["CANCELLED"],
@@ -198,6 +199,13 @@ const OrderDetailPage = () => {
               zone={order.zone}
             />
           </Box>
+
+          {invoice && (
+            <Box>
+              <h3 className="text-lg font-semibold mb-3">Despachos</h3>
+              <OrderShipmentsPanel invoiceId={invoice.id} />
+            </Box>
+          )}
 
           <OrderObservationsCard
             observations={order.observations}

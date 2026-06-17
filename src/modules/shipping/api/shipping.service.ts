@@ -1,0 +1,120 @@
+import apiClient from "../../../shared/api/apiClient";
+import type {
+  Carrier,
+  Shipment,
+  CreateCarrierDTO,
+  UpdateCarrierDTO,
+  UpdateShipmentDTO,
+  ShipmentState,
+} from "../types";
+
+const CARRIERS_BASE_URL = "/api/v1/carriers";
+const SHIPMENTS_BASE_URL = "/api/v1/shipments";
+
+// ─── CARRIERS ───────────────────────────────────────────────────────────────
+
+export const getAllCarriers = async (params?: {
+  page?: number;
+  size?: number;
+  name?: string;
+}): Promise<{ content: Carrier[]; totalElements: number }> => {
+  const { page = 0, size = 15, ...filters } = params || {};
+  const { data } = await apiClient.get<{
+    content: Carrier[];
+    totalElements: number;
+  }>(CARRIERS_BASE_URL, { params: { page, size, ...filters } });
+  return data;
+};
+
+export const getCarrierById = async (id: string): Promise<Carrier> => {
+  const { data } = await apiClient.get<Carrier>(`${CARRIERS_BASE_URL}/${id}`);
+  return data;
+};
+
+export const createCarrier = async (payload: CreateCarrierDTO): Promise<Carrier> => {
+  const { data } = await apiClient.post<Carrier>(CARRIERS_BASE_URL, payload);
+  return data;
+};
+
+export const updateCarrier = async (
+  id: string,
+  payload: UpdateCarrierDTO
+): Promise<Carrier> => {
+  const { data } = await apiClient.put<Carrier>(
+    `${CARRIERS_BASE_URL}/${id}`,
+    payload
+  );
+  return data;
+};
+
+export const deleteCarrier = async (id: string): Promise<void> => {
+  await apiClient.delete(`${CARRIERS_BASE_URL}/${id}`);
+};
+
+// ─── SHIPMENTS ──────────────────────────────────────────────────────────────
+
+export const getShipmentById = async (id: string): Promise<Shipment> => {
+  const { data } = await apiClient.get<Shipment>(`${SHIPMENTS_BASE_URL}/${id}`);
+  return data;
+};
+
+export const getShipmentsByInvoice = async (invoiceId: string): Promise<Shipment> => {
+  const { data } = await apiClient.get<Shipment>(
+    `${SHIPMENTS_BASE_URL}/invoice/${invoiceId}`
+  );
+  return data;
+};
+
+export const getShipmentsByCarrier = async (
+  carrierId: string,
+  params?: { page?: number; size?: number }
+): Promise<{ content: Shipment[]; totalElements: number }> => {
+  const { page = 0, size = 10 } = params || {};
+  const { data } = await apiClient.get<{
+    content: Shipment[];
+    totalElements: number;
+  }>(`${SHIPMENTS_BASE_URL}/carrier/${carrierId}`, {
+    params: { page, size },
+  });
+  return data;
+};
+
+export const getAllShipments = async (params?: {
+  page?: number;
+  size?: number;
+  state?: string;
+  clientName?: string;
+  asesorName?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<{ content: Shipment[]; totalElements: number }> => {
+  const { page = 0, size = 10, ...filters } = params || {};
+  const { data } = await apiClient.get<{
+    content: Shipment[];
+    totalElements: number;
+  }>(SHIPMENTS_BASE_URL, { params: { page, size, ...filters } });
+  return data;
+};
+
+export const updateShipment = async (
+  id: string,
+  payload: UpdateShipmentDTO
+): Promise<Shipment> => {
+  const { data } = await apiClient.put<Shipment>(
+    `${SHIPMENTS_BASE_URL}/${id}`,
+    payload
+  );
+  return data;
+};
+
+export const updateShipmentState = async (
+  id: string,
+  state: ShipmentState
+): Promise<Shipment> => {
+  const { data } = await apiClient.put<Shipment>(
+    `${SHIPMENTS_BASE_URL}/${id}/state`,
+    null,
+    { params: { state } }
+  );
+  return data;
+};
