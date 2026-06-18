@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../../shared/components/Button/Button";
 import CustomTitle from "../../../shared/components/Title/Title";
@@ -10,6 +10,7 @@ import ProductSeoSection from "../components/form/ProductSeoSection";
 import { useEditProduct } from "../hooks/useEditProduct";
 import { PRODUCT_STATUS_CONFIG } from "../config/statusConfig";
 import { BackButton } from "../../../shared/components/BackButton/BackButton";
+import { useAuth } from "../../iam/hooks/useAuth";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,9 @@ const ProductDetailPage = () => {
   } = useEditProduct(id!);
 
   const navigate = useNavigate();
+
+  const { authorities } = useAuth();
+  const canEdit = authorities.includes("PRODUCTS_EDIT");
 
   if (isLoading) {
     return (
@@ -58,20 +62,22 @@ const ProductDetailPage = () => {
           <StatusBadge status={product.state} configMap={PRODUCT_STATUS_CONFIG} />
         </Box>
         <Box className="flex items-center justify-end gap-3">
-          
-          {isEditing ? (
-            <>
-              <Button variant="secondary" onClick={cancelEditing} disabled={isSubmitting}>
-                Cancelar
+
+          {canEdit && (
+            isEditing ? (
+              <>
+                <Button variant="secondary" onClick={cancelEditing} disabled={isSubmitting}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onClick={onSubmit} isLoading={isSubmitting}>
+                  Guardar
+                </Button>
+              </>
+            ) : (
+              <Button variant="primary" onClick={startEditing}>
+                Editar
               </Button>
-              <Button variant="primary" onClick={onSubmit} isLoading={isSubmitting}>
-                Guardar
-              </Button>
-            </>
-          ) : (
-            <Button variant="primary" onClick={startEditing}>
-              Editar
-            </Button>
+            )
           )}
         </Box>
       </Box>
