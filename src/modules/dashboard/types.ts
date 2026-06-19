@@ -15,3 +15,13 @@ export interface DashboardStats {
   ventasPorMes: MonthlySales[];
   productosMasVendidos: TopProduct[];
 }
+
+export interface AsesorVsQuotaStats {
+  asesorId: string;
+  asesorFullName: string;
+  year: number;
+  month: number;
+  ventas: number;
+  cuota: number;
+  pctCumplimiento: number;
+}
