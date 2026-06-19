@@ -59,7 +59,7 @@ const DashboardPage = (): JSX.Element => {
         <ProductosMasVendidosChart data={stats?.productosMasVendidos ?? []} loading={loading} />
         
         <div className="md:col-span-2">
-          <AsesorVsQuotaChart data={asesorQuotaStats ?? []} loading={loading} />
+          <AsesorVsQuotaChart />
         </div>
       </div>
     </div>

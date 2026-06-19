@@ -10,8 +10,8 @@ export const useDashboard = () => {
   useEffect(() => {
     getDashboardStats()
       .then(setStats)
-      
-    getAsesorVsQuotaStats()
+
+    getAsesorVsQuotaStats(6, "SALES_QUOTA")
       .then(setAsesorQuotaStats)
       .finally(() => setLoading(false));
   }, []);
