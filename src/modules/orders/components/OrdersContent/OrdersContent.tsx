@@ -28,6 +28,7 @@ import { deleteOrder, attachInvoice } from "../../api/order.service";
 import AttachInvoiceDialog from "../AttachInvoiceDialog/AttachInvoiceDialog";
 import { Eye, Paperclip, Trash2 } from "lucide-react";
 import { ListItemIcon } from "@mui/material";
+import { useAuth } from "../../../iam/hooks/useAuth";
 
 const filterConfigs: FilterConfig[] = [
   {
@@ -162,6 +163,9 @@ const OrdersContent = (): JSX.Element => {
     }
   };
 
+  const { authorities } = useAuth();
+  const canDelete = authorities.includes("PURCHASE_ORDERS_DELETE");
+
   const renderOptionsMenu = (item: SalesOrder, closeMenu: () => void) => (
     <>
       <MenuItem onClick={() => { closeMenu(); navigate(`/ordenes/${item.id}`); }}>
@@ -172,10 +176,13 @@ const OrdersContent = (): JSX.Element => {
         <ListItemIcon><Paperclip size={16} /></ListItemIcon>
         Adjuntar factura
       </MenuItem>
-      <MenuItem onClick={() => { closeMenu(); setOrderToDelete(item); }} sx={{ color: "error.main" }}>
-        <ListItemIcon sx={{ color: "error.main" }}><Trash2 size={16} /></ListItemIcon>
-        Eliminar orden
-      </MenuItem>
+      {canDelete && (
+        <MenuItem onClick={() => { closeMenu(); setOrderToDelete(item); }} sx={{ color: "error.main" }}>
+          <ListItemIcon sx={{ color: "error.main" }}><Trash2 size={16} /></ListItemIcon>
+          Eliminar orden
+        </MenuItem>
+      )} 
+      
     </>
   );
 

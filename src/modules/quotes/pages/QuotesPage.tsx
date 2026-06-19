@@ -114,16 +114,14 @@ const QuotesPage = () => {
     }
   };
 
-  const handleChangeStatus = async (quoteId: string, newStatus: string) => {
+  const handleChangeStatus = async (quote: QuotePreview, status: string) => {
     try {
-      await changeQuoteStatusService(quoteId, newStatus);
+      const updatedQuote = await changeQuoteStatusService(quote.id, status);
       setQuotes((prev) =>
-        prev.map((q) =>
-          q.id === quoteId ? { ...q, status: newStatus as QuotePreview["status"] } : q,
-        ),
+        prev.map((q) => (q.id === updatedQuote.id ? { ...q, status: updatedQuote.status } : q))
       );
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al cambiar el estado.";
+      const message = err instanceof Error ? err.message : "Error al cambiar el estado de la cotización.";
       setError(message);
     }
   };
