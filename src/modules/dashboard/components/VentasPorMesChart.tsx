@@ -48,7 +48,7 @@ export const VentasPorMesChart = ({ data, loading }: Props) => {
               width={52}
             />
             <Tooltip
-              formatter={(value: number) => [formatCurrency(value), "Ventas"]}
+              formatter={(value) => [formatCurrency(Number(value ?? 0)), "Ventas"]}
               contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
             />
             <Area

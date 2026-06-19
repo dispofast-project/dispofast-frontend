@@ -35,8 +35,8 @@ export const ProductosMasVendidosChart = ({ data, loading }: Props) => {
             <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} width={36} />
             <Tooltip
-              formatter={(value: number, _name: string, props) => [
-                `${value} uds`,
+              formatter={(value, _name, props) => [
+                `${Number(value ?? 0)} uds`,
                 props.payload?.fullName ?? _name,
               ]}
               contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}

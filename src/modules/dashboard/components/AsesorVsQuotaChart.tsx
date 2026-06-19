@@ -101,7 +101,7 @@ const AsesorVsQuotaChart = () => {
                 tickLine={false}
               />
               <Tooltip
-                formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                formatter={(value, name) => [formatCurrency(Number(value ?? 0)), name as string]}
                 contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
               />
               <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />

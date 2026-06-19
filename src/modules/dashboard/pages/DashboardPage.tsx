@@ -10,7 +10,7 @@ import { formatCurrency } from "../../../shared/utils/currency";
 import AsesorVsQuotaChart from "../components/AsesorVsQuotaChart";
 
 const DashboardPage = (): JSX.Element => {
-  const { stats, loading, asesorQuotaStats } = useDashboard();
+  const { stats, loading } = useDashboard();
 
   const today = new Date();
   const dateLabel = today.toLocaleDateString("es-CO", {
