@@ -6,5 +6,7 @@ const BASE_URL = "/dashboard";
 export const getDashboardStats = (): Promise<DashboardStats> =>
   apiClient.get<DashboardStats>(`${BASE_URL}/stats`).then((r) => r.data);
 
-export const getAsesorVsQuotaStats = (): Promise<AsesorVsQuotaStats[]> =>
-  apiClient.get<AsesorVsQuotaStats[]>(`${BASE_URL}/asesor-vs-quota`).then((r) => r.data);
+export const getAsesorVsQuotaStats = (months: number, type: string): Promise<AsesorVsQuotaStats[]> =>
+  apiClient.get<AsesorVsQuotaStats[]>(`${BASE_URL}/asesor-vs-quota`, {
+    params: { months, type }
+  }).then((r) => r.data);
