@@ -16,6 +16,7 @@ import InventoryRoutes from "../modules/inventory/inventory.routes";
 import PriceListPage from "../modules/pricelist/pages/PriceListPage";
 import NotFoundPage from "../shared/pages/NotFoundPage";
 import ForbiddenPage from "../shared/pages/ForbiddenPage";
+import DashboardPage from "../modules/dashboard/pages/DashboardPage";
 
 const AppRouter = (): ReactElement => {
   return (
@@ -28,19 +29,7 @@ const AppRouter = (): ReactElement => {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           {/* Dashboard: accesible para cualquier usuario autenticado */}
-          <Route
-            path="/dashboard"
-            element={
-              <div className="p-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                  Dashboard
-                </h1>
-                <div className="bg-white rounded-lg shadow p-6">
-                  <p>Contenido del dashboard</p>
-                </div>
-              </div>
-            }
-          />
+          <Route path="/dashboard" element={<DashboardPage />} />
 
           {/* Cotizaciones */}
           <Route element={<ProtectedRoute requiredAuthorities={["QUOTES_VIEW"]} />}>
