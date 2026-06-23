@@ -10,7 +10,7 @@ const OrdersPage = () => {
   const navigate = useNavigate();
 
   const { authorities } = useAuth();
-  const canCreate = authorities.includes("ORDERS_CREATE");
+  const canCreate = authorities.includes("PURCHASE_ORDERS_CREATE");
 
   return (
     <Box className="flex h-full flex-col space-y-6">
