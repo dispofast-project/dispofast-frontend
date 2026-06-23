@@ -13,6 +13,7 @@ import CreatePriceListModal from "../components/CreatePriceListModal";
 import PriceListItemsDrawer from "../components/PriceListItemsDrawer";
 import { Button } from "../../../shared/components/Button/Button";
 import CustomTitle from "../../../shared/components/Title/Title";
+import { useAuth } from "../../iam/hooks/useAuth";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,6 +28,7 @@ const PriceListPage = () => {
   const [drawerPriceList, setDrawerPriceList] = useState<PriceListItem | null>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const uploadingItemRef = useRef<PriceListItem | null>(null);
+  const { authorities } = useAuth();
 
   const fetchPriceLists = async () => {
     setIsLoading(true);
@@ -138,6 +140,7 @@ const PriceListPage = () => {
           onView={handleView}
           onUpdate={handleUpdate}
           onDownload={handleDownload}
+          authorithies={authorities}
         />
       )}
 

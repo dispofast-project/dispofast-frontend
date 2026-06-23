@@ -4,9 +4,13 @@ import { useNavigate } from "react-router-dom";
 import CustomTitle from "../../../shared/components/Title/Title";
 import { Button } from "../../../shared/components/Button/Button";
 import OrdersContent from "../components/OrdersContent/OrdersContent";
+import { useAuth } from "../../iam/hooks/useAuth";
 
 const OrdersPage = () => {
   const navigate = useNavigate();
+
+  const { authorities } = useAuth();
+  const canCreate = authorities.includes("ORDERS_CREATE");
 
   return (
     <Box className="flex h-full flex-col space-y-6">
@@ -14,10 +18,12 @@ const OrdersPage = () => {
         <CustomTitle mainTitle="Órdenes de compra" description="Gestiona las órdenes de compra de los clientes" />
 
         <Box className="flex items-center justify-end">
-          <Button variant="primary" onClick={() => navigate("/ordenes/nuevo")}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Orden
-          </Button>
+          {canCreate && (
+            <Button variant="primary" onClick={() => navigate("/ordenes/nuevo")}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Orden
+            </Button>
+          )}
         </Box>
       </Box>
 
