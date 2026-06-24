@@ -171,6 +171,9 @@ const OrderDetailPage = () => {
         onBack={() => navigate("/ordenes")}
         onAttachInvoice={() => setInvoiceOpen(true)}
         onStateChange={handleStateChange}
+        invoice={invoice}
+        downloadLoading={downloadLoading}
+        onDownloadInvoice={handleDownloadInvoice}
       />
 
       <OrderStatusStepper state={order.state} />
@@ -189,8 +192,6 @@ const OrderDetailPage = () => {
               orderDate={order.orderDate}
               asesorName={order.asesorName}
               invoice={invoice}
-              downloadLoading={downloadLoading}
-              onDownloadInvoice={handleDownloadInvoice}
             />
             <OrderDeliveryCard
               shipmentCityName={order.shipmentCityName}
