@@ -1,5 +1,5 @@
-import { Box, Typography, Divider, TextField, InputAdornment, Alert } from "@mui/material";
-import { AlertCircle, Circle } from "lucide-react";
+import { Box, Typography, Divider, TextField, InputAdornment, Alert, CircularProgress } from "@mui/material";
+import { AlertCircle, Circle, Download } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
 
@@ -24,6 +24,8 @@ interface QuoteSummaryPanelProps {
   isSaving: boolean;
   error?: string | null;
   onSave: () => void;
+  onDownload?: () => void;
+  isDownloading?: boolean;
 }
 
 const SummaryRow = ({
@@ -63,6 +65,8 @@ const QuoteSummaryPanel = ({
   isSaving,
   error,
   onSave,
+  onDownload,
+  isDownloading,
 }: QuoteSummaryPanelProps) => {
   return (
     <Box className="lg:col-span-1 sticky top-4">
@@ -185,6 +189,22 @@ const QuoteSummaryPanel = ({
           >
             Guardar Cotización
           </Button>
+
+          {onDownload && (
+            <Button
+              variant="secondary"
+              onClick={onDownload}
+              disabled={isDownloading}
+              className="w-full justify-center gap-1.5"
+            >
+              {isDownloading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              Descargar PDF
+            </Button>
+          )}
 
           {missingFields.length > 0 && (
             <Box className="rounded-lg border border-amber-200 bg-amber-50 p-3">

@@ -30,8 +30,17 @@ interface DraftItem {
   unitPrice: number;
 }
 
+export interface DraftPrintItem {
+  productReference: string;
+  productName: string;
+  taxFree: boolean;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface QuoteItemsDraftSectionHandle {
   getItems: () => Array<{ productId: string; quantity: number; unitPrice: number }>;
+  getFullItems: () => DraftPrintItem[];
 }
 
 export interface DraftTotals {
@@ -75,6 +84,14 @@ const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteIte
       getItems: () =>
         items.map((item) => ({
           productId: item.productId,
+          quantity: parseFloat(pendingQty[item.tempId] ?? String(item.quantity)) || item.quantity,
+          unitPrice: parseFloat(pendingPrice[item.tempId] ?? String(item.unitPrice)) || item.unitPrice,
+        })),
+      getFullItems: () =>
+        items.map((item) => ({
+          productReference: item.productReference,
+          productName: item.productName,
+          taxFree: item.taxFree,
           quantity: parseFloat(pendingQty[item.tempId] ?? String(item.quantity)) || item.quantity,
           unitPrice: parseFloat(pendingPrice[item.tempId] ?? String(item.unitPrice)) || item.unitPrice,
         })),
