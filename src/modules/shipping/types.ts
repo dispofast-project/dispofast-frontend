@@ -118,3 +118,10 @@ export interface CreateVehicleDTO {
 export interface VehicleFilters {
   plate?: string;
 }
+
+export interface ShipmentHistory {
+  id: string;
+  changedAt: string;
+  description: string;
+  userEmail: string;
+}

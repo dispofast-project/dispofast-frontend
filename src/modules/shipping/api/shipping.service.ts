@@ -5,6 +5,7 @@ import type {
   CreateDriverDTO,
   Driver,
   Shipment,
+  ShipmentHistory,
   UpdateCarrierDTO,
   UpdateShipmentDTO,
   ShipmentState,
@@ -161,6 +162,11 @@ export const updateShipmentState = async (
 
 export const deleteShipment = async (id: string): Promise<void> => {
   await apiClient.delete(`${SHIPMENTS_BASE_URL}/${id}`);
+};
+
+export const getShipmentHistory = async (id: string): Promise<ShipmentHistory[]> => {
+  const { data } = await apiClient.get<ShipmentHistory[]>(`${SHIPMENTS_BASE_URL}/${id}/history`);
+  return data;
 };
 
 // ─── DRIVERS ─────────────────────────────────────────────────────────────────
