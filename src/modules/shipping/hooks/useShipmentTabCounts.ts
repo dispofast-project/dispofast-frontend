@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { getAllShipments } from "../api/shipping.service";
+import { getShipmentCounts } from "../api/shipping.service";
 import type { ShipmentState } from "../types";
-
-const TAB_STATES: ShipmentState[] = ["PENDING", "ASSIGNED", "IN_ROUTE", "DELIVERED", "DELAYED"];
 
 const INITIAL_COUNTS: Record<ShipmentState, number> = {
   PENDING: 0,
@@ -12,20 +10,20 @@ const INITIAL_COUNTS: Record<ShipmentState, number> = {
   DELAYED: 0,
 };
 
-export const useShipmentTabCounts = () => {
+export const useShipmentTabCounts = (refreshKey?: number) => {
   const [tabCounts, setTabCounts] = useState<Record<ShipmentState, number>>(INITIAL_COUNTS);
 
   useEffect(() => {
-    Promise.all(TAB_STATES.map((s) => getAllShipments({ state: s, size: 1, page: 0 }))).then(
-      (results) => {
-        const counts = {} as Record<ShipmentState, number>;
-        TAB_STATES.forEach((s, i) => {
-          counts[s] = results[i].totalElements;
-        });
-        setTabCounts(counts);
-      }
-    );
-  }, []);
+    getShipmentCounts().then((counts) => {
+      setTabCounts({
+        PENDING: counts.PENDING ?? 0,
+        ASSIGNED: counts.ASSIGNED ?? 0,
+        IN_ROUTE: counts.IN_ROUTE ?? 0,
+        DELIVERED: counts.DELIVERED ?? 0,
+        DELAYED: counts.DELAYED ?? 0,
+      });
+    });
+  }, [refreshKey]);
 
   return tabCounts;
 };

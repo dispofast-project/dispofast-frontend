@@ -23,7 +23,7 @@ export const useShipmentDetail = (id?: string) => {
 
   useEffect(() => {
     refetch();
-  }, [id, refetch]);
+  }, [refetch]);
 
   return { shipment, loading, error, refetch };
 };

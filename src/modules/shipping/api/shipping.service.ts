@@ -169,6 +169,13 @@ export const getShipmentHistory = async (id: string): Promise<ShipmentHistory[]>
   return data;
 };
 
+export const getShipmentCounts = async (): Promise<Record<ShipmentState, number>> => {
+  const { data } = await apiClient.get<{ counts: Record<string, number> }>(
+    `${SHIPMENTS_BASE_URL}/counts`
+  );
+  return data.counts as Record<ShipmentState, number>;
+};
+
 // ─── DRIVERS ─────────────────────────────────────────────────────────────────
 
 const DRIVERS_BASE_URL = "/api/v1/drivers";

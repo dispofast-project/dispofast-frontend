@@ -132,7 +132,8 @@ const EMPTY_FILTERS: ShipmentFilterValues = {
 
 const ShipmentsPage = () => {
   const [activeTab, setActiveTab] = useState<ShipmentState>("PENDING");
-  const tabCounts = useShipmentTabCounts();
+  const [countsKey, setCountsKey] = useState(0);
+  const tabCounts = useShipmentTabCounts(countsKey);
   const [filterValues, setFilterValues] = useState<ShipmentFilterValues>(EMPTY_FILTERS);
   const [carrierPanelOpen, setCarrierPanelOpen] = useState(false);
   const [vehiclePanelOpen, setVehiclePanelOpen] = useState(false);
@@ -205,6 +206,7 @@ const ShipmentsPage = () => {
       try {
         await deleteShipment(selectedShipmentId);
         handleStateFilter(activeTab);
+        setCountsKey((k) => k + 1);
       } catch {
         showNotification("Error al eliminar el despacho", "error");
       }
@@ -234,6 +236,7 @@ const ShipmentsPage = () => {
     if (updated) {
       showNotification("Estado actualizado correctamente", "success");
       handleStateFilter(activeTab);
+      setCountsKey((k) => k + 1);
       handleChangeStateClose();
     } else {
       showNotification("Error al cambiar el estado del despacho", "error");
