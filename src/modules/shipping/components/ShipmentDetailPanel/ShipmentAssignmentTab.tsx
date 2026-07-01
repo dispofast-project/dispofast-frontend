@@ -24,7 +24,7 @@ import type { Carrier, DeliveryType, Driver, Shipment, Vehicle } from "../../typ
 
 const assignmentSchema = z
   .object({
-    deliveryType: z.enum(["CONDUCTOR", "TRANSPORTADORA", "RECOGEN"] as const),
+    deliveryType: z.enum(["CONDUCTOR", "TRANSPORTADORA", "RETIRO"] as const),
     driver: z.custom<Driver>().nullable(),
     vehicle: z.custom<Vehicle>().nullable(),
     carrier: z.custom<Carrier>().nullable(),
@@ -56,7 +56,7 @@ interface Props {
 const DELIVERY_TYPES: { value: DeliveryType; label: string; icon: React.ReactNode }[] = [
   { value: "CONDUCTOR", label: "Conductor", icon: <User size={15} /> },
   { value: "TRANSPORTADORA", label: "Transportadora", icon: <Truck size={15} /> },
-  { value: "RECOGEN", label: "Recogen", icon: <Package size={15} /> },
+  { value: "RETIRO", label: "Retiro", icon: <Package size={15} /> },
 ];
 
 const sectionTitleSx = {
@@ -110,7 +110,7 @@ export const ShipmentAssignmentTab = ({ shipment, onSaved }: Props) => {
         carrierId: data.deliveryType === "TRANSPORTADORA" ? (data.carrier?.id ?? null) : null,
         trackingCode: data.deliveryType === "TRANSPORTADORA" ? (data.trackingCode || null) : null,
         estimatedDeliveryDate:
-          data.deliveryType !== "RECOGEN" ? (data.estimatedDeliveryDate || null) : null,
+          data.deliveryType !== "RETIRO" ? (data.estimatedDeliveryDate || null) : null,
         cityCode: data.city?.code,
         deliveryAddress: data.deliveryAddress,
         addressDetail: data.addressDetail || null,
@@ -249,7 +249,7 @@ export const ShipmentAssignmentTab = ({ shipment, onSaved }: Props) => {
             </Box>
           )}
 
-          {deliveryType !== "RECOGEN" && (
+          {deliveryType !== "RETIRO" && (
             <Controller
               name="estimatedDeliveryDate"
               control={control}

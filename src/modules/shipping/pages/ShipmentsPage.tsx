@@ -9,6 +9,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Link,
   Menu,
   MenuItem,
   Paper,
@@ -107,7 +108,19 @@ const buildColumns = (state: ShipmentState): ColumnDef[] => {
   };
   const codigoS: ColumnDef = {
     label: "Código S",
-    render: (s) => s.trackingCode || "-",
+    render: (s) =>
+      s.trackingCode ? (
+        <Link
+          href={`https://transprensa.com/Seguimiento/?remesa_codigo=${encodeURIComponent(s.trackingCode)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {s.trackingCode}
+        </Link>
+      ) : (
+        "-"
+      ),
   };
 
   switch (state) {
@@ -132,7 +145,8 @@ const EMPTY_FILTERS: ShipmentFilterValues = {
 
 const ShipmentsPage = () => {
   const [activeTab, setActiveTab] = useState<ShipmentState>("PENDING");
-  const tabCounts = useShipmentTabCounts();
+  const [countsKey, setCountsKey] = useState(0);
+  const tabCounts = useShipmentTabCounts(countsKey);
   const [filterValues, setFilterValues] = useState<ShipmentFilterValues>(EMPTY_FILTERS);
   const [carrierPanelOpen, setCarrierPanelOpen] = useState(false);
   const [vehiclePanelOpen, setVehiclePanelOpen] = useState(false);
@@ -205,6 +219,7 @@ const ShipmentsPage = () => {
       try {
         await deleteShipment(selectedShipmentId);
         handleStateFilter(activeTab);
+        setCountsKey((k) => k + 1);
       } catch {
         showNotification("Error al eliminar el despacho", "error");
       }
@@ -234,6 +249,7 @@ const ShipmentsPage = () => {
     if (updated) {
       showNotification("Estado actualizado correctamente", "success");
       handleStateFilter(activeTab);
+      setCountsKey((k) => k + 1);
       handleChangeStateClose();
     } else {
       showNotification("Error al cambiar el estado del despacho", "error");
