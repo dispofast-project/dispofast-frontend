@@ -64,9 +64,9 @@ const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteIte
       for (const item of items) {
         const qty = parseFloat(pendingQty[item.tempId] ?? String(item.quantity)) || 0;
         const price = parseFloat(pendingPrice[item.tempId] ?? String(item.unitPrice)) || 0;
-        const line = qty * price;
-        subtotal += line;
-        tax += item.taxFree ? 0 : line * IVA;
+        const lineSubtotal = qty * price;
+        subtotal += lineSubtotal;
+        tax += item.taxFree ? 0 : lineSubtotal * IVA;
       }
       onTotalsChange({ subtotal, tax, itemCount: items.length });
     }, [items, pendingQty, pendingPrice, onTotalsChange]);

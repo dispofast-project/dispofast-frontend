@@ -1,10 +1,10 @@
 import { Box, Divider, ListItemIcon, MenuItem, Typography } from "@mui/material";
-import { Eye, ShoppingCart } from "lucide-react";
+import { Eye, ShoppingCart, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import type { QuotePreview } from "../types";
+import { QuoteStatus } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
 import { QuoteStatusBadge } from "./QuoteStatusBadge";
-import { QUOTE_STATUS_UI } from "../constants";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -16,14 +16,8 @@ interface QuotesTableProps {
   onShowActions: (quote: QuotePreview) => void;
   onRowClick: (quote: QuotePreview) => void;
   onCreateOrder: (quote: QuotePreview) => void;
-  onChangeStatus?: (quoteId: string, newStatus: string) => void;
+  onChangeStatus: (quote: QuotePreview, status: string) => void;
 }
-
-const STATUS_OPTIONS = Object.entries(QUOTE_STATUS_UI).map(([value, config]) => ({
-  value,
-  label: config.label,
-  colorClass: config.colorClass,
-}));
 
 const QuotesTable = ({
   quotes,
@@ -73,6 +67,13 @@ const QuotesTable = ({
     ];
   };
 
+  const STATUS_OPTIONS = [
+    { value: QuoteStatus.PENDING,  label: "Pendiente", icon: <Clock size={15} className="text-orange-500" /> },
+    { value: QuoteStatus.ACCEPTED, label: "Aprobada",  icon: <CheckCircle size={15} className="text-green-600" /> },
+    { value: QuoteStatus.REJECTED, label: "Rechazada", icon: <XCircle size={15} className="text-red-500" /> },
+    { value: QuoteStatus.EXPIRED,  label: "Caducada",  icon: <AlertCircle size={15} className="text-gray-500" /> },
+  ];
+
   const optionsMenu = (quote: QuotePreview, closeMenu: () => void) => (
     <>
       <MenuItem onClick={() => { closeMenu(); onRowClick(quote); }}>
@@ -83,28 +84,16 @@ const QuotesTable = ({
         <ListItemIcon><ShoppingCart size={16} /></ListItemIcon>
         Crear orden
       </MenuItem>
-
-      {onChangeStatus && (
-        <>
-          <Divider sx={{ my: 0.5 }} />
-          <Typography variant="caption" sx={{ px: 2, py: 0.5, color: "text.secondary", display: "block" }}>
-            Cambiar estado
-          </Typography>
-          {STATUS_OPTIONS.filter((opt) => opt.value !== quote.status).map((opt) => (
-            <MenuItem
-              key={opt.value}
-              onClick={() => {
-                closeMenu();
-                onChangeStatus(quote.id, opt.value);
-              }}
-            >
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${opt.colorClass}`}>
-                {opt.label}
-              </span>
-            </MenuItem>
-          ))}
-        </>
-      )}
+      <Divider />
+      <Typography variant="caption" className="px-4 py-1 text-gray-400 font-semibold uppercase tracking-wide block">
+        Cambiar estado
+      </Typography>
+      {STATUS_OPTIONS.filter((s) => s.value !== quote.status).map((s) => (
+        <MenuItem key={s.value} onClick={() => { closeMenu(); onChangeStatus(quote, s.value); }}>
+          <ListItemIcon>{s.icon}</ListItemIcon>
+          {s.label}
+        </MenuItem>
+      ))}
     </>
   );
 

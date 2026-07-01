@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Box, Typography, IconButton, CircularProgress, Button } from "@mui/material";
+import { Box, Typography, IconButton, CircularProgress, Button, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import {
@@ -29,7 +29,8 @@ import QuoteOrderCard from "../components/QuoteOrderCard";
 import QuoteItemsSection from "../components/QuoteItemsSection";
 import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
 import QuoteItemsDraftSection from "../components/QuoteItemsDraftSection";
-import type { QuoteItemsDraftSectionHandle, DraftTotals } from "../components/QuoteItemsDraftSection";
+import type { QuoteItemsDraftSectionHandle } from "../components/QuoteItemsDraftSection";
+import type { DraftTotals } from "../components/QuoteItemsDraftSection";
 import QuoteSummaryPanel from "../components/QuoteSummaryPanel/QuoteSummaryPanel";
 
 interface QuoteDetailPageProps {
@@ -262,10 +263,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     }
   };
 
-  const isPageLoading =
-    mode === "edit" ? isQuoteLoading : mode === "create" ? isClientLoading : false;
-  const pageError =
-    mode === "edit" ? quoteError : mode === "create" ? clientError : null;
+  const isPageLoading = mode === "edit" ? isQuoteLoading : mode === "create" ? isClientLoading : false;
+  const pageError = mode === "edit" ? quoteError : clientError;
 
   if (isPageLoading) {
     return (
@@ -361,10 +360,9 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             onOtherRateChange={setOtherRate}
           />
 
-          {/* Price list moved to main column in create modes */}
           {isCreateMode && (
             <QuotePriceListCard
-              quote={quote}
+              quote={null}
               priceLists={priceLists}
               selectedPriceListId={selectedPriceListId}
               setSelectedPriceListId={setSelectedPriceListId}
@@ -394,9 +392,9 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
 
         {/* ── Columna lateral ── */}
         <Box className="flex flex-col gap-6">
-          {isCreateMode && accountInfo ? (
+          {isCreateMode ? (
             <QuoteSummaryPanel
-              accountInfo={accountInfo}
+              accountInfo={accountInfo!}
               subtotal={createSummary.subtotal}
               tax={createSummary.tax}
               commercialDiscountAmt={createSummary.commercialDiscountAmt}
@@ -408,7 +406,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               itemCount={draftTotals.itemCount}
               missingFields={createMissingFields}
               isSaving={isCreating}
-              error={displayError}
+              error={createError}
               onSave={handleSave}
             />
           ) : (
@@ -429,9 +427,13 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               {mode === "edit" && quote && (
                 <QuotePaymentDetailsCard quote={quote} />
               )}
-
-              {/* Guardar (edit mode) */}
+              {/* Guardar — solo en modo edición */}
               <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-3">
+                {displayError && (
+                  <Alert severity="error" sx={{ fontSize: "0.8rem" }}>
+                    {displayError}
+                  </Alert>
+                )}
                 <Button
                   variant="contained"
                   fullWidth
