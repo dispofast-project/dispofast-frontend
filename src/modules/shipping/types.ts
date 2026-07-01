@@ -7,7 +7,7 @@ export type ShipmentState =
   | "DELIVERED"
   | "DELAYED";
 
-export type DeliveryType = "CONDUCTOR" | "TRANSPORTADORA" | "RECOGEN";
+export type DeliveryType = "CONDUCTOR" | "TRANSPORTADORA" | "RETIRO";
 
 export interface Carrier {
   id: string;

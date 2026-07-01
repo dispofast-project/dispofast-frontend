@@ -9,6 +9,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Link,
   Menu,
   MenuItem,
   Paper,
@@ -107,7 +108,19 @@ const buildColumns = (state: ShipmentState): ColumnDef[] => {
   };
   const codigoS: ColumnDef = {
     label: "Código S",
-    render: (s) => s.trackingCode || "-",
+    render: (s) =>
+      s.trackingCode ? (
+        <Link
+          href={`https://transprensa.com/Seguimiento/?remesa_codigo=${encodeURIComponent(s.trackingCode)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {s.trackingCode}
+        </Link>
+      ) : (
+        "-"
+      ),
   };
 
   switch (state) {
