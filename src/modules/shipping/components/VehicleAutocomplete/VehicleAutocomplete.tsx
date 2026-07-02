@@ -1,7 +1,14 @@
-import { Autocomplete, TextField } from "@mui/material";
+import { useEffect, useState } from "react";
+import {
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { getAllVehicles } from "../../api/shipping.service";
 import type { Vehicle } from "../../types";
-import { useApiAutocomplete } from "../../../../shared/hooks/useApiAutocomplete";
 import { VEHICLE_TYPE_LABELS } from "../../constants/shippingConstants";
 
 interface VehicleAutocompleteProps {
@@ -21,45 +28,50 @@ export const VehicleAutocomplete = ({
   error = false,
   helperText,
 }: VehicleAutocompleteProps) => {
-  const { options, setOptions, isSearching, open, setOpen, handleInputChange } =
-    useApiAutocomplete<Vehicle>({
-      fetchFn: (query) => getAllVehicles({ size: 100, plate: query }).then((r) => r.content),
-      debounceMs: 300,
-    });
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    getAllVehicles({ size: 100 })
+      .then((r) => {
+        if (active) setVehicles(r.content);
+      })
+      .catch(() => {
+        if (active) setVehicles([]);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const availableVehicles = vehicles.filter(
+    (vehicle) => vehicle.state === "AVAILABLE" || vehicle.id === value?.id
+  );
 
   return (
-    <Autocomplete
-      size="small"
-      value={value}
-      onChange={(_, newValue) => {
-        setOptions(newValue ? [newValue, ...options] : options);
-        onChange(newValue);
-      }}
-      onInputChange={(_, newInputValue, reason) => handleInputChange(newInputValue, reason)}
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={() => {
-        setOpen(false);
-        setOptions(value ? [value] : []);
-      }}
-      options={options}
-      getOptionLabel={(option) => `${option.plate} — ${VEHICLE_TYPE_LABELS[option.type]}`}
-      isOptionEqualToValue={(option, val) => option.id === val.id}
-      filterOptions={(x) => x}
-      filterSelectedOptions
-      loading={isSearching}
-      disabled={disabled}
-      fullWidth
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Vehículo"
-          placeholder="Buscar por placa..."
-          required={required}
-          error={error}
-          helperText={helperText}
-        />
-      )}
-    />
+    <FormControl fullWidth size="small" disabled={disabled} error={error} required={required}>
+      <InputLabel>Vehículo</InputLabel>
+      <Select
+        value={value?.id ?? ""}
+        label="Vehículo"
+        onChange={(e) => {
+          const selected = availableVehicles.find((v) => v.id === e.target.value) ?? null;
+          onChange(selected);
+        }}
+        endAdornment={isLoading ? <CircularProgress size={16} sx={{ mr: 2 }} /> : null}
+      >
+        {availableVehicles.map((vehicle) => (
+          <MenuItem key={vehicle.id} value={vehicle.id}>
+            {vehicle.plate} — {VEHICLE_TYPE_LABELS[vehicle.type]}
+          </MenuItem>
+        ))}
+      </Select>
+      {helperText && <FormHelperText>{helperText}</FormHelperText>}
+    </FormControl>
   );
 };
