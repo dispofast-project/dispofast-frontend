@@ -181,37 +181,37 @@ const AddLineItemDialog = ({
                   <Box
                     key={product.productId}
                     onClick={() => handleSelectProduct(product)}
-                    className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
+                    className={`flex items-center justify-between gap-2 px-3 sm:px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
                       selectedProduct?.productId === product.productId
                         ? "bg-blue-50 border-l-4 border-l-dispofast-primary"
                         : "hover:bg-gray-50"
                     }`}
                   >
-                    <Box className="flex items-center gap-3">
+                    <Box className="flex items-center gap-3 min-w-0">
                       <Box className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
                         <Package className="w-4 h-4 text-gray-500" />
                       </Box>
-                      <Box>
-                        <Typography variant="body2" className="font-medium text-gray-800">
+                      <Box className="min-w-0">
+                        <Typography variant="body2" className="font-medium text-gray-800 truncate">
                           {product.productName}
                         </Typography>
-                        <Typography variant="caption" className="text-gray-400">
+                        <Typography variant="caption" className="text-gray-400 truncate block">
                           {product.productReference}
                         </Typography>
                       </Box>
                     </Box>
-                    <Box className="text-right">
+                    <Box className="text-right flex-shrink-0">
                       {product.unitPrice != null ? (
-                        <Typography variant="caption" className="text-dispofast-primary font-semibold">
+                        <Typography variant="caption" className="text-dispofast-primary font-semibold whitespace-nowrap">
                           ${product.unitPrice.toLocaleString("es-CO")}
                         </Typography>
                       ) : (
-                        <Typography variant="caption" className="text-orange-500 font-semibold">
+                        <Typography variant="caption" className="text-orange-500 font-semibold whitespace-nowrap">
                           Sin precio
                         </Typography>
                       )}
                       {product.quantityAvailable !== null && (
-                        <Typography variant="caption" className="text-gray-400 block">
+                        <Typography variant="caption" className="text-gray-400 block whitespace-nowrap">
                           Stock: {product.quantityAvailable}
                         </Typography>
                       )}
