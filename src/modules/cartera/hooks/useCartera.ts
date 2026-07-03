@@ -3,6 +3,7 @@ import type { ArEntry, ArEntryState, CarteraStats } from "../types";
 import { getArEntries, getTotalPaidValue } from "../api/cartera.service";
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 400;
 
 export const useCartera = () => {
   // ── Table state ─────────────────────────────────────────────────────────────
@@ -13,7 +14,8 @@ export const useCartera = () => {
 
   // ── Filters ──────────────────────────────────────────────────────────────────
   const [stateFilter, setStateFilter] = useState<ArEntryState | "">("");
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchTextRaw] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [asesorFilter, setAsesorFilter] = useState("");
 
   // ── Stats (fetched separately, all PENDING entries, no pagination) ───────────
@@ -59,20 +61,32 @@ export const useCartera = () => {
     loadStats();
   }, []);
 
+  // Debounce the search text before it drives a request, so we don't hit the
+  // API on every keystroke.
+  useEffect(() => {
+    const timeoutId = setTimeout(
+      () => setDebouncedSearch(searchText.trim()),
+      SEARCH_DEBOUNCE_MS
+    );
+    return () => clearTimeout(timeoutId);
+  }, [searchText]);
+
   // ── Table load ───────────────────────────────────────────────────────────────
+  // Search runs server-side (across the full dataset) so results aren't limited
+  // to whatever page happens to already be loaded.
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getArEntries(
         { page: currentPage - 1, size: PAGE_SIZE },
-        { state: stateFilter || undefined }
+        { state: stateFilter || undefined, search: debouncedSearch || undefined }
       );
       setEntries(data.content);
       setTotalElements(data.totalElements);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, stateFilter]);
+  }, [currentPage, stateFilter, debouncedSearch]);
 
   useEffect(() => {
     load();
@@ -84,23 +98,16 @@ export const useCartera = () => {
     setCurrentPage(1);
   };
 
-  // ── Client-side filtering (text search + asesor) ─────────────────────────────
+  const setSearchText = (value: string) => {
+    setSearchTextRaw(value);
+    setCurrentPage(1);
+  };
+
+  // ── Client-side filtering (asesor only — not covered by the server search) ──
   const filtered = useMemo(() => {
-    let result = entries;
-    const text = searchText.trim().toLowerCase();
-    if (text) {
-      result = result.filter(
-        (e) =>
-          e.clientName?.toLowerCase().includes(text) ||
-          e.invoiceNumber?.toLowerCase().includes(text) ||
-          e.orderNumber?.toLowerCase().includes(text)
-      );
-    }
-    if (asesorFilter) {
-      result = result.filter((e) => e.asesorName === asesorFilter);
-    }
-    return result;
-  }, [entries, searchText, asesorFilter]);
+    if (!asesorFilter) return entries;
+    return entries.filter((e) => e.asesorName === asesorFilter);
+  }, [entries, asesorFilter]);
 
   return {
     entries: filtered,

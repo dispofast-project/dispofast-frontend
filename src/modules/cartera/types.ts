@@ -52,6 +52,7 @@ export interface CreatePaymentReceiptRequest {
 
 export interface CarteraFilters {
   state?: ArEntryState;
+  search?: string;
 }
 
 export interface CarteraStats {
