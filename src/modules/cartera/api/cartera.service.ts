@@ -25,6 +25,7 @@ export const getArEntries = async (
       size,
       sort: 'createdAt,desc',
       ...(filters?.state && { state: filters.state }),
+      ...(filters?.search && { search: filters.search }),
     },
   });
   return data;
