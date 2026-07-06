@@ -81,7 +81,6 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const [hasItemChanges, setHasItemChanges] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [freight, setFreight] = useState(0);
   const [draftTotals, setDraftTotals] = useState<DraftTotals>({ subtotal: 0, tax: 0, itemCount: 0 });
 
   const quoteItemsRef = useRef<QuoteItemsSectionHandle>(null);
@@ -109,6 +108,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setCommercialRate,
     otherRate,
     setOtherRate,
+    freight,
+    setFreight,
     isSaving,
     saveError,
     hasChanges,
@@ -334,7 +335,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
           ivaAmount: quote.ivaAmount,
           retefuenteAmount: quote.retefuenteAmount ?? 0,
           totalAmount: quote.totalAmount,
-          freight: 0,
+          freight: quote.freight ?? 0,
         };
       } else {
         // Fetch full client data for PDF (ClientDetails only has limited fields)
@@ -490,10 +491,12 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             offerValidity={selectedOfferValidity}
             commercialRate={commercialRate}
             otherRate={otherRate}
+            freight={freight}
             onPaymentConditionChange={setSelectedPaymentCondition}
             onOfferValidityChange={setSelectedOfferValidity}
             onCommercialRateChange={setCommercialRate}
             onOtherRateChange={setOtherRate}
+            onFreightChange={setFreight}
           />
 
           {isCreateMode && (
@@ -537,7 +540,6 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               otherDiscountAmt={createSummary.otherDiscountAmt}
               retefuenteAmt={createSummary.retefuenteAmt}
               freight={freight}
-              onFreightChange={setFreight}
               total={createSummary.total}
               itemCount={draftTotals.itemCount}
               missingFields={createMissingFields}

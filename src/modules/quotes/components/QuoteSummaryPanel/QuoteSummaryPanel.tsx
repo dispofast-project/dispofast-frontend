@@ -1,4 +1,4 @@
-import { Box, Typography, Divider, TextField, InputAdornment, Alert, CircularProgress } from "@mui/material";
+import { Box, Typography, Divider, Alert, CircularProgress } from "@mui/material";
 import { AlertCircle, Circle, Download } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
@@ -17,7 +17,6 @@ interface QuoteSummaryPanelProps {
   otherDiscountAmt: number;
   retefuenteAmt: number;
   freight: number;
-  onFreightChange: (v: number) => void;
   total: number;
   itemCount: number;
   missingFields: string[];
@@ -58,7 +57,6 @@ const QuoteSummaryPanel = ({
   otherDiscountAmt,
   retefuenteAmt,
   freight,
-  onFreightChange,
   total,
   itemCount,
   missingFields,
@@ -135,27 +133,7 @@ const QuoteSummaryPanel = ({
             {retefuenteAmt > 0 && (
               <SummaryRow label="Retefuente (3.5%)" value={retefuenteAmt} negative />
             )}
-
-            {/* Flete — editable */}
-            <Box className="flex items-center justify-between gap-2">
-              <Typography variant="body2" className="text-gray-500 shrink-0">
-                Flete
-              </Typography>
-              <TextField
-                size="small"
-                type="number"
-                value={freight || ""}
-                onChange={(e) => onFreightChange(parseFloat(e.target.value) || 0)}
-                placeholder="0"
-                slotProps={{
-                  htmlInput: { min: 0, step: 1000 },
-                  input: {
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                  },
-                }}
-                sx={{ width: 130 }}
-              />
-            </Box>
+            {freight > 0 && <SummaryRow label="Flete" value={freight} />}
           </Box>
 
           <Divider />

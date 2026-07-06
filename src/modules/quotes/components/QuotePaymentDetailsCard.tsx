@@ -76,6 +76,9 @@ const QuotePaymentDetailsCard = ({ quote }: QuotePaymentDetailsCardProps) => {
         variant: "retention",
       },
     ],
+    ...(quote?.freight
+      ? [[{ label: "Flete", value: formatCurrency(quote.freight) }]]
+      : []),
     [
       { label: "Total a Pagar", value: formatCurrency(quote?.totalAmount), variant: "total" },
     ],
