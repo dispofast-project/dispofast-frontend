@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ArEntry, ArEntryState, CarteraStats } from "../types";
-import { getArEntries, getTotalPaidValue } from "../api/cartera.service";
+import {
+  getArEntries,
+  getAsesorNames,
+  getCarteraStats,
+  getTotalPaidValue,
+} from "../api/cartera.service";
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 400;
@@ -18,42 +23,28 @@ export const useCartera = () => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [asesorFilter, setAsesorFilter] = useState("");
 
-  // ── Stats (fetched separately, all PENDING entries, no pagination) ───────────
+  // ── Stats (computed server-side, independent of the table's pagination) ─────
   const [stats, setStats] = useState<CarteraStats>({
     totalCartera: 0,
     carteraVencida: 0,
     alDia: 0,
   });
   const [statsLoading, setStatsLoading] = useState(true);
-  // Unique asesor names extracted from the stats dataset for the dropdown
   const [asesorOptions, setAsesorOptions] = useState<string[]>([]);
 
-  // Load stats once on mount
+  // Load stats once on mount. Totals and the asesor list are computed in the
+  // database (SUM/DISTINCT queries) instead of fetching hundreds of full rows
+  // and reducing them client-side.
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const data = await getArEntries({ page: 0, size: 500 });
-        const all = data.content;
-
-        // Unique asesores for the filter dropdown
-        const asesores = Array.from(
-          new Set(all.map((e) => e.asesorName).filter(Boolean))
-        ) as string[];
-        setAsesorOptions(asesores.sort());
-
-        // Only PENDING entries contribute to the financial totals.
-        // Use balance (= value - paidAmount) so partial payments are reflected.
-        const pending = all.filter((e) => e.state === "PENDING");
-        const bal = (e: (typeof pending)[0]) => e.balance ?? e.value ?? 0;
-        const totalCartera = pending.reduce((s, e) => s + bal(e), 0);
-        const carteraVencida = pending
-          .filter((e) => e.diasVencimiento <= 0)
-          .reduce((s, e) => s + bal(e), 0);
-
-        // "Al Día" = total acumulado pagado en todos los recibos
-        const alDia = await getTotalPaidValue();
-
+        const [{ totalCartera, carteraVencida }, alDia, asesores] = await Promise.all([
+          getCarteraStats(),
+          getTotalPaidValue(),
+          getAsesorNames(),
+        ]);
         setStats({ totalCartera, carteraVencida, alDia });
+        setAsesorOptions(asesores);
       } finally {
         setStatsLoading(false);
       }

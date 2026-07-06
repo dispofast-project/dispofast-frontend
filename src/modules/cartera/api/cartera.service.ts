@@ -56,6 +56,21 @@ export const getTotalPaidValue = async (): Promise<number> => {
   return data;
 };
 
+export interface CarteraStatsResponse {
+  totalCartera: number;
+  carteraVencida: number;
+}
+
+export const getCarteraStats = async (): Promise<CarteraStatsResponse> => {
+  const { data } = await apiClient.get<CarteraStatsResponse>(`${BASE_URL}/stats`);
+  return data;
+};
+
+export const getAsesorNames = async (): Promise<string[]> => {
+  const { data } = await apiClient.get<string[]>(`${BASE_URL}/asesores`);
+  return data;
+};
+
 export const uploadPaymentVoucher = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
