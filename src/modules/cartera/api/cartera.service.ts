@@ -25,6 +25,7 @@ export const getArEntries = async (
       size,
       sort: 'createdAt,desc',
       ...(filters?.state && { state: filters.state }),
+      ...(filters?.search && { search: filters.search }),
     },
   });
   return data;
@@ -52,6 +53,21 @@ export const getReceiptsByArEntry = async (
 
 export const getTotalPaidValue = async (): Promise<number> => {
   const { data } = await apiClient.get<number>(`${BASE_URL}/total-value`);
+  return data;
+};
+
+export interface CarteraStatsResponse {
+  totalCartera: number;
+  carteraVencida: number;
+}
+
+export const getCarteraStats = async (): Promise<CarteraStatsResponse> => {
+  const { data } = await apiClient.get<CarteraStatsResponse>(`${BASE_URL}/stats`);
+  return data;
+};
+
+export const getAsesorNames = async (): Promise<string[]> => {
+  const { data } = await apiClient.get<string[]>(`${BASE_URL}/asesores`);
   return data;
 };
 
