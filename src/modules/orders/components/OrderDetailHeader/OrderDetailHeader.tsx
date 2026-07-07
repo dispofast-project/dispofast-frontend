@@ -1,9 +1,10 @@
 import { Box, CircularProgress, Menu, MenuItem } from "@mui/material";
-import { ArrowLeft, ChevronDown, FileText } from "lucide-react";
+import { ArrowLeft, ChevronDown, FileText, Download } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { StatusBadge } from "../../../../shared/components/StatusBadge/StatusBadge";
 import { ORDER_STATUS_CONFIG } from "../../config/statusConfig";
 import type { OrderState } from "../../types";
+import type { Invoice } from "../../../invoices/types";
 import { useState } from "react";
 
 interface OrderDetailHeaderProps {
@@ -17,6 +18,9 @@ interface OrderDetailHeaderProps {
   onBack: () => void;
   onAttachInvoice: () => void;
   onStateChange: (state: OrderState) => void;
+  invoice: Invoice | null;
+  downloadLoading: boolean;
+  onDownloadInvoice: () => void;
 }
 
 const OrderDetailHeader = ({
@@ -30,6 +34,9 @@ const OrderDetailHeader = ({
   onBack,
   onAttachInvoice,
   onStateChange,
+  invoice,
+  downloadLoading,
+  onDownloadInvoice,
 }: OrderDetailHeaderProps) => {
   const [stateAnchor, setStateAnchor] = useState<null | HTMLElement>(null);
 
@@ -54,6 +61,21 @@ const OrderDetailHeader = ({
 
         <Box className="flex items-center gap-2 flex-wrap">
           <StatusBadge status={state} configMap={ORDER_STATUS_CONFIG} />
+
+          {invoice && (
+            <button
+              onClick={onDownloadInvoice}
+              disabled={downloadLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
+            >
+              {downloadLoading ? (
+                <CircularProgress size={12} color="inherit" />
+              ) : (
+                <Download className="w-3.5 h-3.5" />
+              )}
+              Descargar factura
+            </button>
+          )}
 
           {canAttachInvoice && (
             <button

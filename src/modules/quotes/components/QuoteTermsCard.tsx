@@ -1,4 +1,4 @@
-import { Box, Typography, Select, MenuItem } from "@mui/material";
+import { Box, Typography, Select, MenuItem, TextField, InputAdornment } from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { PaymentCondition, OfferValidity } from "../types";
 import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
@@ -11,10 +11,12 @@ interface QuoteTermsCardProps {
   offerValidity: OfferValidityType | "";
   commercialRate: string;
   otherRate: string;
+  freight: number;
   onPaymentConditionChange: (value: PaymentConditionType | "") => void;
   onOfferValidityChange: (value: OfferValidityType | "") => void;
   onCommercialRateChange: (value: string) => void;
   onOtherRateChange: (value: string) => void;
+  onFreightChange: (value: number) => void;
 }
 
 const QuoteTermsCard = ({
@@ -22,10 +24,12 @@ const QuoteTermsCard = ({
   offerValidity,
   commercialRate,
   otherRate,
+  freight,
   onPaymentConditionChange,
   onOfferValidityChange,
   onCommercialRateChange,
   onOtherRateChange,
+  onFreightChange,
 }: QuoteTermsCardProps) => (
   <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
     <SectionTitle icon={<AssignmentIcon fontSize="small" />}>Términos</SectionTitle>
@@ -67,6 +71,23 @@ const QuoteTermsCard = ({
       <Box>
         <Typography variant="body2" className="text-gray-500 mb-1">Otros descuentos</Typography>
         <PercentageInput value={otherRate} onChange={onOtherRateChange} fullWidth />
+      </Box>
+      <Box>
+        <Typography variant="body2" className="text-gray-500 mb-1">Flete</Typography>
+        <TextField
+          size="small"
+          fullWidth
+          type="number"
+          value={freight || ""}
+          onChange={(e) => onFreightChange(parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          slotProps={{
+            htmlInput: { min: 0, step: 1000 },
+            input: {
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            },
+          }}
+        />
       </Box>
     </Box>
   </Box>

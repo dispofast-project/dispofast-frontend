@@ -33,9 +33,7 @@ const EditPermissionsDialog: React.FC<EditPermissionsDialogProps> = ({
     const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    // All permissions for this user's role (with IDs needed for PATCH)
     const [allPermissionsForRole, setAllPermissionsForRole] = useState<PermissionSummary[]>([]);
-    // Current active (granted) permission names — drives the matrix checkboxes
     const [activePermissions, setActivePermissions] = useState<Set<string>>(new Set());
 
     useEffect(() => {
