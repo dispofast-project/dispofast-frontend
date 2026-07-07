@@ -4,7 +4,7 @@ import { Button } from "../../../../shared/components/Button/Button";
 import { StatusBadge } from "../../../../shared/components/StatusBadge/StatusBadge";
 import { ORDER_STATUS_CONFIG } from "../../config/statusConfig";
 import type { OrderState } from "../../types";
-import type { Invoice } from "../../invoices/types";
+import type { Invoice } from "../../../invoices/types";
 import { useState } from "react";
 
 interface OrderDetailHeaderProps {

@@ -1,5 +1,4 @@
-import { Box, CircularProgress } from "@mui/material";
-import { Download } from "lucide-react";
+import { Box } from "@mui/material";
 import type { Invoice } from "../../../invoices/types";
 
 const formatCurrency = (value: number | null | undefined): string => {
