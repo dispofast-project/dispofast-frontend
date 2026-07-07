@@ -204,59 +204,60 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
             ))}
           </Box>
 
-          <Divider />
+        </>
+      )}
+        
+      <Divider /> 
+      
+      <Box className="px-5 py-4 flex flex-col gap-2">
+        <Box className="flex items-center justify-between">
+          <Typography variant="body2" className="font-bold text-gray-800">
+            Saldo Factura
+          </Typography>
+          <Typography
+            variant="body2"
+            className="font-bold text-base"
+            sx={{
+              color:
+                data.balance <= 0
+                  ? "success.main"
+                  : "var(--dispofast-primary)",
+            }}
+          >
+            {fmt(Math.max(0, data.balance))}
+          </Typography>
+        </Box>
 
-          <Box className="px-5 py-4 flex flex-col gap-2">
+        {data.pendingPayment != null && data.pendingPayment > 0 && (
+          <Box className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2">
             <Box className="flex items-center justify-between">
-              <Typography variant="body2" className="font-bold text-gray-800">
-                Saldo Factura
+              <Typography variant="body2" className="text-gray-500">
+                Pago
+              </Typography>
+              <Typography variant="body2" className="font-medium text-gray-700">
+                -{fmt(data.pendingPayment)}
+              </Typography>
+            </Box>
+            <Box className="flex items-center justify-between">
+              <Typography variant="body2" className="text-gray-500">
+                Saldo restante
               </Typography>
               <Typography
                 variant="body2"
-                className="font-bold text-base"
+                className="font-bold"
                 sx={{
                   color:
-                    data.balance <= 0
+                    data.balance - data.pendingPayment <= 0
                       ? "success.main"
                       : "var(--dispofast-primary)",
                 }}
               >
-                {fmt(Math.max(0, data.balance))}
+                {fmt(Math.max(0, data.balance - data.pendingPayment))}
               </Typography>
             </Box>
-
-            {data.pendingPayment != null && data.pendingPayment > 0 && (
-              <Box className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2">
-                <Box className="flex items-center justify-between">
-                  <Typography variant="body2" className="text-gray-500">
-                    Pago
-                  </Typography>
-                  <Typography variant="body2" className="font-medium text-gray-700">
-                    -{fmt(data.pendingPayment)}
-                  </Typography>
-                </Box>
-                <Box className="flex items-center justify-between">
-                  <Typography variant="body2" className="text-gray-500">
-                    Saldo restante
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    className="font-bold"
-                    sx={{
-                      color:
-                        data.balance - data.pendingPayment <= 0
-                          ? "success.main"
-                          : "var(--dispofast-primary)",
-                    }}
-                  >
-                    {fmt(Math.max(0, data.balance - data.pendingPayment))}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
           </Box>
-        </>
-      )}
+        )}
+      </Box>
     </Box>
   );
 };

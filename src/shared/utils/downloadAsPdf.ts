@@ -1,76 +1,47 @@
+import html2canvas from "html2canvas-pro";
+import jsPDF from "jspdf";
+
+const A4_WIDTH_MM = 210;
+const A4_HEIGHT_MM = 297;
+const MARGIN_MM = 10;
+
+/**
+ * Captures `element` as a raster image and assembles it into a real,
+ * downloadable A4 PDF, paginating the image across as many pages as needed.
+ * Uses html2canvas-pro (not html2canvas) because it supports modern CSS
+ * color functions (oklch, lab, color-mix, …) that vanilla html2canvas
+ * cannot parse and previously caused capture failures.
+ */
 export async function downloadElementAsPdf(
   element: HTMLElement,
   filename = "document.pdf"
 ): Promise<void> {
-  return new Promise<void>((resolve) => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      resolve();
-      return;
-    }
-
-    // Collect all styles — <link> hrefs are already absolute in the DOM
-    const styles = Array.from(
-      document.querySelectorAll<HTMLStyleElement | HTMLLinkElement>(
-        "style, link[rel=stylesheet]"
-      )
-    )
-      .map((el) =>
-        el instanceof HTMLLinkElement
-          ? `<link rel="stylesheet" href="${el.href}">`
-          : el.outerHTML
-      )
-      .join("\n");
-
-    const clone = element.cloneNode(true) as HTMLElement;
-
-    // Resolve image src to absolute URLs so they load correctly from about:blank
-    const origImgs = element.querySelectorAll<HTMLImageElement>("img");
-    const cloneImgs = clone.querySelectorAll<HTMLImageElement>("img");
-    origImgs.forEach((orig, i) => {
-      const resolved = orig.currentSrc || orig.src;
-      if (resolved && cloneImgs[i]) cloneImgs[i].setAttribute("src", resolved);
-    });
-
-    printWindow.document.write(`<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>${filename}</title>
-  <base href="${window.location.origin}/" />
-  ${styles}
-  <style>
-    body {
-      background: #fff !important;
-      padding: 24px;
-      margin: 0;
-    }
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    @media print {
-      @page { margin: 12mm; size: A4 portrait; }
-      body { padding: 0; }
-    }
-  </style>
-</head>
-<body>${clone.outerHTML}</body>
-</html>`);
-
-    printWindow.document.close();
-
-    const doPrint = () => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-      resolve();
-    };
-
-    if (printWindow.document.readyState === "complete") {
-      setTimeout(doPrint, 600);
-    } else {
-      printWindow.addEventListener("load", () => setTimeout(doPrint, 600));
-    }
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
   });
+
+  const imgData = canvas.toDataURL("image/png");
+
+  const contentWidth = A4_WIDTH_MM - MARGIN_MM * 2;
+  const pageContentHeight = A4_HEIGHT_MM - MARGIN_MM * 2;
+  const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  let heightLeft = imgHeight;
+  let offsetY = 0;
+
+  pdf.addImage(imgData, "PNG", MARGIN_MM, MARGIN_MM, contentWidth, imgHeight);
+  heightLeft -= pageContentHeight;
+
+  while (heightLeft > 0) {
+    offsetY += pageContentHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", MARGIN_MM, MARGIN_MM - offsetY, contentWidth, imgHeight);
+    heightLeft -= pageContentHeight;
+  }
+
+  pdf.save(filename);
 }

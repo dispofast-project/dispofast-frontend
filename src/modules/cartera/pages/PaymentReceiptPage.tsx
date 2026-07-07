@@ -132,6 +132,7 @@ const PaymentReceiptPage = () => {
       );
     } finally {
       setSubmitting(false);
+      navigate("/cartera", { replace: true });
     }
   };
 
