@@ -74,6 +74,8 @@ const HEADERS = [
   "Valor",
   "# Factura",
   "Ciudad",
+  "Dirección de Entrega",
+  "# Guía",
   "Fecha",
 ];
 
@@ -216,6 +218,8 @@ const OrdersContent = (): JSX.Element => {
         {item.invoiceNumber ?? "-"}
       </span>,
       item.shipmentCityName,
+      item.shipmentAddress ?? "-",
+      item.trackingCode ?? "-",
       formatDate(item.orderDate),
     ],
     [navigate]

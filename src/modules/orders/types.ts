@@ -40,6 +40,7 @@ export interface SalesOrder {
   shipmentCityName: string;
   shipmentAddress: string;
   invoiceNumber: string | null;
+  trackingCode: string | null;
   zone: string;
   totalValue: number;
   priceListId: string;

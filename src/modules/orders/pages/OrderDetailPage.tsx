@@ -198,6 +198,7 @@ const OrderDetailPage = () => {
               shipmentCityName={order.shipmentCityName}
               shipmentAddress={order.shipmentAddress}
               zone={order.zone}
+              trackingCode={order.trackingCode}
             />
           </Box>
 
