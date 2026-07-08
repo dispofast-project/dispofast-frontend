@@ -38,6 +38,7 @@ const PaymentReceiptPage = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [typedPayment, setTypedPayment] = useState(0);
+  const [discountRate, setDiscountRate] = useState<2 | 3 | 5 | undefined>(undefined);
 
   const loadReceipts = useCallback(async () => {
     if (!entry) return;
@@ -84,11 +85,17 @@ const PaymentReceiptPage = () => {
   );
   const totalValue = order?.totalValue ?? entry.value;
 
-  // Compute live balance from fetched receipts so it updates after payment
+  // Compute live balance from fetched receipts so it updates after payment.
+  // Prompt-payment discounts are forgiven debt: they settle the balance just like cash.
   const paidTotal = receipts
     .filter((r) => r.state === "ACTIVE")
-    .reduce((s, r) => s + r.value, 0);
+    .reduce((s, r) => s + r.value + (r.promptPaymentDiscountAmount ?? 0), 0);
   const liveBalance = Math.max(0, totalValue - paidTotal);
+
+  const appliedDiscountTotal = receipts
+    .filter((r) => r.state === "ACTIVE")
+    .reduce((s, r) => s + (r.promptPaymentDiscountAmount ?? 0), 0);
+  const discountPreview = discountRate ? subtotal * (discountRate / 100) : 0;
 
   const summaryData: ReceiptSummaryData = {
     diasCartera: entry.diasCartera,
@@ -101,11 +108,13 @@ const PaymentReceiptPage = () => {
     discountAmt:
       subtotal * ((order?.discountRate ?? 0) / 100) +
       subtotal * ((order?.additionalDiscountRate ?? 0) / 100),
+    promptPaymentDiscount: appliedDiscountTotal,
     totalValue,
     hasOrderData: !loadingData && order !== null,
     receipts,
     balance: liveBalance,
     pendingPayment: typedPayment,
+    pendingDiscount: discountPreview,
   };
 
   const receiptRef = entry.id.replace(/-/g, "").substring(0, 13);
@@ -121,9 +130,11 @@ const PaymentReceiptPage = () => {
         voucherS3Key: values.voucherS3Key,
         documentNumber: values.documentNumber || undefined,
         observations: values.observations || undefined,
+        promptPaymentDiscountRate: values.promptPaymentDiscountRate,
       });
       showNotification("Recibo de caja registrado exitosamente", "success");
       // Stay on the page and refresh receipts to show updated balance
+      setDiscountRate(undefined);
       await loadReceipts();
     } catch (error: any) {
       showNotification(
@@ -173,6 +184,8 @@ const PaymentReceiptPage = () => {
               onCancel={() => navigate("/cartera")}
               isLoading={submitting}
               onValueChange={setTypedPayment}
+              onDiscountRateChange={setDiscountRate}
+              preTaxSubtotal={subtotal}
             />
           )}
         </Box>

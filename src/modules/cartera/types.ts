@@ -26,6 +26,8 @@ export interface ArEntry {
   cityName: string | null;
 }
 
+export type PromptPaymentDiscountRate = 2 | 3 | 5;
+
 export interface PaymentReceipt {
   id: string;
   receiptCode: string;
@@ -39,6 +41,8 @@ export interface PaymentReceipt {
   observations: string | null;
   state: PaymentReceiptState;
   createdAt: string;
+  promptPaymentDiscountRate: PromptPaymentDiscountRate | null;
+  promptPaymentDiscountAmount: number | null;
 }
 
 export interface CreatePaymentReceiptRequest {
@@ -48,6 +52,7 @@ export interface CreatePaymentReceiptRequest {
   voucherS3Key: string;
   documentNumber?: string;
   observations?: string;
+  promptPaymentDiscountRate?: PromptPaymentDiscountRate;
 }
 
 export interface CarteraFilters {

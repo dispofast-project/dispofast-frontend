@@ -6,8 +6,10 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
+  MenuItem,
   Radio,
   RadioGroup,
+  Select,
   TextField,
   Typography,
 } from "@mui/material";
@@ -29,17 +31,21 @@ const schema = z.object({
   }),
   voucherS3Key: z.string().min(1, "El comprobante de pago es obligatorio"),
   observations: z.string().optional(),
+  promptPaymentDiscountRate: z.union([z.literal(2), z.literal(3), z.literal(5)]).optional(),
 });
 
 export type ReceiptFormValues = z.infer<typeof schema>;
 
-
+const fmt = (v: number) => `$${v.toLocaleString("es-CO", { minimumFractionDigits: 0 })}`;
 
 interface ReceiptPaymentFormProps {
   onSubmit: (values: ReceiptFormValues) => void;
   onCancel: () => void;
   isLoading: boolean;
   onValueChange?: (v: number) => void;
+  onDiscountRateChange?: (rate: 2 | 3 | 5 | undefined) => void;
+  /** Subtotal antes de impuestos de la orden asociada; base del descuento por pronto pago. */
+  preTaxSubtotal?: number;
 }
 
 const ReceiptPaymentForm = ({
@@ -47,6 +53,8 @@ const ReceiptPaymentForm = ({
   onCancel,
   isLoading,
   onValueChange,
+  onDiscountRateChange,
+  preTaxSubtotal = 0,
 }: ReceiptPaymentFormProps) => {
   const {
     register,
@@ -64,6 +72,12 @@ const ReceiptPaymentForm = ({
   useEffect(() => {
     onValueChange?.(Number.isFinite(typedValue) && typedValue > 0 ? typedValue : 0);
   }, [typedValue]);
+
+  const discountRate = watch("promptPaymentDiscountRate");
+  useEffect(() => {
+    onDiscountRateChange?.(discountRate);
+  }, [discountRate]);
+  const discountPreview = discountRate ? preTaxSubtotal * (discountRate / 100) : 0;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingVoucher, setUploadingVoucher] = useState(false);
@@ -169,6 +183,36 @@ const ReceiptPaymentForm = ({
           />
           {errors.paymentMethod && (
             <FormHelperText>{errors.paymentMethod.message}</FormHelperText>
+          )}
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <FormLabel sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.5 }}>
+            Descuento por pronto pago
+          </FormLabel>
+          <Controller
+            name="promptPaymentDiscountRate"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                displayEmpty
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(e.target.value === "" ? undefined : Number(e.target.value))
+                }
+              >
+                <MenuItem value="">Ninguno</MenuItem>
+                <MenuItem value={2}>2%</MenuItem>
+                <MenuItem value={3}>3%</MenuItem>
+                <MenuItem value={5}>5%</MenuItem>
+              </Select>
+            )}
+          />
+          {discountPreview > 0 && (
+            <FormHelperText className="!text-green-600">
+              Descuento: -{fmt(discountPreview)} (sobre subtotal antes de IVA)
+            </FormHelperText>
           )}
         </FormControl>
 
