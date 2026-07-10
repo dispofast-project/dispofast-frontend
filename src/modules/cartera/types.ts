@@ -43,6 +43,7 @@ export interface PaymentReceipt {
   createdAt: string;
   promptPaymentDiscountRate: PromptPaymentDiscountRate | null;
   promptPaymentDiscountAmount: number | null;
+  paymentGroupId: string | null;
 }
 
 export interface CreatePaymentReceiptRequest {
@@ -53,6 +54,28 @@ export interface CreatePaymentReceiptRequest {
   documentNumber?: string;
   observations?: string;
   promptPaymentDiscountRate?: PromptPaymentDiscountRate;
+}
+
+export interface PaymentAllocation {
+  arEntryId: string;
+  value: number;
+  promptPaymentDiscountRate?: PromptPaymentDiscountRate;
+}
+
+export interface CreateMultiInvoicePaymentRequest {
+  clientId: string;
+  paymentDate: string;
+  paymentMethod: PaymentMethod;
+  voucherS3Key?: string;
+  documentNumber?: string;
+  observations?: string;
+  allocations: PaymentAllocation[];
+}
+
+export interface MultiInvoicePaymentResponse {
+  paymentGroupId: string;
+  receipts: PaymentReceipt[];
+  totalApplied: number;
 }
 
 export interface CarteraFilters {

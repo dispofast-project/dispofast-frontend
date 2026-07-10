@@ -12,6 +12,7 @@ import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
 import PaymentReceiptPage from "../modules/cartera/pages/PaymentReceiptPage";
+import MultiPaymentReceiptPage from "../modules/cartera/pages/MultiPaymentReceiptPage";
 import InventoryRoutes from "../modules/inventory/inventory.routes";
 import PriceListPage from "../modules/pricelist/pages/PriceListPage";
 import NotFoundPage from "../shared/pages/NotFoundPage";
@@ -42,6 +43,7 @@ const AppRouter = (): ReactElement => {
           {/* Cartera / Cuentas */}
           <Route element={<ProtectedRoute requiredAuthorities={["ACCOUNTS_VIEW"]} />}>
             <Route path="/cartera" element={<CarteraPage />} />
+            <Route path="/cartera/pago-multiple" element={<MultiPaymentReceiptPage />} />
             <Route path="/cartera/:arEntryId/recibo" element={<PaymentReceiptPage />} />
           </Route>
 
