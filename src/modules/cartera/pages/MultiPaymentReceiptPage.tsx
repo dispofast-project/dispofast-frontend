@@ -440,11 +440,12 @@ const MultiPaymentReceiptPage = () => {
                 <Select
                   displayEmpty
                   value={discountRate ?? ""}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const raw = String(e.target.value);
                     setDiscountRate(
-                      e.target.value === "" ? undefined : (Number(e.target.value) as PromptPaymentDiscountRate)
-                    )
-                  }
+                      raw === "" ? undefined : (Number(raw) as PromptPaymentDiscountRate)
+                    );
+                  }}
                 >
                   <MenuItem value="">Ninguno</MenuItem>
                   <MenuItem value={2}>2%</MenuItem>

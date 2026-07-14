@@ -198,9 +198,10 @@ const ReceiptPaymentForm = ({
                 {...field}
                 displayEmpty
                 value={field.value ?? ""}
-                onChange={(e) =>
-                  field.onChange(e.target.value === "" ? undefined : Number(e.target.value))
-                }
+                onChange={(e) => {
+                  const raw = String(e.target.value);
+                  field.onChange(raw === "" ? undefined : Number(raw));
+                }}
               >
                 <MenuItem value="">Ninguno</MenuItem>
                 <MenuItem value={2}>2%</MenuItem>
