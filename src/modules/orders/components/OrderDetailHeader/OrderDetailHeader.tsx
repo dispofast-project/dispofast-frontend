@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Menu, MenuItem } from "@mui/material";
-import { ArrowLeft, ChevronDown, FileText, Download } from "lucide-react";
+import { ArrowLeft, ChevronDown, FileText, Download, Pencil } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { StatusBadge } from "../../../../shared/components/StatusBadge/StatusBadge";
 import { ORDER_STATUS_CONFIG } from "../../config/statusConfig";
@@ -14,8 +14,10 @@ interface OrderDetailHeaderProps {
   nextStates: OrderState[];
   isTerminal: boolean;
   canAttachInvoice: boolean;
+  canEdit: boolean;
   stateLoading: boolean;
   onBack: () => void;
+  onEdit: () => void;
   onAttachInvoice: () => void;
   onStateChange: (state: OrderState) => void;
   invoice: Invoice | null;
@@ -30,8 +32,10 @@ const OrderDetailHeader = ({
   nextStates,
   isTerminal,
   canAttachInvoice,
+  canEdit,
   stateLoading,
   onBack,
+  onEdit,
   onAttachInvoice,
   onStateChange,
   invoice,
@@ -87,7 +91,17 @@ const OrderDetailHeader = ({
             </button>
           )}
 
-          {!isTerminal && nextStates.length > 0 && (
+          {canEdit && !isTerminal && (
+            <button
+              onClick={onEdit}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Editar orden
+            </button>
+          )}
+
+          {canEdit && !isTerminal && nextStates.length > 0 && (
             <>
               <button
                 disabled={stateLoading}

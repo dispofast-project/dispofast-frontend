@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box } from "@mui/material";
 import { useOrderDetail } from "../hooks/useOrderDetail";
+import { useAuth } from "../../iam/hooks/useAuth";
 import type { OrderState } from "../types";
 import { Button } from "../../../shared/components/Button/Button";
 import { attachInvoice, downloadInvoice, updateOrder } from "../api/order.service";
@@ -38,6 +39,8 @@ const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { order, loading, error, refetch } = useOrderDetail(id);
+  const { authorities } = useAuth();
+  const canEdit = authorities.includes("PURCHASE_ORDERS_EDIT");
 
   // ── Client ──────────────────────────────────────────────────────────────────
   const [client, setClient] = useState<ClientResponse | null>(null);
@@ -168,8 +171,10 @@ const OrderDetailPage = () => {
         nextStates={nextStates}
         isTerminal={isTerminal}
         canAttachInvoice={canAttachInvoice}
+        canEdit={canEdit}
         stateLoading={stateLoading}
         onBack={() => navigate("/ordenes")}
+        onEdit={() => navigate(`/ordenes/${id}/editar`)}
         onAttachInvoice={() => setInvoiceOpen(true)}
         onStateChange={handleStateChange}
         invoice={invoice}
@@ -198,6 +203,7 @@ const OrderDetailPage = () => {
               shipmentCityName={order.shipmentCityName}
               shipmentAddress={order.shipmentAddress}
               zone={order.zone}
+              trackingCode={order.trackingCode}
             />
           </Box>
 
@@ -211,6 +217,7 @@ const OrderDetailPage = () => {
           <OrderObservationsCard
             observations={order.observations}
             onSave={handleSaveObservations}
+            canEdit={canEdit}
           />
 
           <OrderItemsTable items={order.items ?? []} />

@@ -1,12 +1,16 @@
 import type { JSX } from "react";
+import { useState } from "react";
 import {
   Box,
+  Checkbox,
   InputAdornment,
   ListItemIcon,
   MenuItem,
   Select,
   TextField,
   Skeleton,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import {
   Search,
@@ -15,6 +19,7 @@ import {
   AlertCircle,
   Wallet,
   FileText,
+  Layers,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StatCard from "../../../shared/components/Card/StatCard";
@@ -62,6 +67,8 @@ const CarteraPage = (): JSX.Element => {
   const navigate = useNavigate();
   const { showNotification } = useNotificationStore();
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const handleDownloadInvoice = async (entry: ArEntry) => {
     if (!entry.invoiceId) return;
     try {
@@ -87,6 +94,26 @@ const CarteraPage = (): JSX.Element => {
     setAsesorFilter,
     handleStateFilter,
   } = useCartera();
+
+  const selectedEntries = entries.filter((e) => selectedIds.has(e.id));
+  const selectedClientId = selectedEntries[0]?.clientId;
+
+  const toggleSelected = (entry: ArEntry) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(entry.id)) {
+        next.delete(entry.id);
+      } else {
+        next.add(entry.id);
+      }
+      return next;
+    });
+  };
+
+  const handleCombinedPayment = () => {
+    if (selectedEntries.length < 2) return;
+    navigate("/cartera/pago-multiple", { state: { entries: selectedEntries } });
+  };
 
   return (
     <Box className="flex flex-col gap-6 pb-8">
@@ -188,9 +215,35 @@ const CarteraPage = (): JSX.Element => {
         </Select>
       </Box>
 
+      {/* ── Combined payment bar ──────────────────────────────────────────────── */}
+      {selectedEntries.length > 0 && (
+        <Box className="bg-white rounded-xl border border-dispofast-primary shadow-sm px-4 py-3 flex items-center justify-between gap-3">
+          <Typography variant="body2" className="text-gray-700">
+            {selectedEntries.length} factura{selectedEntries.length !== 1 ? "s" : ""} seleccionada
+            {selectedEntries.length !== 1 ? "s" : ""}
+            {selectedEntries.length === 1 && " (selecciona al menos 2 para un pago combinado)"}
+          </Typography>
+          <Box className="flex items-center gap-2">
+            <Button variant="secondary" onClick={() => setSelectedIds(new Set())}>
+              Limpiar selección
+            </Button>
+            <Button
+              variant="primary"
+              disabled={selectedEntries.length < 2}
+              onClick={handleCombinedPayment}
+              className="flex items-center gap-2"
+            >
+              <Layers className="w-4 h-4" />
+              Registrar pago combinado
+            </Button>
+          </Box>
+        </Box>
+      )}
+
       {/* ── Table ─────────────────────────────────────────────────────────────── */}
       <CustomTable<ArEntry>
         headers={[
+          "",
           "Estado",
           "Cliente",
           "Asesor",
@@ -203,7 +256,25 @@ const CarteraPage = (): JSX.Element => {
         ]}
         data={loading ? [] : entries}
         renderRow={(entry): (string | JSX.Element)[] => {
+          const disabledReason =
+            entry.state !== "PENDING"
+              ? "Solo se pueden combinar facturas pendientes"
+              : selectedClientId && entry.clientId !== selectedClientId
+                ? "Un pago combinado solo puede cubrir facturas del mismo cliente"
+                : null;
+
           return [
+            <Tooltip key="select" title={disabledReason ?? ""} disableHoverListener={!disabledReason}>
+              <span>
+                <Checkbox
+                  size="small"
+                  checked={selectedIds.has(entry.id)}
+                  disabled={!!disabledReason}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={() => toggleSelected(entry)}
+                />
+              </span>
+            </Tooltip>,
             <StatusBadge
               key="estado"
               status={entry.state}

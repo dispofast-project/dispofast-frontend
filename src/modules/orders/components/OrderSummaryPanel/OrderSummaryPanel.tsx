@@ -8,6 +8,7 @@ import type { OrderItem } from "../../hooks/useCreateOrder";
 interface OrderSummaryPanelProps {
   selectedClient: ClientPreview | null;
   orderNumber: string;
+  orderDate?: Date;
   subtotal: number;
   tax: number;
   discount: number;
@@ -20,6 +21,7 @@ interface OrderSummaryPanelProps {
   missingFields: string[];
   isLoading: boolean;
   onSubmit: () => void;
+  submitLabel?: string;
 }
 
 const SummaryRow = ({ label, value, negative = false }: { label: string; value: number; negative?: boolean }) => (
@@ -34,6 +36,7 @@ const SummaryRow = ({ label, value, negative = false }: { label: string; value: 
 const OrderSummaryPanel = ({
   selectedClient,
   orderNumber,
+  orderDate,
   subtotal,
   tax,
   discount,
@@ -46,6 +49,7 @@ const OrderSummaryPanel = ({
   missingFields,
   isLoading,
   onSubmit,
+  submitLabel = "Crear Orden",
 }: OrderSummaryPanelProps) => {
 
   return (
@@ -91,7 +95,7 @@ const OrderSummaryPanel = ({
             </Box>
             <Box className="flex items-center justify-between">
               <Typography variant="body2" className="text-gray-500">Fecha</Typography>
-              <Typography variant="body2" className="font-medium text-gray-700">{formatDate(new Date())}</Typography>
+              <Typography variant="body2" className="font-medium text-gray-700">{formatDate(orderDate ?? new Date())}</Typography>
             </Box>
             <Box className="flex items-center justify-between">
               <Typography variant="body2" className="text-gray-500">Ítems</Typography>
@@ -147,7 +151,7 @@ const OrderSummaryPanel = ({
             disabled={missingFields.length > 0 || isLoading}
             className="w-full justify-center"
           >
-            Crear Orden
+            {submitLabel}
           </Button>
 
           {missingFields.length > 0 && (

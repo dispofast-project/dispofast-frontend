@@ -3,7 +3,9 @@ import type { PagedResponseDTO } from "../../../shared/types/common";
 import type {
   ArEntry,
   CarteraFilters,
+  CreateMultiInvoicePaymentRequest,
   CreatePaymentReceiptRequest,
+  MultiInvoicePaymentResponse,
   PaymentReceipt,
 } from "../types";
 
@@ -37,6 +39,16 @@ export const createPaymentReceipt = async (
 ): Promise<PaymentReceipt> => {
   const { data } = await apiClient.post<PaymentReceipt>(
     `${BASE_URL}/${arEntryId}/recibos`,
+    request
+  );
+  return data;
+};
+
+export const createMultiInvoicePayment = async (
+  request: CreateMultiInvoicePaymentRequest
+): Promise<MultiInvoicePaymentResponse> => {
+  const { data } = await apiClient.post<MultiInvoicePaymentResponse>(
+    `${BASE_URL}/pagos-multiples`,
     request
   );
   return data;
