@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { CheckCircle, Paperclip, Shuffle, XCircle } from "lucide-react";
+import { CheckCircle, Paperclip, XCircle } from "lucide-react";
 import type { ArEntry, PaymentMethod, PromptPaymentDiscountRate } from "../types";
 import type { SalesOrder } from "../../orders/types";
 import { createMultiInvoicePayment, uploadPaymentVoucher } from "../api/cartera.service";
@@ -23,6 +23,73 @@ import { Button } from "../../../shared/components/Button/Button";
 import ReceiptHeader from "../components/ReceiptHeader/ReceiptHeader";
 
 const fmt = (v: number) => `$${v.toLocaleString("es-CO", { minimumFractionDigits: 0 })}`;
+
+interface InvoiceVoucherUploadProps {
+  fileName: string | null;
+  uploading: boolean;
+  invalid: boolean;
+  onUpload: (file: File) => void;
+  onClear: () => void;
+}
+
+const InvoiceVoucherUpload = ({
+  fileName,
+  uploading,
+  invalid,
+  onUpload,
+  onClear,
+}: InvoiceVoucherUploadProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <Box className="flex flex-col gap-1">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onUpload(file);
+          e.target.value = "";
+        }}
+      />
+      {fileName ? (
+        <Box className="flex items-center justify-between gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5">
+          <Box className="flex items-center gap-2 min-w-0">
+            <CheckCircle size={14} className="text-green-600 shrink-0" />
+            <Typography variant="caption" className="text-green-700 truncate">
+              {fileName}
+            </Typography>
+          </Box>
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-gray-400 hover:text-gray-600 shrink-0"
+          >
+            <XCircle size={14} />
+          </button>
+        </Box>
+      ) : (
+        <Button
+          variant="secondary"
+          type="button"
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+          className="gap-2 !py-1.5 !text-xs w-fit"
+        >
+          <Paperclip size={14} />
+          {uploading ? "Subiendo..." : "Adjuntar comprobante"}
+        </Button>
+      )}
+      {invalid && !fileName && (
+        <Typography variant="caption" className="text-red-500">
+          Falta el comprobante de este pago
+        </Typography>
+      )}
+    </Box>
+  );
+};
 
 const MultiPaymentReceiptPage = () => {
   const navigate = useNavigate();
@@ -36,7 +103,7 @@ const MultiPaymentReceiptPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Oldest invoice first (FIFO), matches how the auto-distribution fills balances.
+  // Oldest invoice first (FIFO).
   const sortedEntries = useMemo(
     () =>
       [...entries].sort(
@@ -81,23 +148,18 @@ const MultiPaymentReceiptPage = () => {
   const totalDiscount = sortedEntries.reduce((s, e) => s + discountFor(e.id), 0);
 
   // ── Allocation (cash portion per invoice) ─────────────────────────────────
-  const [totalPayment, setTotalPayment] = useState<number | "">("");
   const [allocations, setAllocations] = useState<Record<string, number>>({});
 
-  const distributeFifo = () => {
-    let remaining = typeof totalPayment === "number" ? totalPayment : 0;
-    const next: Record<string, number> = {};
-    for (const e of sortedEntries) {
-      const targetCash = Math.max(0, e.balance - discountFor(e.id));
-      const take = Math.max(0, Math.min(targetCash, remaining));
-      next[e.id] = Math.round(take * 100) / 100;
-      remaining -= take;
-    }
-    setAllocations(next);
-  };
-
-  const handleAllocationChange = (id: string, value: number) => {
-    setAllocations((prev) => ({ ...prev, [id]: value }));
+  const handleAllocationChange = (id: string, raw: string) => {
+    setAllocations((prev) => {
+      const next = { ...prev };
+      if (raw === "") {
+        delete next[id];
+      } else {
+        next[id] = Number(raw);
+      }
+      return next;
+    });
   };
 
   const allocatedCash = Object.values(allocations).reduce((s, v) => s + (v || 0), 0);
@@ -107,26 +169,41 @@ const MultiPaymentReceiptPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CAJA");
   const [documentNumber, setDocumentNumber] = useState("");
   const [observations, setObservations] = useState("");
-  const [voucherS3Key, setVoucherS3Key] = useState("");
-  const [voucherFileName, setVoucherFileName] = useState<string | null>(null);
-  const [uploadingVoucher, setUploadingVoucher] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingVoucher(true);
+  // ── Voucher (one per invoice — every payment must have its own proof) ────
+  const [voucherKeys, setVoucherKeys] = useState<Record<string, string>>({});
+  const [voucherNames, setVoucherNames] = useState<Record<string, string>>({});
+  const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
+
+  const handleVoucherUpload = async (entryId: string, file: File) => {
+    setUploadingIds((prev) => new Set(prev).add(entryId));
     try {
       const key = await uploadPaymentVoucher(file);
-      setVoucherS3Key(key);
-      setVoucherFileName(file.name);
+      setVoucherKeys((prev) => ({ ...prev, [entryId]: key }));
+      setVoucherNames((prev) => ({ ...prev, [entryId]: file.name }));
     } catch {
       showNotification("No se pudo subir el comprobante", "error");
     } finally {
-      setUploadingVoucher(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(entryId);
+        return next;
+      });
     }
+  };
+
+  const handleVoucherClear = (entryId: string) => {
+    setVoucherKeys((prev) => {
+      const next = { ...prev };
+      delete next[entryId];
+      return next;
+    });
+    setVoucherNames((prev) => {
+      const next = { ...prev };
+      delete next[entryId];
+      return next;
+    });
   };
 
   if (!client) return null;
@@ -135,10 +212,12 @@ const MultiPaymentReceiptPage = () => {
     (allocations[entry.id] || 0) + discountFor(entry.id) > entry.balance + 0.01;
 
   const anyRowInvalid = sortedEntries.some(rowExceedsBalance);
+  const rowsWithPayment = sortedEntries.filter((e) => (allocations[e.id] || 0) > 0);
+  const missingVoucher = rowsWithPayment.some((e) => !voucherKeys[e.id]);
   const canSubmit =
     !!paymentDate &&
-    !!voucherS3Key &&
     !anyRowInvalid &&
+    !missingVoucher &&
     allocatedCash + totalDiscount > 0 &&
     !submitting;
 
@@ -148,18 +227,22 @@ const MultiPaymentReceiptPage = () => {
       return;
     }
 
-    const allocationPayload = sortedEntries
-      .filter((e) => (allocations[e.id] || 0) > 0)
-      .map((e) => ({
-        arEntryId: e.id,
-        value: allocations[e.id],
-        promptPaymentDiscountRate: discountRate,
-      }));
-
-    if (allocationPayload.length === 0) {
+    if (rowsWithPayment.length === 0) {
       showNotification("Asigna un valor a al menos una factura", "error");
       return;
     }
+
+    if (missingVoucher) {
+      showNotification("Adjunta el comprobante de pago de cada factura", "error");
+      return;
+    }
+
+    const allocationPayload = rowsWithPayment.map((e) => ({
+      arEntryId: e.id,
+      value: allocations[e.id],
+      promptPaymentDiscountRate: discountRate,
+      voucherS3Key: voucherKeys[e.id],
+    }));
 
     setSubmitting(true);
     try {
@@ -168,7 +251,6 @@ const MultiPaymentReceiptPage = () => {
         paymentDate,
         paymentMethod,
         documentNumber: documentNumber || undefined,
-        voucherS3Key,
         observations: observations || undefined,
         allocations: allocationPayload,
       });
@@ -202,67 +284,50 @@ const MultiPaymentReceiptPage = () => {
               </Typography>
             </Box>
 
-            <Box className="px-5 py-4 flex flex-col gap-3">
-              <Box className="flex items-end gap-3">
-                <TextField
-                  label="Valor total recibido"
-                  type="number"
-                  size="small"
-                  fullWidth
-                  slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                  value={totalPayment}
-                  onChange={(e) =>
-                    setTotalPayment(e.target.value === "" ? "" : Number(e.target.value))
-                  }
-                />
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={distributeFifo}
-                  className="flex items-center gap-2 whitespace-nowrap"
-                >
-                  <Shuffle size={16} />
-                  Distribuir (más antigua primero)
-                </Button>
-              </Box>
-              <Typography variant="caption" className="text-gray-400">
-                Distribuye automáticamente el valor entre las facturas, empezando por la más
-                antigua. Puedes ajustar cada valor manualmente después. Si cambias el % de pronto
-                pago, vuelve a distribuir.
-              </Typography>
-            </Box>
-
-            <Divider />
-
             <Box className="flex flex-col">
               {sortedEntries.map((entry) => {
                 const discount = discountFor(entry.id);
                 const invalid = rowExceedsBalance(entry);
+                const hasPayment = (allocations[entry.id] || 0) > 0;
+                const voucherMissing = hasPayment && !voucherKeys[entry.id];
                 return (
                   <Box
                     key={entry.id}
-                    className="px-5 py-3 flex items-center gap-3 border-b border-gray-50 last:border-b-0"
+                    className="px-5 py-3 flex flex-col gap-2 border-b border-gray-50 last:border-b-0"
                   >
-                    <Box className="flex-1 min-w-0">
-                      <Typography variant="body2" className="font-medium text-gray-800 truncate">
-                        Factura {entry.invoiceNumber ?? "-"} · Orden {entry.orderNumber ?? "-"}
-                      </Typography>
-                      <Typography variant="caption" className="text-gray-400">
-                        Saldo: {fmt(entry.balance)}
-                        {discount > 0 && ` · Descuento: -${fmt(discount)}`}
-                      </Typography>
+                    <Box className="flex items-center gap-3">
+                      <Box className="flex-1 min-w-0">
+                        <Typography variant="body2" className="font-medium text-gray-800 truncate">
+                          Factura {entry.invoiceNumber ?? "-"} · Orden {entry.orderNumber ?? "-"}
+                        </Typography>
+                        <Typography variant="caption" className="text-gray-400">
+                          Saldo: {fmt(entry.balance)}
+                          {discount > 0 && ` · Descuento: -${fmt(discount)}`}
+                        </Typography>
+                      </Box>
+                      <TextField
+                        type="number"
+                        size="small"
+                        label="Valor asignado"
+                        placeholder="0"
+                        sx={{ width: 160 }}
+                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                        value={allocations[entry.id] ?? ""}
+                        error={invalid}
+                        helperText={invalid ? "Supera el saldo" : undefined}
+                        onChange={(e) => handleAllocationChange(entry.id, e.target.value)}
+                      />
                     </Box>
-                    <TextField
-                      type="number"
-                      size="small"
-                      label="Valor asignado"
-                      sx={{ width: 160 }}
-                      slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                      value={allocations[entry.id] ?? 0}
-                      error={invalid}
-                      helperText={invalid ? "Supera el saldo" : undefined}
-                      onChange={(e) => handleAllocationChange(entry.id, Number(e.target.value))}
-                    />
+
+                    {hasPayment && (
+                      <InvoiceVoucherUpload
+                        fileName={voucherNames[entry.id] ?? null}
+                        uploading={uploadingIds.has(entry.id)}
+                        invalid={voucherMissing}
+                        onUpload={(file) => handleVoucherUpload(entry.id, file)}
+                        onClear={() => handleVoucherClear(entry.id)}
+                      />
+                    )}
                   </Box>
                 );
               })}
@@ -388,46 +453,10 @@ const MultiPaymentReceiptPage = () => {
                 </Select>
               </FormControl>
 
-              <Box className="flex flex-col gap-1">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.webp"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                {voucherFileName ? (
-                  <Box className="flex items-center justify-between gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
-                    <Box className="flex items-center gap-2 min-w-0">
-                      <CheckCircle size={16} className="text-green-600 shrink-0" />
-                      <Typography variant="body2" className="text-green-700 truncate">
-                        {voucherFileName}
-                      </Typography>
-                    </Box>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVoucherS3Key("");
-                        setVoucherFileName(null);
-                      }}
-                      className="text-gray-400 hover:text-gray-600 shrink-0"
-                    >
-                      <XCircle size={16} />
-                    </button>
-                  </Box>
-                ) : (
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    disabled={uploadingVoucher}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full justify-center gap-2"
-                  >
-                    <Paperclip size={16} />
-                    {uploadingVoucher ? "Subiendo..." : "Adjuntar comprobante"}
-                  </Button>
-                )}
-              </Box>
+              <Typography variant="caption" className="text-gray-400 -mt-2">
+                El comprobante de cada pago se adjunta junto a su factura, en la lista de la
+                izquierda.
+              </Typography>
 
               <TextField
                 label="Observaciones"
