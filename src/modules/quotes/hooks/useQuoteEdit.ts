@@ -24,6 +24,8 @@ interface UseQuoteEditReturn {
   setCommercialRate: (value: string) => void;
   otherRate: string;
   setOtherRate: (value: string) => void;
+  freight: number;
+  setFreight: (value: number) => void;
   isSaving: boolean;
   saveError: string | null;
   hasChanges: boolean;
@@ -40,6 +42,7 @@ export function useQuoteEdit(
   const [selectedOfferValidity, setSelectedOfferValidity] = useState<OfferValidity | "">("");
   const [commercialRate, setCommercialRate] = useState<string>("");
   const [otherRate, setOtherRate] = useState<string>("");
+  const [freight, setFreight] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -53,6 +56,7 @@ export function useQuoteEdit(
     setSelectedOfferValidity(quote.offerValidity ?? "");
     setCommercialRate(snapCommercialRate(quote.commercialDiscountRate));
     setOtherRate(String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
+    setFreight(quote.freight ?? 0);
   }, [quote]);
 
   const hasChanges =
@@ -62,7 +66,8 @@ export function useQuoteEdit(
       (selectedPaymentCondition || null) !== (quote.paymentCondition ?? null) ||
       (selectedOfferValidity || null) !== (quote.offerValidity ?? null) ||
       commercialRate !== snapCommercialRate(quote.commercialDiscountRate) ||
-      otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
+      otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)) ||
+      freight !== (quote.freight ?? 0));
 
   const handleSaveAll = async (id: string) => {
     setIsSaving(true);
@@ -75,6 +80,7 @@ export function useQuoteEdit(
         offerValidity: selectedOfferValidity || undefined,
         commercialDiscountRate: commercialRate !== "" ? parseFloat(commercialRate) / 100 : 0,
         otherDiscountsRate: otherRate !== "" ? parseFloat(otherRate) / 100 : 0,
+        freight,
       } as Parameters<typeof updateQuoteService>[1]);
       onUpdated(updated);
     } catch (err) {
@@ -97,6 +103,8 @@ export function useQuoteEdit(
     setCommercialRate,
     otherRate,
     setOtherRate,
+    freight,
+    setFreight,
     isSaving,
     saveError,
     hasChanges,

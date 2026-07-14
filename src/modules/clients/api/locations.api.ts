@@ -9,3 +9,8 @@ export const searchCitiesService = async (
   });
   return response.data?.content || [];
 };
+
+export const getCityByCodeService = async (code: string): Promise<City> => {
+  const response = await apiClient.get(`/locations/cities/${code}`);
+  return response.data;
+};

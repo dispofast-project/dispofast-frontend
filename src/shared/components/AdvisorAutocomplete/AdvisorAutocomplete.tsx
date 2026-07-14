@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
 import { Autocomplete, TextField, CircularProgress, Box, Typography } from "@mui/material";
 import type { User } from "../../../modules/iam/types";
 import { searchUsers } from "../../../modules/iam/api/user.service";
+import { useApiAutocomplete } from "../../hooks/useApiAutocomplete";
 
 interface AdvisorAutocompleteProps {
   value: User | null;
@@ -20,43 +20,11 @@ export const AdvisorAutocomplete = ({
   error,
   helperText,
 }: AdvisorAutocompleteProps) => {
-  const [options, setOptions] = useState<User[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    if (inputValue === "" && !open) {
-      setOptions(value ? [value] : []);
-      return undefined;
-    }
-
-    setIsSearching(true);
-    const debounce = inputValue === "" ? 0 : 400;
-    const timeoutId = setTimeout(async () => {
-      try {
-        const result = await searchUsers(inputValue, { page: 0, size: 20 });
-        if (active) {
-          setOptions(result.content);
-        }
-      } catch (err) {
-        if (active) {
-          console.error("Error buscando asesores:", err);
-        }
-      } finally {
-        if (active) {
-          setIsSearching(false);
-        }
-      }
-    }, debounce);
-
-    return () => {
-      active = false;
-      clearTimeout(timeoutId);
-    };
-  }, [inputValue, value, open]);
+  const { options, setOptions, isSearching, open, setOpen, handleInputChange } =
+    useApiAutocomplete<User>({
+      fetchFn: (query) => searchUsers(query, { page: 0, size: 20 }).then((r) => r.content),
+      debounceMs: 400,
+    });
 
   return (
     <Autocomplete
@@ -71,17 +39,16 @@ export const AdvisorAutocomplete = ({
       value={value}
       open={open}
       onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setOpen(false);
+        setOptions(value ? [value] : []);
+      }}
       noOptionsText={isSearching ? "Buscando..." : "No se encontraron asesores"}
       onChange={(_event, newValue: User | null) => {
         setOptions(newValue ? [newValue, ...options] : options);
         onChange(newValue);
       }}
-      onInputChange={(_event, newInputValue, reason) => {
-        if (reason === "input" || reason === "clear") {
-          setInputValue(newInputValue);
-        }
-      }}
+      onInputChange={(_event, newInputValue, reason) => handleInputChange(newInputValue, reason)}
       isOptionEqualToValue={(option, val) => option.id === val.id}
       renderInput={(params) => (
         <TextField

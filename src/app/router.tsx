@@ -10,6 +10,7 @@ import QuoteDetailPage from "../modules/quotes/pages/QuoteDetailPage";
 import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
+import ShippingRoutes from "../modules/shipping/ShippingRoutes";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
 import PaymentReceiptPage from "../modules/cartera/pages/PaymentReceiptPage";
 import MultiPaymentReceiptPage from "../modules/cartera/pages/MultiPaymentReceiptPage";
@@ -61,18 +62,9 @@ const AppRouter = (): ReactElement => {
             <Route path="/clientes/nuevo" element={<CreateClientPage />} />
           </Route>
 
-          {/* Despachos / Órdenes de compra */}
+                    {/* Despachos / Shipping */}
           <Route element={<ProtectedRoute requiredAuthorities={["PURCHASE_ORDERS_VIEW"]} />}>
-            <Route
-              path="/despachos"
-              element={
-                <div className="p-6">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                    Despachos
-                  </h1>
-                </div>
-              }
-            />
+            <Route path="/despachos/*" element={<ShippingRoutes />} />
           </Route>
 
           {/* Configuración: solo ADMIN */}

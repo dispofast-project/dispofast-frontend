@@ -24,9 +24,9 @@ import CustomTable from "../../../../shared/components/CustomTable/CustomTable";
 import { Button } from "../../../../shared/components/Button/Button";
 import FilterSearchBar from "../../../../shared/components/SearchBar/SearchBar";
 import type { FilterConfig, FilterState } from "../../../../shared/components/SearchBar/types";
-import { deleteOrder, attachInvoice } from "../../api/order.service";
+import { deleteOrder, attachInvoice, downloadInvoice } from "../../api/order.service";
 import AttachInvoiceDialog from "../AttachInvoiceDialog/AttachInvoiceDialog";
-import { Eye, Paperclip, Trash2 } from "lucide-react";
+import { Download, Eye, Paperclip, Trash2 } from "lucide-react";
 import { ListItemIcon } from "@mui/material";
 import { useAuth } from "../../../iam/hooks/useAuth";
 
@@ -74,6 +74,8 @@ const HEADERS = [
   "Valor",
   "# Factura",
   "Ciudad",
+  "Dirección de Entrega",
+  "# Guía",
   "Fecha",
 ];
 
@@ -103,6 +105,7 @@ const OrdersContent = (): JSX.Element => {
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [isUploadingInvoice, setIsUploadingInvoice] = useState(false);
   const [uploadInvoiceError, setUploadInvoiceError] = useState<string | null>(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const handleFilterChange = useCallback(
     (state: FilterState) => {
@@ -163,6 +166,17 @@ const OrdersContent = (): JSX.Element => {
     }
   };
 
+  const handleDownloadInvoice = async (id: string | null) => {
+    if (!id) return;
+    setDownloadLoading(true);
+    try {
+      await downloadInvoice(id);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+  
+
   const { authorities } = useAuth();
   const canDelete = authorities.includes("PURCHASE_ORDERS_DELETE");
 
@@ -172,10 +186,18 @@ const OrdersContent = (): JSX.Element => {
         <ListItemIcon><Eye size={16} /></ListItemIcon>
         Ver detalles
       </MenuItem>
-      <MenuItem onClick={() => { closeMenu(); setInvoiceOrder(item); }}>
-        <ListItemIcon><Paperclip size={16} /></ListItemIcon>
-        Adjuntar factura
-      </MenuItem>
+      {item.state !== "PENDING" && ( 
+        <MenuItem onClick={() => { closeMenu(); handleDownloadInvoice(item.id); }}>
+          <ListItemIcon>{downloadLoading ? <CircularProgress size={12} /> : <Download className="w-3.5 h-3.5" />}</ListItemIcon>
+          Descargar factura
+        </MenuItem>
+      )}
+      {authorities.includes("ROLE_ADMIN") && item.state === "PENDING" && (
+        <MenuItem onClick={() => { closeMenu(); setInvoiceOrder(item); }}>
+          <ListItemIcon><Paperclip size={16} /></ListItemIcon>
+          Adjuntar factura
+        </MenuItem>
+      )}
       {canDelete && (
         <MenuItem onClick={() => { closeMenu(); setOrderToDelete(item); }} sx={{ color: "error.main" }}>
           <ListItemIcon sx={{ color: "error.main" }}><Trash2 size={16} /></ListItemIcon>
@@ -196,6 +218,8 @@ const OrdersContent = (): JSX.Element => {
         {item.invoiceNumber ?? "-"}
       </span>,
       item.shipmentCityName,
+      item.shipmentAddress ?? "-",
+      item.trackingCode ?? "-",
       formatDate(item.orderDate),
     ],
     [navigate]

@@ -1,5 +1,5 @@
-import { Box, Typography, Divider, TextField, InputAdornment, Alert } from "@mui/material";
-import { AlertCircle, Circle } from "lucide-react";
+import { Box, Typography, Divider, Alert, CircularProgress } from "@mui/material";
+import { AlertCircle, Circle, Download } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
 
@@ -17,13 +17,14 @@ interface QuoteSummaryPanelProps {
   otherDiscountAmt: number;
   retefuenteAmt: number;
   freight: number;
-  onFreightChange: (v: number) => void;
   total: number;
   itemCount: number;
   missingFields: string[];
   isSaving: boolean;
   error?: string | null;
   onSave: () => void;
+  onDownload?: () => void;
+  isDownloading?: boolean;
 }
 
 const SummaryRow = ({
@@ -56,13 +57,14 @@ const QuoteSummaryPanel = ({
   otherDiscountAmt,
   retefuenteAmt,
   freight,
-  onFreightChange,
   total,
   itemCount,
   missingFields,
   isSaving,
   error,
   onSave,
+  onDownload,
+  isDownloading,
 }: QuoteSummaryPanelProps) => {
   return (
     <Box className="lg:col-span-1 sticky top-4">
@@ -131,27 +133,7 @@ const QuoteSummaryPanel = ({
             {retefuenteAmt > 0 && (
               <SummaryRow label="Retefuente (3.5%)" value={retefuenteAmt} negative />
             )}
-
-            {/* Flete — editable */}
-            <Box className="flex items-center justify-between gap-2">
-              <Typography variant="body2" className="text-gray-500 shrink-0">
-                Flete
-              </Typography>
-              <TextField
-                size="small"
-                type="number"
-                value={freight || ""}
-                onChange={(e) => onFreightChange(parseFloat(e.target.value) || 0)}
-                placeholder="0"
-                slotProps={{
-                  htmlInput: { min: 0, step: 1000 },
-                  input: {
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                  },
-                }}
-                sx={{ width: 130 }}
-              />
-            </Box>
+            {freight > 0 && <SummaryRow label="Flete" value={freight} />}
           </Box>
 
           <Divider />
@@ -185,6 +167,22 @@ const QuoteSummaryPanel = ({
           >
             Guardar Cotización
           </Button>
+
+          {onDownload && (
+            <Button
+              variant="secondary"
+              onClick={onDownload}
+              disabled={isDownloading}
+              className="w-full justify-center gap-1.5"
+            >
+              {isDownloading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              Descargar PDF
+            </Button>
+          )}
 
           {missingFields.length > 0 && (
             <Box className="rounded-lg border border-amber-200 bg-amber-50 p-3">

@@ -20,15 +20,21 @@ const ALL_NAV_ITEMS = [
         icon: <LayoutDashboard />,
     },
     {
-        label: 'Órdenes',
-        path: '/ordenes',
-        icon: <ShoppingCart />,
-        requiredAuthorities: ['QUOTES_VIEW'],
+        label: 'Clientes',
+        path: '/clientes',
+        icon: <Users />,
+        requiredAuthorities: ['CUSTOMERS_VIEW'],
     },
     {
         label: 'Cotizaciones',
         path: '/cotizaciones',
         icon: <FileText />,
+        requiredAuthorities: ['QUOTES_VIEW'],
+    },
+    {
+        label: 'Órdenes',
+        path: '/ordenes',
+        icon: <ShoppingCart />,
         requiredAuthorities: ['QUOTES_VIEW'],
     },
     {
@@ -44,10 +50,10 @@ const ALL_NAV_ITEMS = [
         requiredAuthorities: ['INVENTORY_VIEW'],
     },
     {
-        label: 'Clientes',
-        path: '/clientes',
-        icon: <Users />,
-        requiredAuthorities: ['CUSTOMERS_VIEW'],
+        label: 'Lista de precios',
+        path: '/lista-precios',
+        icon: <ScrollText />,
+        requiredAuthorities: ['PRICE_LISTS_VIEW'],
     },
     {
         label: 'Despachos',
@@ -61,12 +67,7 @@ const ALL_NAV_ITEMS = [
         icon: <Users />,
         requiredAuthorities: ['IAM_VIEW'],
     },
-    {
-        label: 'Lista de precios',
-        path: '/lista-precios',
-        icon: <ScrollText />,
-        requiredAuthorities: ['PRICE_LISTS_VIEW'],
-    },
+    
 ];
 
 export const MainLayout = () => {

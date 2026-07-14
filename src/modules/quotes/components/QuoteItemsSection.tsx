@@ -37,6 +37,7 @@ interface QuoteItemsSectionProps {
 
 export interface QuoteItemsSectionHandle {
   saveChanges: () => Promise<void>;
+  getItems: () => QuoteItem[];
 }
 
 const fmt = (value: number) =>
@@ -90,6 +91,7 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
     }, [pendingQty, pendingPrice, items, onHasPendingChanges]);
 
     useImperativeHandle(ref, () => ({
+      getItems: () => items,
       saveChanges: async () => {
         const changed = items.filter(
           (i) =>

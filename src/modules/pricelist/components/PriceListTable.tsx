@@ -12,6 +12,7 @@ interface PriceListTableProps {
   onView: (item: PriceListItem) => void;
   onUpdate: (item: PriceListItem) => void;
   onDownload: (item: PriceListItem) => void;
+  authorithies: string[];
 }
 
 const PriceListTable = ({
@@ -23,8 +24,10 @@ const PriceListTable = ({
   onView,
   onUpdate,
   onDownload,
+  authorithies,
 }: PriceListTableProps) => {
   const headers = ["Nombre de documento", "Acciones"];
+  const canUpdate = authorithies.includes("PRICE_LISTS_UPDATE");
 
   const renderRow = (item: PriceListItem) => [
     <div key={`name-${item.id}`} className="flex items-center gap-3 py-1">
@@ -48,17 +51,20 @@ const PriceListTable = ({
         <Eye size={12} />
         Ver
       </button>
-
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onUpdate(item);
-        }}
-        className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-      >
-        <RefreshCw size={12} />
-        Actualizar
-      </button>
+      
+      {canUpdate && (
+          <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onUpdate(item);
+          }}
+          className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+        >
+          <RefreshCw size={12} />
+          Actualizar
+        </button>
+      )}
+      
 
       <button
         onClick={(e) => {

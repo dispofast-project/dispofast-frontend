@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Box, Typography, IconButton, CircularProgress, Button, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DownloadIcon from "@mui/icons-material/Download";
 
 import {
   getQuoteByIdService,
@@ -12,8 +14,10 @@ import {
   addQuoteItemService,
 } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
+import { getClientByIdService as getFullClientByIdService } from "../../clients/api/clients.api";
+import type { ClientResponse } from "../../clients/types";
 import type { Quote, PriceList, ClientDetails, ProspectDetails } from "../types";
-import { QuoteStatus, LegalEntityType } from "../types";
+import { QuoteStatus, LegalEntityType, PaymentCondition, OfferValidity } from "../types";
 import { useQuoteEdit } from "../hooks/useQuoteEdit";
 import { useAuth } from "../../iam/hooks/useAuth";
 
@@ -29,9 +33,12 @@ import QuoteOrderCard from "../components/QuoteOrderCard";
 import QuoteItemsSection from "../components/QuoteItemsSection";
 import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
 import QuoteItemsDraftSection from "../components/QuoteItemsDraftSection";
-import type { QuoteItemsDraftSectionHandle } from "../components/QuoteItemsDraftSection";
+import type { QuoteItemsDraftSectionHandle, DraftPrintItem } from "../components/QuoteItemsDraftSection";
 import type { DraftTotals } from "../components/QuoteItemsDraftSection";
 import QuoteSummaryPanel from "../components/QuoteSummaryPanel/QuoteSummaryPanel";
+import QuotePrintTemplate from "../components/QuotePrintTemplate/QuotePrintTemplate";
+import type { QuotePrintTemplateProps, QuotePrintItem } from "../components/QuotePrintTemplate/QuotePrintTemplate";
+import { downloadElementAsPdf } from "../../../shared/utils/downloadAsPdf";
 
 interface QuoteDetailPageProps {
   mode: "create" | "create-prospect" | "edit";
@@ -74,11 +81,14 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const [hasItemChanges, setHasItemChanges] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [freight, setFreight] = useState(0);
   const [draftTotals, setDraftTotals] = useState<DraftTotals>({ subtotal: 0, tax: 0, itemCount: 0 });
 
   const quoteItemsRef = useRef<QuoteItemsSectionHandle>(null);
   const draftItemsRef = useRef<QuoteItemsDraftSectionHandle>(null);
+  const printTemplateRef = useRef<HTMLDivElement>(null);
+
+  const [printData, setPrintData] = useState<QuotePrintTemplateProps | null>(null);
+  const [downloadQuoteLoading, setDownloadQuoteLoading] = useState(false);
 
   const { data: quote, isLoading: isQuoteLoading, error: quoteError } = quoteState;
   const { data: client, isLoading: isClientLoading, error: clientError } = clientState;
@@ -98,6 +108,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setCommercialRate,
     otherRate,
     setOtherRate,
+    freight,
+    setFreight,
     isSaving,
     saveError,
     hasChanges,
@@ -263,6 +275,131 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     }
   };
 
+  const handleDownloadQuote = async () => {
+    const IVA_RATE = 0.19;
+
+    const toPrintItems = (
+      src: ReturnType<NonNullable<typeof quoteItemsRef.current>["getItems"]>,
+    ): QuotePrintItem[] =>
+      src.map((item) => ({
+        productReference: item.product.reference ?? item.product.sku,
+        productName: item.product.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        subtotal: item.lineTotal,
+        taxAmount: item.taxAmount,
+        total: item.lineTotal + item.taxAmount,
+      }));
+
+    const toDraftPrintItems = (src: DraftPrintItem[]): QuotePrintItem[] =>
+      src.map((item) => {
+        const subtotal = item.quantity * item.unitPrice;
+        const taxAmount = item.taxFree ? 0 : subtotal * IVA_RATE;
+        return {
+          productReference: item.productReference,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          subtotal,
+          taxAmount,
+          total: subtotal + taxAmount,
+        };
+      });
+
+    setDownloadQuoteLoading(true);
+    try {
+      let data: QuotePrintTemplateProps;
+
+      if (mode === "edit" && quote) {
+        data = {
+          quoteNumber: quote.number,
+          createdAt: quote.createdAt,
+          isDraft: false,
+          clientName: quote.account?.name ?? quote.prospect?.name ?? "—",
+          identificationNumber: quote.account?.identificationNumber,
+          email: quote.account?.email ?? quote.prospect?.email,
+          phone: quote.account?.phone ?? quote.prospect?.phone,
+          city: quote.location?.name,
+          department: quote.location?.department?.name,
+          address: quote.account?.address,
+          zone: quote.account?.zone,
+          sellerName: quote.sellerName,
+          paymentCondition: quote.paymentCondition ? PaymentCondition[quote.paymentCondition] : null,
+          offerValidity: quote.offerValidity ? OfferValidity[quote.offerValidity] : null,
+          commercialDiscountRate: quote.commercialDiscountRate,
+          otherDiscountsRate: quote.otherDiscountsRate,
+          items: toPrintItems(quoteItemsRef.current?.getItems() ?? []),
+          subtotalAmount: quote.subtotalAmount,
+          commercialDiscountAmount: quote.commercialDiscountAmount,
+          otherDiscountsAmount: quote.otherDiscountsAmount,
+          ivaAmount: quote.ivaAmount,
+          retefuenteAmount: quote.retefuenteAmount ?? 0,
+          totalAmount: quote.totalAmount,
+          freight: quote.freight ?? 0,
+        };
+      } else {
+        // Fetch full client data for PDF (ClientDetails only has limited fields)
+        let fullClient: ClientResponse | null = null;
+        if (mode === "create" && clientId) {
+          fullClient = await getFullClientByIdService(clientId).catch(() => null);
+        }
+
+        const clientName =
+          mode === "create-prospect" ? (prospectData?.name ?? "—") : (client?.name ?? "—");
+        const commRate = parseFloat(commercialRate || "0") / 100;
+        const othRate = parseFloat(otherRate || "0") / 100;
+        data = {
+          quoteNumber: "BORRADOR",
+          createdAt: new Date().toISOString(),
+          isDraft: true,
+          clientName,
+          identificationNumber:
+            fullClient?.identificationNumber ?? client?.identificationNumber,
+          phone: fullClient?.phone ?? prospectData?.phone,
+          email: fullClient?.email ?? prospectData?.email,
+          city: fullClient?.city?.name,
+          department: fullClient?.city?.department?.name,
+          address: fullClient?.address,
+          sellerName: selectedSeller?.name ?? "—",
+          paymentCondition: selectedPaymentCondition
+            ? (PaymentCondition[selectedPaymentCondition] ?? null)
+            : null,
+          offerValidity: selectedOfferValidity
+            ? (OfferValidity[selectedOfferValidity] ?? null)
+            : null,
+          commercialDiscountRate: commRate,
+          otherDiscountsRate: othRate,
+          items: toDraftPrintItems(draftItemsRef.current?.getFullItems() ?? []),
+          subtotalAmount: createSummary.subtotal,
+          commercialDiscountAmount: createSummary.commercialDiscountAmt,
+          otherDiscountsAmount: createSummary.otherDiscountAmt,
+          ivaAmount: createSummary.tax,
+          retefuenteAmount: createSummary.retefuenteAmt,
+          totalAmount: createSummary.total,
+          freight,
+        };
+      }
+
+      flushSync(() => { setPrintData(data); });
+
+      if (!printTemplateRef.current) return;
+      const docNumber = mode === "edit" ? (quote?.number ?? "COT") : "BORRADOR";
+      const nameLabel = (
+        mode === "edit"
+          ? (quote?.account?.name ?? quote?.prospect?.name)
+          : mode === "create-prospect"
+          ? prospectData?.name
+          : client?.name
+      ) ?? "CLIENTE";
+      await downloadElementAsPdf(
+        printTemplateRef.current,
+        `${docNumber}-${nameLabel.toUpperCase().replace(/\s+/g, "_")}.pdf`,
+      );
+    } finally {
+      setDownloadQuoteLoading(false);
+    }
+  };
+
   const isPageLoading = mode === "edit" ? isQuoteLoading : mode === "create" ? isClientLoading : false;
   const pageError = mode === "edit" ? quoteError : clientError;
 
@@ -354,10 +491,12 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             offerValidity={selectedOfferValidity}
             commercialRate={commercialRate}
             otherRate={otherRate}
+            freight={freight}
             onPaymentConditionChange={setSelectedPaymentCondition}
             onOfferValidityChange={setSelectedOfferValidity}
             onCommercialRateChange={setCommercialRate}
             onOtherRateChange={setOtherRate}
+            onFreightChange={setFreight}
           />
 
           {isCreateMode && (
@@ -401,13 +540,14 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               otherDiscountAmt={createSummary.otherDiscountAmt}
               retefuenteAmt={createSummary.retefuenteAmt}
               freight={freight}
-              onFreightChange={setFreight}
               total={createSummary.total}
               itemCount={draftTotals.itemCount}
               missingFields={createMissingFields}
               isSaving={isCreating}
               error={createError}
               onSave={handleSave}
+              onDownload={handleDownloadQuote}
+              isDownloading={downloadQuoteLoading}
             />
           ) : (
             <>
@@ -447,11 +587,31 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
                     "Guardar cambios"
                   )}
                 </Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  disabled={downloadQuoteLoading}
+                  onClick={handleDownloadQuote}
+                  startIcon={downloadQuoteLoading ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
+                  sx={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  Descargar PDF
+                </Button>
               </Box>
             </>
           )}
         </Box>
       </Box>
+
+      {/* Template oculto para captura de PDF */}
+      {printData && (
+        <div
+          aria-hidden="true"
+          style={{ position: "absolute", left: "-9999px", top: 0, width: "794px" }}
+        >
+          <QuotePrintTemplate ref={printTemplateRef} {...printData} />
+        </div>
+      )}
     </Box>
   );
 };

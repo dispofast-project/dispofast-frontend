@@ -161,4 +161,5 @@ export interface Quote {
   retefuenteRate: number | null;
   retefuenteAmount: number | null;
   totalAmount: number;
+  freight: number;
 }

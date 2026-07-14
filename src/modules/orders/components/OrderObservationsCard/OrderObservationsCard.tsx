@@ -5,9 +5,10 @@ import { MessageSquare, Pencil, Check, X } from "lucide-react";
 interface OrderObservationsCardProps {
   observations: string | null | undefined;
   onSave: (value: string) => Promise<void>;
+  canEdit: boolean;
 }
 
-const OrderObservationsCard = ({ observations, onSave }: OrderObservationsCardProps) => {
+const OrderObservationsCard = ({ observations, onSave, canEdit }: OrderObservationsCardProps) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,7 +43,7 @@ const OrderObservationsCard = ({ observations, onSave }: OrderObservationsCardPr
           <h3 className="text-sm font-semibold text-gray-800">Observaciones</h3>
         </Box>
 
-        {!editing && (
+        {!editing && canEdit && (
           <button
             onClick={handleEdit}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"

@@ -111,8 +111,8 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
                       <td className="px-2 py-2 text-center">
                         <input
                           type="number"
-                          min={0.01}
-                          step={0.01}
+                          min={0}
+                          step={1}
                           value={item.quantity}
                           onChange={(e) => {
                             const qty = parseFloat(e.target.value) || 0;

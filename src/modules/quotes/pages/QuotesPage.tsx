@@ -14,7 +14,7 @@ import CustomTitle from "../../../shared/components/Title/Title";
 /** Maps the FilterSearchBar scope value to the backend `key` query param. */
 const SCOPE_TO_API_KEY: Record<string, string> = {
   sellerName: "seller",
-  accountId: "account",
+  accountId: "client",
   number: "number",
 };
 
