@@ -64,12 +64,16 @@ export interface ReceiptSummaryData {
   retefuente: number;
   freight: number;
   discountAmt: number;
+  /** Suma de descuentos por pronto pago ya aplicados en recibos activos. */
+  promptPaymentDiscount: number;
   totalValue: number;
   hasOrderData: boolean;
   receipts: PaymentReceipt[];
   balance: number;
   currentPayment?: number;
   pendingPayment?: number;
+  /** Vista previa del descuento por pronto pago seleccionado, aún no registrado. */
+  pendingDiscount?: number;
 }
 
 interface ReceiptSummaryPanelProps {
@@ -142,7 +146,11 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
               value={data.discountAmt}
               zero={data.discountAmt === 0}
             />
-            <MoneyRow label="Pronto pago" value={0} zero />
+            <MoneyRow
+              label="Pronto pago"
+              value={data.promptPaymentDiscount}
+              zero={data.promptPaymentDiscount === 0}
+            />
             <MoneyRow label="Otros descuentos" value={0} zero />
             <MoneyRow
               label="Flete"
@@ -166,98 +174,121 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
         <>
           <Divider />
           <Box className="px-5 py-4 flex flex-col gap-2">
-            {activeReceipts.map((r) => (
-              <Box
-                key={r.id}
-                className="flex items-center justify-between gap-1"
-              >
-                <Typography variant="body2" className="text-gray-500 text-xs min-w-0 truncate">
-                  {fmtDate(r.paymentDate)} | Recibo:{" "}
-                  {r.documentNumber ?? r.receiptCode}
-                </Typography>
-                <Box className="flex items-center gap-1 shrink-0">
-                  <Typography
-                    variant="body2"
-                    className="font-medium text-xs"
-                    sx={{ color: "var(--dispofast-primary)" }}
-                  >
-                    -{fmt(r.value)}
+            {activeReceipts.map((r) => {
+              const total = r.value + (r.promptPaymentDiscountAmount ?? 0);
+              return (
+                <Box
+                  key={r.id}
+                  className="flex items-center justify-between gap-1"
+                >
+                  <Typography variant="body2" className="text-gray-500 text-xs min-w-0 truncate">
+                    {fmtDate(r.paymentDate)} | Recibo:{" "}
+                    {r.documentNumber ?? r.receiptCode}
+                    {r.promptPaymentDiscountRate != null &&
+                      ` (incl. pronto pago ${r.promptPaymentDiscountRate}%)`}
                   </Typography>
-                  {r.voucherS3Key && (
-                    <Tooltip title="Descargar comprobante">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDownload(r)}
-                        disabled={downloadingId === r.id}
-                        sx={{ p: 0.25 }}
-                      >
-                        {downloadingId === r.id ? (
-                          <CircularProgress size={14} />
-                        ) : (
-                          <Download size={14} />
-                        )}
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                  <Box className="flex items-center gap-1 shrink-0">
+                    <Typography
+                      variant="body2"
+                      className="font-medium text-xs"
+                      sx={{ color: "var(--dispofast-primary)" }}
+                    >
+                      -{fmt(total)}
+                    </Typography>
+                    {r.voucherS3Key && (
+                      <Tooltip title="Descargar comprobante">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDownload(r)}
+                          disabled={downloadingId === r.id}
+                          sx={{ p: 0.25 }}
+                        >
+                          {downloadingId === r.id ? (
+                            <CircularProgress size={14} />
+                          ) : (
+                            <Download size={14} />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
           </Box>
-
         </>
       )}
-        
-      <Divider /> 
-      
-      <Box className="px-5 py-4 flex flex-col gap-2">
-        <Box className="flex items-center justify-between">
-          <Typography variant="body2" className="font-bold text-gray-800">
-            Saldo Factura
-          </Typography>
-          <Typography
-            variant="body2"
-            className="font-bold text-base"
-            sx={{
-              color:
-                data.balance <= 0
-                  ? "success.main"
-                  : "var(--dispofast-primary)",
-            }}
-          >
-            {fmt(Math.max(0, data.balance))}
-          </Typography>
-        </Box>
 
-        {data.pendingPayment != null && data.pendingPayment > 0 && (
-          <Box className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2">
+      {data.balance > 0 && (
+        <>
+          <Divider />
+          <Box className="px-5 py-4 flex flex-col gap-2">
             <Box className="flex items-center justify-between">
-              <Typography variant="body2" className="text-gray-500">
-                Pago
-              </Typography>
-              <Typography variant="body2" className="font-medium text-gray-700">
-                -{fmt(data.pendingPayment)}
-              </Typography>
-            </Box>
-            <Box className="flex items-center justify-between">
-              <Typography variant="body2" className="text-gray-500">
-                Saldo restante
+              <Typography variant="body2" className="font-bold text-gray-800">
+                Saldo Factura
               </Typography>
               <Typography
                 variant="body2"
-                className="font-bold"
+                className="font-bold text-base"
                 sx={{
                   color:
-                    data.balance - data.pendingPayment <= 0
+                    data.balance <= 0
                       ? "success.main"
                       : "var(--dispofast-primary)",
                 }}
               >
-                {fmt(Math.max(0, data.balance - data.pendingPayment))}
+                {fmt(Math.max(0, data.balance))}
               </Typography>
             </Box>
+
+            {(() => {
+              const pendingPayment = data.pendingPayment ?? 0;
+              const pendingDiscount = data.pendingDiscount ?? 0;
+              const pendingTotal = pendingPayment + pendingDiscount;
+              if (pendingTotal <= 0) return null;
+              const remaining = data.balance - pendingTotal;
+              return (
+                <Box className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2">
+                  {pendingPayment > 0 && (
+                    <Box className="flex items-center justify-between">
+                      <Typography variant="body2" className="text-gray-500">
+                        Pago
+                      </Typography>
+                      <Typography variant="body2" className="font-medium text-gray-700">
+                        -{fmt(pendingPayment)}
+                      </Typography>
+                    </Box>
+                  )}
+                  {pendingDiscount > 0 && (
+                    <Box className="flex items-center justify-between">
+                      <Typography variant="body2" className="text-gray-500">
+                        Descuento pronto pago
+                      </Typography>
+                      <Typography variant="body2" className="font-medium text-green-600">
+                        -{fmt(pendingDiscount)}
+                      </Typography>
+                    </Box>
+                  )}
+                  <Box className="flex items-center justify-between">
+                    <Typography variant="body2" className="text-gray-500">
+                      Saldo restante
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      className="font-bold"
+                      sx={{
+                        color: remaining <= 0 ? "success.main" : "var(--dispofast-primary)",
+                      }}
+                    >
+                      {fmt(Math.max(0, remaining))}
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            })()}
           </Box>
-        )}
-      </Box>
+        </>
+      )}
     </Box>
   );
 };
