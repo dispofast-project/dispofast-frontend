@@ -95,6 +95,10 @@ export interface UpdateOrderRequestDTO {
   shipmentAddress?: string;
   zone?: string;
   priceListId?: string;
+  paymentCondition?: PaymentCondition;
+  discountRate?: number;
+  additionalDiscountRate?: number;
+  freight?: number;
   observations?: string;
   items?: CreateOrderItemDTO[];
 }
