@@ -167,9 +167,15 @@ const MultiPaymentReceiptPage = () => {
   // ── Shared payment metadata ────────────────────────────────────────────────
   const [paymentDate, setPaymentDate] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CAJA");
-  const [documentNumber, setDocumentNumber] = useState("");
   const [observations, setObservations] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // ── Document number (one per invoice — each payment has its own) ─────────
+  const [documentNumbers, setDocumentNumbers] = useState<Record<string, string>>({});
+
+  const handleDocumentNumberChange = (id: string, value: string) => {
+    setDocumentNumbers((prev) => ({ ...prev, [id]: value }));
+  };
 
   // ── Voucher (one per invoice — every payment must have its own proof) ────
   const [voucherKeys, setVoucherKeys] = useState<Record<string, string>>({});
@@ -242,6 +248,7 @@ const MultiPaymentReceiptPage = () => {
       value: allocations[e.id],
       promptPaymentDiscountRate: discountRate,
       voucherS3Key: voucherKeys[e.id],
+      documentNumber: documentNumbers[e.id] || undefined,
     }));
 
     setSubmitting(true);
@@ -250,7 +257,6 @@ const MultiPaymentReceiptPage = () => {
         clientId: client.clientId,
         paymentDate,
         paymentMethod,
-        documentNumber: documentNumber || undefined,
         observations: observations || undefined,
         allocations: allocationPayload,
       });
@@ -320,13 +326,22 @@ const MultiPaymentReceiptPage = () => {
                     </Box>
 
                     {hasPayment && (
-                      <InvoiceVoucherUpload
-                        fileName={voucherNames[entry.id] ?? null}
-                        uploading={uploadingIds.has(entry.id)}
-                        invalid={voucherMissing}
-                        onUpload={(file) => handleVoucherUpload(entry.id, file)}
-                        onClear={() => handleVoucherClear(entry.id)}
-                      />
+                      <Box className="flex items-start gap-3">
+                        <TextField
+                          size="small"
+                          label="N° Documento"
+                          sx={{ width: 160 }}
+                          value={documentNumbers[entry.id] ?? ""}
+                          onChange={(e) => handleDocumentNumberChange(entry.id, e.target.value)}
+                        />
+                        <InvoiceVoucherUpload
+                          fileName={voucherNames[entry.id] ?? null}
+                          uploading={uploadingIds.has(entry.id)}
+                          invalid={voucherMissing}
+                          onUpload={(file) => handleVoucherUpload(entry.id, file)}
+                          onClear={() => handleVoucherClear(entry.id)}
+                        />
+                      </Box>
                     )}
                   </Box>
                 );
@@ -390,24 +405,15 @@ const MultiPaymentReceiptPage = () => {
               </Typography>
             </Box>
             <Box className="px-5 py-4 flex flex-col gap-4">
-              <Box className="grid grid-cols-2 gap-3">
-                <TextField
-                  label="Documento"
-                  size="small"
-                  fullWidth
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
-                />
-                <TextField
-                  label="Fecha de pago"
-                  type="date"
-                  size="small"
-                  fullWidth
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
-                />
-              </Box>
+              <TextField
+                label="Fecha de pago"
+                type="date"
+                size="small"
+                fullWidth
+                slotProps={{ inputLabel: { shrink: true } }}
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
 
               <Divider />
 
@@ -455,8 +461,8 @@ const MultiPaymentReceiptPage = () => {
               </FormControl>
 
               <Typography variant="caption" className="text-gray-400 -mt-2">
-                El comprobante de cada pago se adjunta junto a su factura, en la lista de la
-                izquierda.
+                El número de documento y el comprobante de cada pago se registran junto a su
+                factura, en la lista de la izquierda.
               </Typography>
 
               <TextField
