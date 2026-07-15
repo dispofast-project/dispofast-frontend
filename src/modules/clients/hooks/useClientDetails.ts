@@ -114,7 +114,7 @@ export const useClientDetails = (id: string | undefined) => {
       email: formData.email,
       phone: formData.phone,
       isActive,
-      retefuenteApplies: formData.retefuenteApplies,
+      retefuenteType: formData.retefuenteType,
       address: formData.address,
       cityCode: formData.cityCode,
       zone: formData.zone,

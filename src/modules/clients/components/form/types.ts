@@ -1,5 +1,7 @@
+import type { RetefuenteType } from "../../types";
+
 export type ClientFormData = {
-  retefuenteApplies: boolean;
+  retefuenteType: RetefuenteType;
   defaultDiscountRate: string;
   identificationNumber: string;
   email: string;
