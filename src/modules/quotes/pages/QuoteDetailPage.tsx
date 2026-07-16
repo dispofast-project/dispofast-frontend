@@ -15,11 +15,12 @@ import {
 } from "../api/quotes.api";
 import { createOrderFromQuote } from "../../orders/api/order.service";
 import { getClientByIdService as getFullClientByIdService } from "../../clients/api/clients.api";
-import type { ClientResponse } from "../../clients/types";
+import { RetefuenteType, type ClientResponse } from "../../clients/types";
 import type { Quote, PriceList, ClientDetails, ProspectDetails } from "../types";
-import { QuoteStatus, LegalEntityType, PaymentCondition, OfferValidity } from "../types";
+import { QuoteStatus, PaymentCondition, OfferValidity } from "../types";
 import { useQuoteEdit } from "../hooks/useQuoteEdit";
 import { useAuth } from "../../iam/hooks/useAuth";
+import { useSystemParams } from "../../../shared/hooks/useSystemParams";
 
 import QuoteDetailsHeaderCard from "../components/QuoteDetailsHeaderCard";
 import QuoteCreateHeaderCard from "../components/QuoteCreateHeaderCard";
@@ -94,6 +95,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const { data: client, isLoading: isClientLoading, error: clientError } = clientState;
   const { authorities } = useAuth();
   const isAdmin = authorities.includes("ROLE_ADMIN");
+  const { RETEFUENTE_RATE_PERSONA_JURIDICA, RETEFUENTE_RATE_PERSONA_NATURAL } = useSystemParams();
 
   const {
     selectedSeller,
@@ -129,14 +131,17 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     const othRate = parseFloat(otherRate || "0") / 100;
     const commercialDiscountAmt = subtotal * commRate;
     const otherDiscountAmt = subtotal * othRate;
-    const isClientEmpresa =
-      client?.retefuenteApplies === true &&
-      client?.legalEntityType !== LegalEntityType.NATURAL;
+    const retefuenteRate =
+      client?.retefuenteType === RetefuenteType.PERSONA_JURIDICA
+        ? RETEFUENTE_RATE_PERSONA_JURIDICA
+        : client?.retefuenteType === RetefuenteType.PERSONA_NATURAL
+        ? RETEFUENTE_RATE_PERSONA_NATURAL
+        : 0;
     const netBase = subtotal - commercialDiscountAmt - otherDiscountAmt;
-    const retefuenteAmt = isClientEmpresa ? netBase * 0.025 : 0;
+    const retefuenteAmt = retefuenteRate > 0 ? netBase * retefuenteRate : 0;
     const total = netBase + tax - retefuenteAmt + freight;
     return { subtotal, tax, commercialDiscountAmt, otherDiscountAmt, retefuenteAmt, total };
-  }, [draftTotals, commercialRate, otherRate, freight, client]);
+  }, [draftTotals, commercialRate, otherRate, freight, client, RETEFUENTE_RATE_PERSONA_JURIDICA, RETEFUENTE_RATE_PERSONA_NATURAL]);
 
   const createMissingFields = useMemo(() => {
     const missing: string[] = [];

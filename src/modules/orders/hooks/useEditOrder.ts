@@ -6,7 +6,7 @@ import { getCityByCodeService } from "../../clients/api/locations.api";
 import { getAllPriceLists } from "../../pricelist/api/pricelist.api";
 import { useNotificationStore } from "../../../shared/store";
 import { useSystemParams } from "../../../shared/hooks/useSystemParams";
-import type { ClientResponse } from "../../clients/types";
+import { RetefuenteType, type ClientResponse } from "../../clients/types";
 import type { PaymentCondition, SalesOrder } from "../types";
 import type { City } from "../../../shared/types/location";
 import type { PriceListItem } from "../../pricelist/api/pricelist.api";
@@ -15,7 +15,8 @@ import type { OrderItem } from "./useCreateOrder";
 export const useEditOrder = (id: string | undefined) => {
   const navigate = useNavigate();
   const { showNotification } = useNotificationStore();
-  const { IVA, RETEFUENTE_RATE, RETEFUENTE_THRESHOLD } = useSystemParams();
+  const { IVA, RETEFUENTE_RATE_PERSONA_JURIDICA, RETEFUENTE_RATE_PERSONA_NATURAL, RETEFUENTE_THRESHOLD } =
+    useSystemParams();
 
   // ─── Order load ──────────────────────────────────────────────────────────
   const [order, setOrder] = useState<SalesOrder | null>(null);
@@ -118,10 +119,14 @@ export const useEditOrder = (id: string | undefined) => {
   const tax = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA), 0);
   const discountAmt = subtotal * ((parseInt(discountRate, 10) || 0) / 100);
   const additionalDiscountAmt = subtotal * (parseFloat(additionalDiscountRate || "0") / 100);
-  const retefuente =
-    clientDetail?.retefuenteApplies && subtotal > RETEFUENTE_THRESHOLD
-      ? subtotal * RETEFUENTE_RATE
+  const retefuenteRate =
+    clientDetail?.retefuenteType === RetefuenteType.PERSONA_JURIDICA
+      ? RETEFUENTE_RATE_PERSONA_JURIDICA
+      : clientDetail?.retefuenteType === RetefuenteType.PERSONA_NATURAL
+      ? RETEFUENTE_RATE_PERSONA_NATURAL
       : 0;
+  const retefuente =
+    retefuenteRate > 0 && subtotal > RETEFUENTE_THRESHOLD ? subtotal * retefuenteRate : 0;
   const total = subtotal + tax - discountAmt - additionalDiscountAmt - retefuente + freight;
 
   // ─── Validation ────────────────────────────────────────────────────────────

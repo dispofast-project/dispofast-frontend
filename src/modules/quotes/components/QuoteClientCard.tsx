@@ -7,6 +7,13 @@ import DataField from "./detailcard/DetailItem";
 import SectionTitle from "./SectionTitle";
 import { LegalEntityType } from "../types";
 import type { Quote } from "../types";
+import { RetefuenteType } from "../../clients/types";
+
+const retefuenteLabel = (type: RetefuenteType | undefined): string => {
+  if (type === RetefuenteType.PERSONA_JURIDICA) return "Persona jurídica (2,5%)";
+  if (type === RetefuenteType.PERSONA_NATURAL) return "Persona natural (3,5%)";
+  return "No aplica";
+};
 
 type Account = Quote["account"];
 type Location = Quote["location"];
@@ -70,7 +77,7 @@ const NaturalContent = ({ account, location }: { account: Account; location: Loc
           <DataField label="Nombres" value={account.firstName} />
           <DataField label="Apellidos" value={account.lastName} />
           <DataField label="Cédula" value={account.identificationNumber} />
-          <DataField label="Aplica Retefuente" value={account.retefuenteApplies ? "Sí" : "No"} />
+          <DataField label="Retefuente" value={retefuenteLabel(account.retefuenteType)} />
           <DataField label="Email" value={account.email} />
           <DataField label="Teléfono" value={account.phone} />
           <DataField label="Dirección" value={account.address} />

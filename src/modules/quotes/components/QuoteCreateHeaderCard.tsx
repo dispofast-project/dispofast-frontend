@@ -4,6 +4,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { LegalEntityType } from "../types";
 import type { ClientDetails } from "../types";
+import { RetefuenteType } from "../../clients/types";
 
 interface QuoteCreateHeaderCardProps {
   client: ClientDetails;
@@ -109,11 +110,13 @@ const QuoteCreateHeaderCard = ({ client }: QuoteCreateHeaderCardProps) => {
             Retefuente
           </Typography>
           <Box className="flex items-center gap-1 mt-0.5">
-            {client.retefuenteApplies ? (
+            {client.retefuenteType && client.retefuenteType !== RetefuenteType.NO_APLICA ? (
               <>
                 <VerifiedUserIcon sx={{ fontSize: "0.85rem", color: "warning.main" }} />
                 <Typography variant="body2" className="text-orange-600 font-medium">
-                  Aplica
+                  {client.retefuenteType === RetefuenteType.PERSONA_JURIDICA
+                    ? "Persona jurídica (2,5%)"
+                    : "Persona natural (3,5%)"}
                 </Typography>
               </>
             ) : (

@@ -30,6 +30,14 @@ export const LegalEntityType = {
 
 export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType];
 
+export const RetefuenteType = {
+  PERSONA_JURIDICA: "persona_juridica",
+  PERSONA_NATURAL: "persona_natural",
+  NO_APLICA: "no_aplica",
+} as const;
+
+export type RetefuenteType = (typeof RetefuenteType)[keyof typeof RetefuenteType];
+
 export interface ClientPreview {
   id: string;
   legalEntityType: LegalEntityType;
@@ -58,7 +66,7 @@ export interface ClientResponse {
   email: string;
   phone: string;
   isActive: boolean;
-  retefuenteApplies: boolean;
+  retefuenteType: RetefuenteType;
   address: string;
   defaultAdvisor: UserPreview;
   city: City;

@@ -61,13 +61,13 @@ export interface PaymentAllocation {
   value: number;
   promptPaymentDiscountRate?: PromptPaymentDiscountRate;
   voucherS3Key: string;
+  documentNumber?: string;
 }
 
 export interface CreateMultiInvoicePaymentRequest {
   clientId: string;
   paymentDate: string;
   paymentMethod: PaymentMethod;
-  documentNumber?: string;
   observations?: string;
   allocations: PaymentAllocation[];
 }

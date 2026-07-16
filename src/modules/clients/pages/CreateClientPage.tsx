@@ -4,7 +4,7 @@ import { Box, Typography, Button } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { createClientService, uploadLegalDocumentService } from "../api/clients.api";
-import { LegalEntityType } from "../types";
+import { LegalEntityType, RetefuenteType } from "../types";
 import type { CreateIndividualRequestDTO, CreateOrganizationRequestDTO } from "../types/create-client.dto";
 import { useNotificationStore } from "../../../shared/store";
 import { EntityTypeSelector } from "../components/form/EntityTypeSelector";
@@ -22,7 +22,7 @@ const cleanValue = (val: string | undefined): string | undefined => {
 };
 
 const initialFormState = {
-  retefuenteApplies: true,
+  retefuenteType: RetefuenteType.NO_APLICA,
   defaultDiscountRate: "0",
   identificationNumber: "",
   email: "",
@@ -62,6 +62,10 @@ const CreateClientPage = () => {
       setDocumentsError(false);
       setFormData(prev => ({
         ...prev,
+        retefuenteType:
+          type === LegalEntityType.LEGAL
+            ? RetefuenteType.PERSONA_JURIDICA
+            : RetefuenteType.PERSONA_NATURAL,
         firstName: "",
         lastName: "",
         legalName: "",
@@ -101,7 +105,7 @@ const CreateClientPage = () => {
 
       const basePayload = {
         legalEntityType: entityType,
-        retefuenteApplies: formData.retefuenteApplies,
+        retefuenteType: formData.retefuenteType,
         defaultDiscountRate: finalDiscountRate,
         identificationNumber: formData.identificationNumber,
         email: formData.email,

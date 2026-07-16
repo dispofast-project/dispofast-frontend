@@ -2,11 +2,12 @@ import { Box, Typography, Divider, Alert, CircularProgress } from "@mui/material
 import { AlertCircle, Circle, Download } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
+import { RetefuenteType } from "../../../clients/types";
 
 interface AccountInfo {
   name: string;
   identificationNumber?: string;
-  retefuenteApplies?: boolean;
+  retefuenteType?: RetefuenteType;
 }
 
 interface QuoteSummaryPanelProps {
@@ -106,13 +107,15 @@ const QuoteSummaryPanel = ({
                 {itemCount} {itemCount === 1 ? "ítem" : "ítems"}
               </Typography>
             </Box>
-            {accountInfo.retefuenteApplies && (
+            {accountInfo.retefuenteType && accountInfo.retefuenteType !== RetefuenteType.NO_APLICA && (
               <Box className="flex items-center justify-between">
                 <Typography variant="body2" className="text-gray-500">
                   Retefuente
                 </Typography>
                 <Typography variant="body2" className="font-medium text-orange-500">
-                  Aplica
+                  {accountInfo.retefuenteType === RetefuenteType.PERSONA_JURIDICA
+                    ? "Persona jurídica (2,5%)"
+                    : "Persona natural (3,5%)"}
                 </Typography>
               </Box>
             )}

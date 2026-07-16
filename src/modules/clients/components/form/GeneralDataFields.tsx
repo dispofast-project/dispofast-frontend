@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Typography, TextField, Switch, Box } from "@mui/material";
+import { Typography, TextField, Box } from "@mui/material";
 import type { ClientFormData } from "./types";
 import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete/CityAutocomplete";
 import type { City } from "../../../../shared/types/location";
@@ -7,6 +7,7 @@ import { ZoneSelector } from "../../../../shared/components/ZoneSelector/ZoneSel
 import { AdvisorAutocomplete } from "../../../../shared/components/AdvisorAutocomplete/AdvisorAutocomplete";
 import { ClientTypeSelector } from "../../../../shared/components/ClientTypeSelector/ClientTypeSelector";
 import { PriceListAutocomplete } from "../../../../shared/components/PriceListAutocomplete/PriceListAutocomplete";
+import { RetefuenteTypeSelector } from "../../../../shared/components/RetefuenteTypeSelector/RetefuenteTypeSelector";
 import type { User } from "../../../iam/types";
 import { useAuthStore } from "../../../iam/auth.store";
 import CommercialDiscountSelect from "../../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
@@ -90,32 +91,9 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
         />
       </div>
 
-      <Box className="flex items-center justify-between border border-gray-100 p-4 rounded-xl bg-gray-50 mb-6">
-      <Box className="flex flex-col">
-        <Typography 
-          variant="subtitle2" 
-          className="font-bold text-gray-800"
-          sx={{ lineHeight: 1.4 }}
-        >
-          Aplica Retefuente
-        </Typography>
-        <Typography 
-          variant="caption" 
-          className="text-gray-500"
-          sx={{ lineHeight: 1.2, mt: 0.5 }}
-        >
-          ¿Se le aplicará a este cliente retención en la fuente?
-        </Typography>
+      <Box className="border border-gray-100 p-4 rounded-xl bg-gray-50 mb-6">
+        <RetefuenteTypeSelector value={formData.retefuenteType} onChange={onChange} required />
       </Box>
-      
-      <Switch
-        color="primary"
-        name="retefuenteApplies"
-        checked={formData.retefuenteApplies}
-        onChange={onChange}
-        sx={{ ml: 2 }}
-      />
-    </Box>
     </>
   );
 };
