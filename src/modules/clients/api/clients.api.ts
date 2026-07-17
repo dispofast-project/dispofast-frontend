@@ -39,7 +39,9 @@ export const updateClientService = async (
   const form = new FormData();
   form.append("clientData", new Blob([JSON.stringify(payload)], { type: "application/json" }));
   documents?.forEach((file) => form.append("documents", file));
-  const response = await apiClient.put<ClientResponse>(`/clients/${id}`, form);
+  const response = await apiClient.put<ClientResponse>(`/clients/${id}`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return response.data;
 };
 
