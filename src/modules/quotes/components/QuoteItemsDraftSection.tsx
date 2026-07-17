@@ -16,9 +16,11 @@ import InventoryIcon from "@mui/icons-material/Inventory2Outlined";
 import { Trash2 } from "lucide-react";
 import { NumericFormat } from "react-number-format";
 
+import { History } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import AddLineItemDialog from "../../../shared/components/AddLineItemDialog/AddLineItemDialog";
 import type { LineItemResult } from "../../../shared/components/AddLineItemDialog/AddLineItemDialog";
+import PriceHistoryDialog from "../../../shared/components/PriceHistoryDialog/PriceHistoryDialog";
 
 interface DraftItem {
   tempId: string;
@@ -51,6 +53,7 @@ export interface DraftTotals {
 
 interface QuoteItemsDraftSectionProps {
   priceListId: string;
+  clientId?: string;
   onTotalsChange?: (totals: DraftTotals) => void;
 }
 
@@ -60,11 +63,12 @@ const fmt = (value: number) =>
   new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
 
 const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteItemsDraftSectionProps>(
-  ({ priceListId, onTotalsChange }, ref) => {
+  ({ priceListId, clientId, onTotalsChange }, ref) => {
     const [items, setItems] = useState<DraftItem[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [pendingQty, setPendingQty] = useState<Record<string, string>>({});
     const [pendingPrice, setPendingPrice] = useState<Record<string, string>>({});
+    const [historyItem, setHistoryItem] = useState<{ productId: string; productName: string } | null>(null);
 
     useEffect(() => {
       if (!onTotalsChange) return;
@@ -153,6 +157,7 @@ const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteIte
                     <TableCell align="right">IVA</TableCell>
                     <TableCell align="right">Total</TableCell>
                     <TableCell />
+                    <TableCell />
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -220,6 +225,16 @@ const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteIte
                         <TableCell align="right" padding="none">
                           <IconButton
                             size="small"
+                            disabled={!clientId}
+                            onClick={() => setHistoryItem({ productId: item.productId, productName: item.productName })}
+                            title="Histórico de precios"
+                          >
+                            <History className="w-3.5 h-3.5" />
+                          </IconButton>
+                        </TableCell>
+                        <TableCell align="right" padding="none">
+                          <IconButton
+                            size="small"
                             color="error"
                             onClick={() => handleRemove(item.tempId)}
                           >
@@ -242,6 +257,16 @@ const QuoteItemsDraftSection = forwardRef<QuoteItemsDraftSectionHandle, QuoteIte
           onAdd={handleAdd}
           priceEditable
         />
+
+        {clientId && historyItem && (
+          <PriceHistoryDialog
+            open={!!historyItem}
+            onClose={() => setHistoryItem(null)}
+            clientId={clientId}
+            productId={historyItem.productId}
+            productName={historyItem.productName}
+          />
+        )}
       </>
     );
   },

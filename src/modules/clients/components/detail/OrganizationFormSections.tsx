@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Switch, TextField, Typography } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -9,6 +9,7 @@ import type { City } from "../../../../shared/types/location";
 import SectionCard from "./SectionCard";
 import { CityAutocomplete } from "../../../../shared/components/CityAutocomplete/CityAutocomplete";
 import { ZoneSelector } from "../../../../shared/components/ZoneSelector/ZoneSelector";
+import { RetefuenteTypeSelector } from "../../../../shared/components/RetefuenteTypeSelector/RetefuenteTypeSelector";
 
 interface OrganizationFormSectionsProps {
   formData: ClientFormData;
@@ -47,19 +48,8 @@ const OrganizationFormSections = ({
           label="Correo de Facturación" name="billingEmail"
           value={formData.billingEmail} onChange={onChange}
         />
-        <Box className="flex items-center justify-between border border-gray-100 p-3 rounded-lg bg-gray-50 col-span-1 sm:col-span-2">
-          <Box>
-            <Typography variant="subtitle2" className="font-bold text-gray-800">
-              Aplica Retefuente
-            </Typography>
-            <Typography variant="caption" className="text-gray-500">
-              ¿Se le aplicará retención en la fuente?
-            </Typography>
-          </Box>
-          <Switch
-            color="primary" name="retefuenteApplies"
-            checked={formData.retefuenteApplies as boolean} onChange={onChange}
-          />
+        <Box className="border border-gray-100 p-3 rounded-lg bg-gray-50 col-span-1 sm:col-span-2">
+          <RetefuenteTypeSelector value={formData.retefuenteType} onChange={onChange} required />
         </Box>
       </div>
     </SectionCard>

@@ -10,7 +10,7 @@ export const clientToFormData = (client: ClientResponse): ClientFormData => {
   const ind = client as IndividualResponse;
   const org = client as OrganizationResponse;
   return {
-    retefuenteApplies: client.retefuenteApplies,
+    retefuenteType: client.retefuenteType,
     defaultDiscountRate: String(client.defaultDiscountRate ?? 0),
     identificationNumber: client.identificationNumber || "",
     email: client.email || "",

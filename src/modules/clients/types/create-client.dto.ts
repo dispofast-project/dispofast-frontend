@@ -1,4 +1,4 @@
-import { LegalEntityType } from '../types';
+import { LegalEntityType, type RetefuenteType } from '../types';
 
 export interface CreateClientRequestDTO {
   legalEntityType: LegalEntityType;
@@ -6,7 +6,7 @@ export interface CreateClientRequestDTO {
   email: string;
   phone: string;
   isActive?: boolean;
-  retefuenteApplies?: boolean;
+  retefuenteType?: RetefuenteType;
   address: string;
   defaultAdvisorId?: string;
   cityCode: string;

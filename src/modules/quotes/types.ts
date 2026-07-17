@@ -1,4 +1,5 @@
 import type { Location } from "../../shared/types/common";
+import type { RetefuenteType } from "../clients/types";
 
 // TODO: Mover cuando se implemente el modulo
 export interface PriceList {
@@ -28,7 +29,7 @@ export interface ClientDetails {
   name: string;
   identificationNumber: string;
   isActive: boolean;
-  retefuenteApplies: boolean;
+  retefuenteType: RetefuenteType;
   defaultAdvisor: SellerPreview | null;
   defaultDiscountRate: number | null;
   priceList: PriceList | null;
@@ -100,7 +101,7 @@ export interface Account {
   phone: string;
   address: string;
   isActive: boolean;
-  retefuenteApplies: boolean;
+  retefuenteType: RetefuenteType;
   defaultDiscountRate: number;
   zone: string;
   // Persona Natural

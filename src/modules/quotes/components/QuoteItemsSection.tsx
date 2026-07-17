@@ -15,11 +15,12 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import InventoryIcon from "@mui/icons-material/Inventory2Outlined";
-import { Trash2 } from "lucide-react";
+import { Trash2, History } from "lucide-react";
 import { NumericFormat } from "react-number-format";
 
 import SectionTitle from "./SectionTitle";
 import AddLineItemDialog from "../../../shared/components/AddLineItemDialog/AddLineItemDialog";
+import PriceHistoryDialog from "../../../shared/components/PriceHistoryDialog/PriceHistoryDialog";
 import {
   getQuoteItemsService,
   addQuoteItemService,
@@ -31,6 +32,7 @@ import type { QuoteItem } from "../types";
 interface QuoteItemsSectionProps {
   quoteId: string;
   priceListId: string;
+  clientId?: string;
   onHasPendingChanges?: (hasPending: boolean) => void;
   onItemsChanged?: () => void;
 }
@@ -44,7 +46,7 @@ const fmt = (value: number) =>
   new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
 
 const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionProps>(
-  ({ quoteId, priceListId, onHasPendingChanges, onItemsChanged }, ref) => {
+  ({ quoteId, priceListId, clientId, onHasPendingChanges, onItemsChanged }, ref) => {
     const [items, setItems] = useState<QuoteItem[]>([]);
     const [isLoadingItems, setIsLoadingItems] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -53,6 +55,7 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
     const [isAdding, setIsAdding] = useState(false);
     const [addError, setAddError] = useState<string | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
+    const [historyItem, setHistoryItem] = useState<{ productId: string; productName: string } | null>(null);
 
     const [pendingQty, setPendingQty] = useState<Record<string, string>>({});
     const [pendingPrice, setPendingPrice] = useState<Record<string, string>>({});
@@ -187,6 +190,7 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
                   <TableCell align="right">IVA</TableCell>
                   <TableCell align="right">Total</TableCell>
                   <TableCell />
+                  <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -252,6 +256,16 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
                       <TableCell align="right" padding="none">
                         <IconButton
                           size="small"
+                          disabled={!clientId}
+                          onClick={() => setHistoryItem({ productId: item.product.id, productName: item.product.name })}
+                          title="Histórico de precios"
+                        >
+                          <History className="w-3.5 h-3.5" />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell align="right" padding="none">
+                        <IconButton
+                          size="small"
                           color="error"
                           disabled={removingId === item.id}
                           onClick={() => handleRemove(item.id)}
@@ -279,6 +293,16 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
         onAdd={(result) => handleAdd(result.productId, result.quantity, result.unitPrice)}
         priceEditable
       />
+
+      {clientId && historyItem && (
+        <PriceHistoryDialog
+          open={!!historyItem}
+          onClose={() => setHistoryItem(null)}
+          clientId={clientId}
+          productId={historyItem.productId}
+          productName={historyItem.productName}
+        />
+      )}
       </>
     );
   },
