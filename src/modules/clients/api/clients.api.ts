@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { ClientPreview, ClientResponse, ClientType, LegalDocument, PriceListResponse } from "../types";
+import type { ClientPreview, ClientResponse, ClientType, LegalDocument, PriceHistoryEntry, PriceListResponse } from "../types";
 import type { CreateClientRequestDTO, CreateIndividualRequestDTO, CreateOrganizationRequestDTO } from "../types/create-client.dto";
 
 export const getClientsService = async (
@@ -40,6 +40,16 @@ export const updateClientService = async (
   form.append("clientData", new Blob([JSON.stringify(payload)], { type: "application/json" }));
   documents?.forEach((file) => form.append("documents", file));
   const response = await apiClient.put<ClientResponse>(`/clients/${id}`, form);
+  return response.data;
+};
+
+export const getClientProductPriceHistoryService = async (
+  clientId: string,
+  productId: string
+): Promise<PriceHistoryEntry[]> => {
+  const response = await apiClient.get<PriceHistoryEntry[]>(
+    `/clients/${clientId}/products/${productId}/price-history`
+  );
   return response.data;
 };
 

@@ -518,6 +518,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               ref={quoteItemsRef}
               quoteId={quote.id}
               priceListId={quote.priceList.id}
+              clientId={quote.account?.id}
               onHasPendingChanges={setHasItemChanges}
               onItemsChanged={() =>
                 getQuoteByIdService(id!).then((data) =>
@@ -529,6 +530,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             <QuoteItemsDraftSection
               ref={draftItemsRef}
               priceListId={selectedPriceListId ?? ""}
+              clientId={clientId}
               onTotalsChange={handleDraftTotalsChange}
             />
           )}

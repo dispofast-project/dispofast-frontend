@@ -99,6 +99,7 @@ const EditOrderPage = () => {
           />
           <OrderItemsCard
             priceListId={order.priceListId}
+            clientId={order.clientDetail?.id}
             items={order.items}
             onAddProduct={order.handleAddProduct}
             onRemoveItem={order.handleRemoveItem}

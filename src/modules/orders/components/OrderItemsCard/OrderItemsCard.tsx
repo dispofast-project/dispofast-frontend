@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { ShoppingCart, Plus, Trash2 } from "lucide-react";
+import { ShoppingCart, Plus, Trash2, History } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import AddLineItemDialog from "../../../../shared/components/AddLineItemDialog/AddLineItemDialog";
+import PriceHistoryDialog from "../../../../shared/components/PriceHistoryDialog/PriceHistoryDialog";
 import { formatCurrency } from "../../utils/format";
 import type { OrderItem } from "../../hooks/useCreateOrder";
 import type { CreateOrderItemDTO } from "../../types";
@@ -10,6 +11,7 @@ import type { LineItemResult } from "../../../../shared/components/AddLineItemDi
 
 interface OrderItemsCardProps {
   priceListId: string;
+  clientId?: string;
   items: OrderItem[];
   onAddProduct: (item: CreateOrderItemDTO & { productName: string; productReference: string; taxFree: boolean }) => void;
   onRemoveItem: (index: number) => void;
@@ -28,8 +30,9 @@ const toCreateOrderItem = (result: LineItemResult): CreateOrderItemDTO & { produ
 
 const IVA = 0.19;
 
-const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpdateItem }: OrderItemsCardProps) => {
+const OrderItemsCard = ({ priceListId, clientId, items, onAddProduct, onRemoveItem, onUpdateItem }: OrderItemsCardProps) => {
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [historyItem, setHistoryItem] = useState<{ productId: string; productName: string } | null>(null);
 
   const totalSubtotal  = items.reduce((acc, it) => acc + it.lineTotal, 0);
   const totalIva       = items.reduce((acc, it) => acc + (it.taxFree ? 0 : it.lineTotal * IVA), 0);
@@ -95,6 +98,7 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
                   <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Subtotal</th>
                   <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">IVA</th>
                   <th className="px-4 py-2 text-right  text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">Total</th>
+                  <th className="w-20" />
                   <th className="w-8" />
                 </tr>
               </thead>
@@ -146,6 +150,18 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
 
                       <td className="px-2 py-2 text-right">
                         <button
+                          type="button"
+                          disabled={!clientId}
+                          onClick={() => setHistoryItem({ productId: item.productId, productName: item.productName })}
+                          className="flex items-center gap-1 text-xs text-dispofast-primary hover:underline disabled:text-gray-300 disabled:no-underline disabled:cursor-not-allowed"
+                        >
+                          <History className="w-3.5 h-3.5" />
+                          Histórico
+                        </button>
+                      </td>
+
+                      <td className="px-2 py-2 text-right">
+                        <button
                           onClick={() => onRemoveItem(idx)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50"
                         >
@@ -163,6 +179,7 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
                   <td className="px-4 py-3 text-sm font-bold text-gray-500 text-right">{formatCurrency(totalIva)}</td>
                   <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right">{formatCurrency(totalWithIva)}</td>
                   <td />
+                  <td />
                 </tr>
               </tfoot>
             </table>
@@ -177,6 +194,16 @@ const OrderItemsCard = ({ priceListId, items, onAddProduct, onRemoveItem, onUpda
         onAdd={(result) => onAddProduct(toCreateOrderItem(result))}
         priceEditable
       />
+
+      {clientId && historyItem && (
+        <PriceHistoryDialog
+          open={!!historyItem}
+          onClose={() => setHistoryItem(null)}
+          clientId={clientId}
+          productId={historyItem.productId}
+          productName={historyItem.productName}
+        />
+      )}
     </>
   );
 };
