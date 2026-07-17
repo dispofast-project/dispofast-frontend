@@ -77,6 +77,14 @@ export interface ClientResponse {
   legalDocuments: LegalDocument[];
 }
 
+export interface PriceHistoryEntry {
+  source: "ORDER" | "QUOTE";
+  documentNumber: string;
+  date: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface IndividualResponse extends ClientResponse {
   firstName: string;
   lastName: string;

@@ -56,6 +56,7 @@ const CreateOrderPage = () => {
           />
           <OrderItemsCard
             priceListId={order.priceListId}
+            clientId={order.selectedClient?.id}
             items={order.items}
             onAddProduct={order.handleAddProduct}
             onRemoveItem={order.handleRemoveItem}
