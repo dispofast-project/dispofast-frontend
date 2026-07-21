@@ -67,7 +67,7 @@ const OrganizationFormSections = ({
           value={formData.address} onChange={onChange}
         />
         <CityAutocomplete required value={selectedCity} onChange={onCityChange} />
-        <ZoneSelector required value={formData.zone} onChange={onChange} />
+        <ZoneSelector value={formData.zone} onChange={onChange} />
       </div>
     </SectionCard>
 

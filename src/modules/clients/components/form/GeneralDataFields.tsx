@@ -45,10 +45,9 @@ export const GeneralDataFields = ({ formData, onChange }: GeneralDataFieldsProps
             } as React.ChangeEvent<HTMLInputElement>);
           }}
         />
-        <ZoneSelector 
-          value={formData.zone} 
-          onChange={onChange} 
-          required 
+        <ZoneSelector
+          value={formData.zone}
+          onChange={onChange}
         />
         <ClientTypeSelector required value={formData.clientTypeId} onChange={onChange} />
         <PriceListAutocomplete

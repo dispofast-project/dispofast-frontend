@@ -67,7 +67,7 @@ const IndividualFormSections = ({
           sx={{ gridColumn: "1 / -1" }}
         />
         <CityAutocomplete required value={selectedCity} onChange={onCityChange} />
-        <ZoneSelector required value={formData.zone} onChange={onChange} />
+        <ZoneSelector value={formData.zone} onChange={onChange} />
       </div>
     </SectionCard>
 
