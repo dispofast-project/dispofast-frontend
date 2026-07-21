@@ -67,7 +67,7 @@ const CarteraPage = (): JSX.Element => {
   const navigate = useNavigate();
   const { showNotification } = useNotificationStore();
 
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedEntriesMap, setSelectedEntriesMap] = useState<Map<string, ArEntry>>(new Map());
 
   const handleDownloadInvoice = async (entry: ArEntry) => {
     if (!entry.invoiceId) return;
@@ -95,16 +95,16 @@ const CarteraPage = (): JSX.Element => {
     handleStateFilter,
   } = useCartera();
 
-  const selectedEntries = entries.filter((e) => selectedIds.has(e.id));
+  const selectedEntries = Array.from(selectedEntriesMap.values());
   const selectedClientId = selectedEntries[0]?.clientId;
 
   const toggleSelected = (entry: ArEntry) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
+    setSelectedEntriesMap((prev) => {
+      const next = new Map(prev);
       if (next.has(entry.id)) {
         next.delete(entry.id);
       } else {
-        next.add(entry.id);
+        next.set(entry.id, entry);
       }
       return next;
     });
@@ -224,7 +224,7 @@ const CarteraPage = (): JSX.Element => {
             {selectedEntries.length === 1 && " (selecciona al menos 2 para un pago combinado)"}
           </Typography>
           <Box className="flex items-center gap-2">
-            <Button variant="secondary" onClick={() => setSelectedIds(new Set())}>
+            <Button variant="secondary" onClick={() => setSelectedEntriesMap(new Map())}>
               Limpiar selección
             </Button>
             <Button
@@ -268,7 +268,7 @@ const CarteraPage = (): JSX.Element => {
               <span>
                 <Checkbox
                   size="small"
-                  checked={selectedIds.has(entry.id)}
+                  checked={selectedEntriesMap.has(entry.id)}
                   disabled={!!disabledReason}
                   onClick={(e) => e.stopPropagation()}
                   onChange={() => toggleSelected(entry)}
