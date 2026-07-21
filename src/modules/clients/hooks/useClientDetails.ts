@@ -20,7 +20,6 @@ const REQUIRED_FIELD_LABELS: Partial<Record<keyof ClientFormData, string>> = {
   phone: "Teléfono",
   address: "Dirección",
   cityCode: "Ciudad",
-  zone: "Zona",
   priceListId: "Lista de precios",
   clientTypeId: "Tipo de cliente",
 };
