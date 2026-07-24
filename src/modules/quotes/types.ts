@@ -161,6 +161,7 @@ export interface Quote {
   ivaAmount: number;
   retefuenteRate: number | null;
   retefuenteAmount: number | null;
+  retefuenteTypeOverride: RetefuenteType | null;
   totalAmount: number;
   freight: number;
 }

@@ -2,12 +2,12 @@ import { Box, Typography, Divider, Alert, CircularProgress } from "@mui/material
 import { AlertCircle, Circle, Download } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
+import { formatRate } from "../../../../shared/utils/format";
 import { RetefuenteType } from "../../../clients/types";
 
 interface AccountInfo {
   name: string;
   identificationNumber?: string;
-  retefuenteType?: RetefuenteType;
 }
 
 interface QuoteSummaryPanelProps {
@@ -16,6 +16,8 @@ interface QuoteSummaryPanelProps {
   tax: number;
   commercialDiscountAmt: number;
   otherDiscountAmt: number;
+  retefuenteType: RetefuenteType;
+  retefuenteRate: number;
   retefuenteAmt: number;
   freight: number;
   total: number;
@@ -56,6 +58,8 @@ const QuoteSummaryPanel = ({
   tax,
   commercialDiscountAmt,
   otherDiscountAmt,
+  retefuenteType,
+  retefuenteRate,
   retefuenteAmt,
   freight,
   total,
@@ -107,15 +111,15 @@ const QuoteSummaryPanel = ({
                 {itemCount} {itemCount === 1 ? "ítem" : "ítems"}
               </Typography>
             </Box>
-            {accountInfo.retefuenteType && accountInfo.retefuenteType !== RetefuenteType.NO_APLICA && (
+            {retefuenteType !== RetefuenteType.NO_APLICA && (
               <Box className="flex items-center justify-between">
                 <Typography variant="body2" className="text-gray-500">
                   Retefuente
                 </Typography>
                 <Typography variant="body2" className="font-medium text-orange-500">
-                  {accountInfo.retefuenteType === RetefuenteType.PERSONA_JURIDICA
-                    ? "Persona jurídica (2,5%)"
-                    : "Persona natural (3,5%)"}
+                  {retefuenteType === RetefuenteType.PERSONA_JURIDICA
+                    ? `Persona jurídica (${formatRate(retefuenteRate)})`
+                    : `Persona natural (${formatRate(retefuenteRate)})`}
                 </Typography>
               </Box>
             )}
@@ -134,7 +138,7 @@ const QuoteSummaryPanel = ({
               <SummaryRow label="Otros descuentos" value={otherDiscountAmt} negative />
             )}
             {retefuenteAmt > 0 && (
-              <SummaryRow label="Retefuente (3.5%)" value={retefuenteAmt} negative />
+              <SummaryRow label={`Retefuente (${formatRate(retefuenteRate)})`} value={retefuenteAmt} negative />
             )}
             {freight > 0 && <SummaryRow label="Flete" value={freight} />}
           </Box>

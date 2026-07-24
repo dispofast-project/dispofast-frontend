@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { Hash } from "lucide-react";
 import type { Quote } from "../types";
 import { formatCurrency } from "../../../shared/utils/currency";
+import { formatRate } from "../../../shared/utils/format";
 
 interface QuotePaymentDetailsCardProps {
   quote: Quote | null;
@@ -15,12 +16,6 @@ interface RowConfig {
   value: string;
   variant?: RowVariant;
 }
-
-const formatRate = (rate: number | null | undefined): string => {
-  if (rate == null) return "0%";
-  const pct = rate * 100;
-  return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
-};
 
 const VARIANT_STYLES: Record<RowVariant, { label: string; value: string }> = {
   normal:    { label: "text-gray-500",       value: "font-medium tabular-nums" },

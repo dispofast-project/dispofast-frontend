@@ -3,6 +3,8 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import { PaymentCondition, OfferValidity } from "../types";
 import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
 import CommercialDiscountSelect from "../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
+import { RetefuenteTypeSelector } from "../../../shared/components/RetefuenteTypeSelector/RetefuenteTypeSelector";
+import { RetefuenteType } from "../../clients/types";
 import type { PaymentCondition as PaymentConditionType, OfferValidity as OfferValidityType } from "../types";
 import SectionTitle from "./SectionTitle";
 
@@ -12,11 +14,13 @@ interface QuoteTermsCardProps {
   commercialRate: string;
   otherRate: string;
   freight: number;
+  retefuenteOverride: RetefuenteType | "";
   onPaymentConditionChange: (value: PaymentConditionType | "") => void;
   onOfferValidityChange: (value: OfferValidityType | "") => void;
   onCommercialRateChange: (value: string) => void;
   onOtherRateChange: (value: string) => void;
   onFreightChange: (value: number) => void;
+  onRetefuenteOverrideChange: (value: RetefuenteType | "") => void;
 }
 
 const QuoteTermsCard = ({
@@ -25,11 +29,13 @@ const QuoteTermsCard = ({
   commercialRate,
   otherRate,
   freight,
+  retefuenteOverride,
   onPaymentConditionChange,
   onOfferValidityChange,
   onCommercialRateChange,
   onOtherRateChange,
   onFreightChange,
+  onRetefuenteOverrideChange,
 }: QuoteTermsCardProps) => (
   <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
     <SectionTitle icon={<AssignmentIcon fontSize="small" />}>Términos</SectionTitle>
@@ -87,6 +93,12 @@ const QuoteTermsCard = ({
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
             },
           }}
+        />
+      </Box>
+      <Box>
+        <RetefuenteTypeSelector
+          value={retefuenteOverride || RetefuenteType.NO_APLICA}
+          onChange={(e) => onRetefuenteOverrideChange(e.target.value as RetefuenteType)}
         />
       </Box>
     </Box>
