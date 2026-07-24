@@ -14,6 +14,16 @@ import type { User } from "../../iam/types";
 import { useNotificationStore } from "../../../shared/store";
 import { cleanValue, clientToFormData } from "../utils/clientFormHelpers";
 
+const REQUIRED_FIELD_LABELS: Partial<Record<keyof ClientFormData, string>> = {
+  identificationNumber: "Número de identificación",
+  email: "Correo electrónico",
+  phone: "Teléfono",
+  address: "Dirección",
+  cityCode: "Ciudad",
+  priceListId: "Lista de precios",
+  clientTypeId: "Tipo de cliente",
+};
+
 export const useClientDetails = (id: string | undefined) => {
   const { showNotification } = useNotificationStore();
 
@@ -105,6 +115,21 @@ export const useClientDetails = (id: string | undefined) => {
 
   const handleUpdate = async () => {
     if (!client || !formData || !isDirty) return;
+
+    const missingFields = (
+      Object.keys(REQUIRED_FIELD_LABELS) as Array<keyof ClientFormData>
+    )
+      .filter((key) => !String(formData[key] ?? "").trim())
+      .map((key) => REQUIRED_FIELD_LABELS[key] as string);
+
+    if (missingFields.length > 0) {
+      showNotification(
+        `Completa los siguientes campos antes de guardar: ${missingFields.join(", ")}`,
+        "error"
+      );
+      return;
+    }
+
     setIsUpdating(true);
 
     const isNatural = client.legalEntityType === LegalEntityType.NATURAL;
