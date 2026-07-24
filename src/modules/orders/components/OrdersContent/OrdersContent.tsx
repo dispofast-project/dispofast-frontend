@@ -13,6 +13,7 @@ import {
   DialogActions,
   Button as MuiButton,
   CircularProgress,
+  Link,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import type { JSX } from "react";
@@ -219,7 +220,18 @@ const OrdersContent = (): JSX.Element => {
       </span>,
       item.shipmentCityName,
       item.shipmentAddress ?? "-",
-      item.trackingCode ?? "-",
+      item.trackingCode ? (
+        <Link
+          href={`https://transprensa.com/Seguimiento/?remesa_codigo=${encodeURIComponent(item.trackingCode)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {item.trackingCode}
+        </Link>
+      ) : (
+        "-"
+      ),
       formatDate(item.orderDate),
     ],
     [navigate]

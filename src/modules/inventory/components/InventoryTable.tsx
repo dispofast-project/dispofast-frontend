@@ -3,7 +3,6 @@ import { Box, ListItemIcon, MenuItem } from "@mui/material";
 import { Eye, ImageIcon } from "lucide-react";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { StatusBadge } from "../../../shared/components/StatusBadge/StatusBadge";
-import StockBar from "./StockBar";
 import { INVENTORY_STATUS_CONFIG } from "../config/statusConfig";
 import type { InventoryTableItem } from "../types";
 import { useNavigate } from "react-router-dom";
@@ -29,8 +28,6 @@ const   InventoryTable = ({
     "SKU.",
     "Categoría",
     "Disponible",
-    "Reservado",
-    "Stock",
   ];
 
   const navigate = useNavigate();
@@ -72,14 +69,6 @@ const   InventoryTable = ({
     >
       {item.quantityAvailable.toLocaleString("es-CO")}
     </span>,
-    <span key="reserved" className="text-gray-600">
-      {item.quantityReserved.toLocaleString("es-CO")}
-    </span>,
-    <StockBar
-      key="bar"
-      available={item.quantityAvailable}
-      reserved={item.quantityReserved}
-    />,
   ];
 
   const optionsMenu = (item: InventoryTableItem, closeMenu: () => void) => (
