@@ -114,6 +114,10 @@ const QuotesPage = () => {
     }
   };
 
+  const handleCompleteProspect = (quote: QuotePreview) => {
+    navigate(`/cotizaciones/${quote.id}/completar-cliente`);
+  };
+
   const handleChangeStatus = async (quote: QuotePreview, status: string) => {
     try {
       const updatedQuote = await changeQuoteStatusService(quote.id, status);
@@ -166,6 +170,7 @@ const QuotesPage = () => {
           onShowActions={handleShowActions}
           onRowClick={handleRowClick}
           onCreateOrder={handleCreateOrder}
+          onCompleteProspect={handleCompleteProspect}
           onChangeStatus={handleChangeStatus}
         />
       )}

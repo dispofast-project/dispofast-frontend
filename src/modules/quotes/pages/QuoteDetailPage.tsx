@@ -31,6 +31,7 @@ import QuoteTermsCard from "../components/QuoteTermsCard";
 import QuotePriceListCard from "../components/QuotePriceListCard";
 import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
 import QuoteOrderCard from "../components/QuoteOrderCard";
+import CompleteProspectCard from "../components/CompleteProspectCard";
 import QuoteItemsSection from "../components/QuoteItemsSection";
 import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
 import QuoteItemsDraftSection from "../components/QuoteItemsDraftSection";
@@ -587,11 +588,17 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
           ) : (
             <>
               {mode === "edit" && quote?.status === QuoteStatus.ACCEPTED && (
-                <QuoteOrderCard
-                  isCreatingOrder={isCreatingOrder}
-                  orderError={orderError}
-                  onCreateOrder={handleCreateOrder}
-                />
+                !quote.account && quote.prospect ? (
+                  <CompleteProspectCard
+                    onCompleteClient={() => navigate(`/cotizaciones/${id}/completar-cliente`)}
+                  />
+                ) : (
+                  <QuoteOrderCard
+                    isCreatingOrder={isCreatingOrder}
+                    orderError={orderError}
+                    onCreateOrder={handleCreateOrder}
+                  />
+                )
               )}
               <QuotePriceListCard
                 quote={quote}

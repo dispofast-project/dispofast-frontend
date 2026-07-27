@@ -1,5 +1,5 @@
 import { Box, Divider, ListItemIcon, MenuItem, Typography } from "@mui/material";
-import { Eye, ShoppingCart, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Eye, ShoppingCart, UserCheck, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import type { QuotePreview } from "../types";
 import { QuoteStatus } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
@@ -16,6 +16,7 @@ interface QuotesTableProps {
   onShowActions: (quote: QuotePreview) => void;
   onRowClick: (quote: QuotePreview) => void;
   onCreateOrder: (quote: QuotePreview) => void;
+  onCompleteProspect: (quote: QuotePreview) => void;
   onChangeStatus: (quote: QuotePreview, status: string) => void;
 }
 
@@ -27,6 +28,7 @@ const QuotesTable = ({
   onPageChange,
   onRowClick,
   onCreateOrder,
+  onCompleteProspect,
   onChangeStatus,
 }: QuotesTableProps) => {
 
@@ -80,10 +82,19 @@ const QuotesTable = ({
         <ListItemIcon><Eye size={16} /></ListItemIcon>
         Ver cotización
       </MenuItem>
-      <MenuItem onClick={() => { closeMenu(); onCreateOrder(quote); }}>
-        <ListItemIcon><ShoppingCart size={16} /></ListItemIcon>
-        Crear orden
-      </MenuItem>
+      {quote.status === QuoteStatus.ACCEPTED && (
+        quote.prospect ? (
+          <MenuItem onClick={() => { closeMenu(); onCompleteProspect(quote); }}>
+            <ListItemIcon><UserCheck size={16} /></ListItemIcon>
+            Completar cliente
+          </MenuItem>
+        ) : (
+          <MenuItem onClick={() => { closeMenu(); onCreateOrder(quote); }}>
+            <ListItemIcon><ShoppingCart size={16} /></ListItemIcon>
+            Crear orden
+          </MenuItem>
+        )
+      )}
       <Divider />
       <Typography variant="caption" className="px-4 py-1 text-gray-400 font-semibold uppercase tracking-wide block">
         Cambiar estado

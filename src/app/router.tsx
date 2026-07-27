@@ -10,6 +10,7 @@ import QuoteDetailPage from "../modules/quotes/pages/QuoteDetailPage";
 import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
+import CompleteProspectClientPage from "../modules/clients/pages/CompleteProspectClientPage";
 import ShippingRoutes from "../modules/shipping/ShippingRoutes";
 import CarteraPage from "../modules/cartera/pages/CarteraPage";
 import PaymentReceiptPage from "../modules/cartera/pages/PaymentReceiptPage";
@@ -39,6 +40,9 @@ const AppRouter = (): ReactElement => {
             <Route path="/cotizaciones/nuevo/prospecto" element={<QuoteDetailPage mode="create-prospect" />} />
             <Route path="/cotizaciones/nuevo/:clientId" element={<QuoteDetailPage mode="create" />} />
             <Route path="/cotizaciones/:id" element={<QuoteDetailPage mode="edit" />} />
+          </Route>
+          <Route element={<ProtectedRoute requiredAuthorities={["CUSTOMERS_CREATE"]} />}>
+            <Route path="/cotizaciones/:id/completar-cliente" element={<CompleteProspectClientPage />} />
           </Route>
 
           {/* Cartera / Cuentas */}

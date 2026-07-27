@@ -2,6 +2,10 @@ import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
 import type { QuotePreview, Quote, QuoteItem, ClientPreview, ClientDetails, ProspectDetails } from "../types";
 import type { PriceList } from "../types";
+import type {
+  CreateIndividualRequestDTO,
+  CreateOrganizationRequestDTO,
+} from "../../clients/types/create-client.dto";
 
 export const getQuotesService = async (
   page: number = 0,
@@ -91,5 +95,13 @@ export const createQuoteFromProspectService = async (
   prospectData: ProspectDetails,
 ): Promise<Quote> => {
   const response = await apiClient.post("/quotes", { prospect: prospectData });
+  return response.data;
+};
+
+export const completeProspectClientService = async (
+  quoteId: string,
+  payload: CreateIndividualRequestDTO | CreateOrganizationRequestDTO,
+): Promise<Quote> => {
+  const response = await apiClient.post(`/quotes/${quoteId}/complete-prospect`, payload);
   return response.data;
 };
