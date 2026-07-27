@@ -95,7 +95,11 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
   const { data: client, isLoading: isClientLoading, error: clientError } = clientState;
   const { authorities } = useAuth();
   const isAdmin = authorities.includes("ROLE_ADMIN");
-  const { RETEFUENTE_RATE_PERSONA_JURIDICA, RETEFUENTE_RATE_PERSONA_NATURAL } = useSystemParams();
+  const {
+    RETEFUENTE_RATE_PERSONA_JURIDICA,
+    RETEFUENTE_RATE_PERSONA_NATURAL,
+    RETEFUENTE_THRESHOLD,
+  } = useSystemParams();
 
   const {
     selectedSeller,
@@ -112,6 +116,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setOtherRate,
     freight,
     setFreight,
+    retefuenteOverride,
+    setRetefuenteOverride,
     isSaving,
     saveError,
     hasChanges,
@@ -124,6 +130,14 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setDraftTotals(totals);
   }, []);
 
+  // Tipo de retefuente efectivo: el override elegido en esta cotización tiene
+  // prioridad; si no se ha tocado, se hereda del cliente (o del prospecto, que
+  // siempre es NO_APLICA por no tener retefuenteType propio).
+  const clientRetefuenteType =
+    mode === "edit" ? quote?.account?.retefuenteType : client?.retefuenteType;
+  const effectiveRetefuenteType: RetefuenteType =
+    retefuenteOverride || clientRetefuenteType || RetefuenteType.NO_APLICA;
+
   // Financial summary for create modes — computed from draft items + rates
   const createSummary = useMemo(() => {
     const { subtotal, tax } = draftTotals;
@@ -132,16 +146,26 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     const commercialDiscountAmt = subtotal * commRate;
     const otherDiscountAmt = subtotal * othRate;
     const retefuenteRate =
-      client?.retefuenteType === RetefuenteType.PERSONA_JURIDICA
+      effectiveRetefuenteType === RetefuenteType.PERSONA_JURIDICA
         ? RETEFUENTE_RATE_PERSONA_JURIDICA
-        : client?.retefuenteType === RetefuenteType.PERSONA_NATURAL
+        : effectiveRetefuenteType === RetefuenteType.PERSONA_NATURAL
         ? RETEFUENTE_RATE_PERSONA_NATURAL
         : 0;
     const netBase = subtotal - commercialDiscountAmt - otherDiscountAmt;
-    const retefuenteAmt = retefuenteRate > 0 ? netBase * retefuenteRate : 0;
+    const retefuenteAmt =
+      retefuenteRate > 0 && netBase > RETEFUENTE_THRESHOLD ? netBase * retefuenteRate : 0;
     const total = netBase + tax - retefuenteAmt + freight;
-    return { subtotal, tax, commercialDiscountAmt, otherDiscountAmt, retefuenteAmt, total };
-  }, [draftTotals, commercialRate, otherRate, freight, client, RETEFUENTE_RATE_PERSONA_JURIDICA, RETEFUENTE_RATE_PERSONA_NATURAL]);
+    return { subtotal, tax, commercialDiscountAmt, otherDiscountAmt, retefuenteRate, retefuenteAmt, total };
+  }, [
+    draftTotals,
+    commercialRate,
+    otherRate,
+    freight,
+    effectiveRetefuenteType,
+    RETEFUENTE_RATE_PERSONA_JURIDICA,
+    RETEFUENTE_RATE_PERSONA_NATURAL,
+    RETEFUENTE_THRESHOLD,
+  ]);
 
   const createMissingFields = useMemo(() => {
     const missing: string[] = [];
@@ -497,11 +521,13 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             commercialRate={commercialRate}
             otherRate={otherRate}
             freight={freight}
+            retefuenteOverride={effectiveRetefuenteType}
             onPaymentConditionChange={setSelectedPaymentCondition}
             onOfferValidityChange={setSelectedOfferValidity}
             onCommercialRateChange={setCommercialRate}
             onOtherRateChange={setOtherRate}
             onFreightChange={setFreight}
+            onRetefuenteOverrideChange={setRetefuenteOverride}
           />
 
           {isCreateMode && (
@@ -545,6 +571,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               tax={createSummary.tax}
               commercialDiscountAmt={createSummary.commercialDiscountAmt}
               otherDiscountAmt={createSummary.otherDiscountAmt}
+              retefuenteType={effectiveRetefuenteType}
+              retefuenteRate={createSummary.retefuenteRate}
               retefuenteAmt={createSummary.retefuenteAmt}
               freight={freight}
               total={createSummary.total}

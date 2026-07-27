@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Quote, PaymentCondition, OfferValidity } from "../types";
+import type { RetefuenteType } from "../../clients/types";
 import type { User } from "../../iam/types";
 import { updateQuoteService } from "../api/quotes.api";
 import { COMMERCIAL_DISCOUNT_OPTIONS } from "../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
@@ -26,6 +27,8 @@ interface UseQuoteEditReturn {
   setOtherRate: (value: string) => void;
   freight: number;
   setFreight: (value: number) => void;
+  retefuenteOverride: RetefuenteType | "";
+  setRetefuenteOverride: (value: RetefuenteType | "") => void;
   isSaving: boolean;
   saveError: string | null;
   hasChanges: boolean;
@@ -43,6 +46,7 @@ export function useQuoteEdit(
   const [commercialRate, setCommercialRate] = useState<string>("");
   const [otherRate, setOtherRate] = useState<string>("");
   const [freight, setFreight] = useState<number>(0);
+  const [retefuenteOverride, setRetefuenteOverride] = useState<RetefuenteType | "">("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -57,6 +61,7 @@ export function useQuoteEdit(
     setCommercialRate(snapCommercialRate(quote.commercialDiscountRate));
     setOtherRate(String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
     setFreight(quote.freight ?? 0);
+    setRetefuenteOverride(quote.retefuenteTypeOverride ?? "");
   }, [quote]);
 
   const hasChanges =
@@ -67,7 +72,8 @@ export function useQuoteEdit(
       (selectedOfferValidity || null) !== (quote.offerValidity ?? null) ||
       commercialRate !== snapCommercialRate(quote.commercialDiscountRate) ||
       otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)) ||
-      freight !== (quote.freight ?? 0));
+      freight !== (quote.freight ?? 0) ||
+      (retefuenteOverride || null) !== (quote.retefuenteTypeOverride ?? null));
 
   const handleSaveAll = async (id: string) => {
     setIsSaving(true);
@@ -81,6 +87,7 @@ export function useQuoteEdit(
         commercialDiscountRate: commercialRate !== "" ? parseFloat(commercialRate) / 100 : 0,
         otherDiscountsRate: otherRate !== "" ? parseFloat(otherRate) / 100 : 0,
         freight,
+        retefuenteTypeOverride: retefuenteOverride || undefined,
       } as Parameters<typeof updateQuoteService>[1]);
       onUpdated(updated);
     } catch (err) {
@@ -105,6 +112,8 @@ export function useQuoteEdit(
     setOtherRate,
     freight,
     setFreight,
+    retefuenteOverride,
+    setRetefuenteOverride,
     isSaving,
     saveError,
     hasChanges,
