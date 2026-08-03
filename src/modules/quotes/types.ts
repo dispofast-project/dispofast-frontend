@@ -33,6 +33,7 @@ export interface ClientDetails {
   defaultAdvisor: SellerPreview | null;
   defaultDiscountRate: number | null;
   priceList: PriceList | null;
+  city: Location | null;
 }
 
 export const QuoteStatus = {
@@ -148,6 +149,7 @@ export interface Quote {
   sellerId: string;
   sellerName: string;
   location: Location;
+  shipmentAddress: string | null;
   priceList: PriceList;
   createdAt: string;
   updatedAt: string;

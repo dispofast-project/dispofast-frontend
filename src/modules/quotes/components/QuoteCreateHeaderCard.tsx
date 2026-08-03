@@ -136,6 +136,26 @@ const QuoteCreateHeaderCard = ({ client }: QuoteCreateHeaderCardProps) => {
             </Typography>
           </Box>
         )}
+        {client.city && (
+          <Box>
+            <Typography variant="caption" className="text-gray-400 font-medium block">
+              Ciudad
+            </Typography>
+            <Typography variant="body2" className="text-gray-700 font-medium">
+              {client.city.name}
+            </Typography>
+          </Box>
+        )}
+        {client.city?.department && (
+          <Box>
+            <Typography variant="caption" className="text-gray-400 font-medium block">
+              Departamento
+            </Typography>
+            <Typography variant="body2" className="text-gray-700 font-medium">
+              {client.city.department.name}
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

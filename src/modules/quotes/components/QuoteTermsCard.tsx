@@ -14,12 +14,14 @@ interface QuoteTermsCardProps {
   commercialRate: string;
   otherRate: string;
   freight: number;
+  shipmentAddress: string;
   retefuenteOverride: RetefuenteType | "";
   onPaymentConditionChange: (value: PaymentConditionType | "") => void;
   onOfferValidityChange: (value: OfferValidityType | "") => void;
   onCommercialRateChange: (value: string) => void;
   onOtherRateChange: (value: string) => void;
   onFreightChange: (value: number) => void;
+  onShipmentAddressChange: (value: string) => void;
   onRetefuenteOverrideChange: (value: RetefuenteType | "") => void;
 }
 
@@ -29,12 +31,14 @@ const QuoteTermsCard = ({
   commercialRate,
   otherRate,
   freight,
+  shipmentAddress,
   retefuenteOverride,
   onPaymentConditionChange,
   onOfferValidityChange,
   onCommercialRateChange,
   onOtherRateChange,
   onFreightChange,
+  onShipmentAddressChange,
   onRetefuenteOverrideChange,
 }: QuoteTermsCardProps) => (
   <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
@@ -99,6 +103,16 @@ const QuoteTermsCard = ({
         <RetefuenteTypeSelector
           value={retefuenteOverride || RetefuenteType.NO_APLICA}
           onChange={(e) => onRetefuenteOverrideChange(e.target.value as RetefuenteType)}
+        />
+      </Box>
+      <Box className="sm:col-span-2">
+        <Typography variant="body2" className="text-gray-500 mb-1">Dirección de despacho</Typography>
+        <TextField
+          size="small"
+          fullWidth
+          value={shipmentAddress}
+          onChange={(e) => onShipmentAddressChange(e.target.value)}
+          placeholder="Dirección para el despacho de la orden"
         />
       </Box>
     </Box>

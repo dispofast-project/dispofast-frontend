@@ -27,6 +27,8 @@ interface UseQuoteEditReturn {
   setOtherRate: (value: string) => void;
   freight: number;
   setFreight: (value: number) => void;
+  shipmentAddress: string;
+  setShipmentAddress: (value: string) => void;
   retefuenteOverride: RetefuenteType | "";
   setRetefuenteOverride: (value: RetefuenteType | "") => void;
   isSaving: boolean;
@@ -46,6 +48,7 @@ export function useQuoteEdit(
   const [commercialRate, setCommercialRate] = useState<string>("");
   const [otherRate, setOtherRate] = useState<string>("");
   const [freight, setFreight] = useState<number>(0);
+  const [shipmentAddress, setShipmentAddress] = useState<string>("");
   const [retefuenteOverride, setRetefuenteOverride] = useState<RetefuenteType | "">("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -61,6 +64,7 @@ export function useQuoteEdit(
     setCommercialRate(snapCommercialRate(quote.commercialDiscountRate));
     setOtherRate(String(Math.round((quote.otherDiscountsRate ?? 0) * 100)));
     setFreight(quote.freight ?? 0);
+    setShipmentAddress(quote.shipmentAddress ?? "");
     setRetefuenteOverride(quote.retefuenteTypeOverride ?? "");
   }, [quote]);
 
@@ -73,6 +77,7 @@ export function useQuoteEdit(
       commercialRate !== snapCommercialRate(quote.commercialDiscountRate) ||
       otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)) ||
       freight !== (quote.freight ?? 0) ||
+      shipmentAddress !== (quote.shipmentAddress ?? "") ||
       (retefuenteOverride || null) !== (quote.retefuenteTypeOverride ?? null));
 
   const handleSaveAll = async (id: string) => {
@@ -87,6 +92,7 @@ export function useQuoteEdit(
         commercialDiscountRate: commercialRate !== "" ? parseFloat(commercialRate) / 100 : 0,
         otherDiscountsRate: otherRate !== "" ? parseFloat(otherRate) / 100 : 0,
         freight,
+        shipmentAddress,
         retefuenteTypeOverride: retefuenteOverride || undefined,
       } as Parameters<typeof updateQuoteService>[1]);
       onUpdated(updated);
@@ -112,6 +118,8 @@ export function useQuoteEdit(
     setOtherRate,
     freight,
     setFreight,
+    shipmentAddress,
+    setShipmentAddress,
     retefuenteOverride,
     setRetefuenteOverride,
     isSaving,
