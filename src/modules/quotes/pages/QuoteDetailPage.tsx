@@ -315,9 +315,9 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
         productName: item.product.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        subtotal: item.lineTotal,
+        subtotal: item.quantity * item.unitPrice,
         taxAmount: item.taxAmount,
-        total: item.lineTotal + item.taxAmount,
+        total: item.lineTotal,
       }));
 
     const toDraftPrintItems = (src: DraftPrintItem[]): QuotePrintItem[] =>
