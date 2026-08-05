@@ -116,6 +116,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setOtherRate,
     freight,
     setFreight,
+    shipmentAddress,
+    setShipmentAddress,
     retefuenteOverride,
     setRetefuenteOverride,
     isSaving,
@@ -521,12 +523,14 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             commercialRate={commercialRate}
             otherRate={otherRate}
             freight={freight}
+            shipmentAddress={shipmentAddress}
             retefuenteOverride={effectiveRetefuenteType}
             onPaymentConditionChange={setSelectedPaymentCondition}
             onOfferValidityChange={setSelectedOfferValidity}
             onCommercialRateChange={setCommercialRate}
             onOtherRateChange={setOtherRate}
             onFreightChange={setFreight}
+            onShipmentAddressChange={setShipmentAddress}
             onRetefuenteOverrideChange={setRetefuenteOverride}
           />
 
