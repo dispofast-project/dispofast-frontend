@@ -16,20 +16,11 @@ export interface OrderItem extends CreateOrderItemDTO {
   taxFree: boolean;
 }
 
-const generateOrderNumber = (): string => {
-  const year = new Date().getFullYear();
-  const seq = Math.floor(100 + Math.random() * 900);
-  return `ORD-${year}-${seq}`;
-};
-
 export const useCreateOrder = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotificationStore();
   const { IVA, RETEFUENTE_RATE_PERSONA_JURIDICA, RETEFUENTE_RATE_PERSONA_NATURAL, RETEFUENTE_THRESHOLD } =
     useSystemParams();
-
-  // ─── Order metadata ────────────────────────────────────────────────────────
-  const [orderNumber] = useState<string>(generateOrderNumber);
 
   // ─── Client search ─────────────────────────────────────────────────────────
   const [clientInputValue, setClientInputValue] = useState("");
@@ -176,7 +167,6 @@ export const useCreateOrder = () => {
     setIsLoading(true);
     try {
       const payload = {
-        orderNumber,
         clientId: selectedClient!.id,
         asesorUserId,
         orderDate: new Date().toISOString(),
@@ -205,7 +195,6 @@ export const useCreateOrder = () => {
   };
 
   return {
-    orderNumber,
     clientInputValue,
     setClientInputValue,
     clientOptions,
