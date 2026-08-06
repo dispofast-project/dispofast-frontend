@@ -7,7 +7,7 @@ import type { OrderItem } from "../../hooks/useCreateOrder";
 
 interface OrderSummaryPanelProps {
   selectedClient: ClientPreview | null;
-  orderNumber: string;
+  orderNumber?: string;
   orderDate?: Date;
   subtotal: number;
   tax: number;
@@ -91,7 +91,9 @@ const OrderSummaryPanel = ({
           <Box className="flex flex-col gap-2.5">
             <Box className="flex items-center justify-between">
               <Typography variant="body2" className="text-gray-500">Nº Orden</Typography>
-              <Typography variant="body2" className="font-bold text-gray-800">{orderNumber}</Typography>
+              <Typography variant="body2" className="font-bold text-gray-800">
+                {orderNumber ?? "Se genera al crear"}
+              </Typography>
             </Box>
             <Box className="flex items-center justify-between">
               <Typography variant="body2" className="text-gray-500">Fecha</Typography>

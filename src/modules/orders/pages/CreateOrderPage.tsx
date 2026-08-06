@@ -66,7 +66,6 @@ const CreateOrderPage = () => {
 
         <OrderSummaryPanel
           selectedClient={order.selectedClient}
-          orderNumber={order.orderNumber}
           subtotal={order.subtotal}
           tax={order.tax}
           discount={order.discountAmt}
