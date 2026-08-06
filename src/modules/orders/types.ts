@@ -71,7 +71,6 @@ export interface CreateOrderItemDTO {
 }
 
 export interface CreateOrderRequestDTO {
-  orderNumber: string;
   clientId: string;
   asesorUserId: string;
   orderDate?: string;
