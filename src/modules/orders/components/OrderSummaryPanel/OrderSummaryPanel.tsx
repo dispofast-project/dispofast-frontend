@@ -2,11 +2,15 @@ import { Box, Typography, Divider, TextField, InputAdornment } from "@mui/materi
 import { AlertCircle, Circle } from "lucide-react";
 import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency, formatDate } from "../../utils/format";
-import type { ClientPreview } from "../../../clients/types";
 import type { OrderItem } from "../../hooks/useCreateOrder";
 
+interface SummaryClientInfo {
+  name: string;
+  identificationNumber: string;
+}
+
 interface OrderSummaryPanelProps {
-  selectedClient: ClientPreview | null;
+  selectedClient: SummaryClientInfo | null;
   orderNumber?: string;
   orderDate?: Date;
   subtotal: number;
