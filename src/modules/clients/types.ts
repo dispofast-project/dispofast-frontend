@@ -85,6 +85,11 @@ export interface PriceHistoryEntry {
   unitPrice: number;
 }
 
+export interface PriceHistoryResponse {
+  entries: PriceHistoryEntry[];
+  currentListPrice: number | null;
+}
+
 export interface IndividualResponse extends ClientResponse {
   firstName: string;
   lastName: string;
