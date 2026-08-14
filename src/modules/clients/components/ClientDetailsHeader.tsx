@@ -1,7 +1,7 @@
 import { Box, Typography, Button, Avatar, FormControlLabel, Switch, CircularProgress } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router-dom";
-import type { ClientPreview } from "../types";
+import type { City } from "../../../shared/types/location";
 import { BackButton } from "../../../shared/components/BackButton/BackButton";
 
 const getInitials = (name: string) => {
@@ -13,8 +13,14 @@ const getInitials = (name: string) => {
   return name.substring(0, 2).toUpperCase();
 };
 
+interface ClientHeaderInfo {
+  name: string;
+  identificationNumber: string;
+  city: City;
+}
+
 interface ClientDetailsHeaderProps {
-  client: ClientPreview;
+  client: ClientHeaderInfo;
   isActive: boolean;
   onActiveChange: (value: boolean) => void;
   isDirty: boolean;
