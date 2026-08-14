@@ -24,6 +24,7 @@ const ClientsTable = ({
   const headers = [
     "Cliente",
     "NIT",
+    "Tipo de cliente",
     "Estado",
     "Asesor",
     "Ciudad",
@@ -35,6 +36,9 @@ const ClientsTable = ({
         {client.name}
       </span>,
       <span key={`id-${client.id}`}>{client.identificationNumber}</span>,
+      <span key={`type-${client.id}`}>
+        {client.legalEntityType === "natural" ? "Persona natural" : "Empresa"}/{client.clientType}
+      </span>,
       <StatusBadge
         key={`status-${client.id}`}
         status={client.isActive}

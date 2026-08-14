@@ -41,6 +41,7 @@ export type RetefuenteType = (typeof RetefuenteType)[keyof typeof RetefuenteType
 export interface ClientPreview {
   id: string;
   legalEntityType: LegalEntityType;
+  clientType: string;
   name: string;
   identificationNumber: string;
   isActive: boolean;
