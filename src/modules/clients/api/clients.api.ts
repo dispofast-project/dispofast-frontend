@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/api/apiClient";
 import type { PagedResponse } from "../../../shared/types/common";
-import type { ClientPreview, ClientResponse, ClientType, LegalDocument, PriceHistoryEntry, PriceListResponse } from "../types";
+import type { ClientPreview, ClientResponse, ClientType, LegalDocument, PriceHistoryResponse, PriceListResponse } from "../types";
 import type { CreateClientRequestDTO, CreateIndividualRequestDTO, CreateOrganizationRequestDTO } from "../types/create-client.dto";
 
 export const getClientsService = async (
@@ -48,8 +48,8 @@ export const updateClientService = async (
 export const getClientProductPriceHistoryService = async (
   clientId: string,
   productId: string
-): Promise<PriceHistoryEntry[]> => {
-  const response = await apiClient.get<PriceHistoryEntry[]>(
+): Promise<PriceHistoryResponse> => {
+  const response = await apiClient.get<PriceHistoryResponse>(
     `/clients/${clientId}/products/${productId}/price-history`
   );
   return response.data;

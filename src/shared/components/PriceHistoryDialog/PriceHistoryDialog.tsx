@@ -8,6 +8,7 @@ import {
   Typography,
   CircularProgress,
   Chip,
+  Divider,
   Table,
   TableHead,
   TableBody,
@@ -36,6 +37,7 @@ const PriceHistoryDialog = ({
   productName,
 }: PriceHistoryDialogProps) => {
   const [entries, setEntries] = useState<PriceHistoryEntry[]>([]);
+  const [currentListPrice, setCurrentListPrice] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +46,10 @@ const PriceHistoryDialog = ({
     setIsLoading(true);
     setError(null);
     getClientProductPriceHistoryService(clientId, productId)
-      .then(setEntries)
+      .then((data) => {
+        setEntries(data.entries);
+        setCurrentListPrice(data.currentListPrice);
+      })
       .catch(() => setError("No se pudo cargar el histórico de precios."))
       .finally(() => setIsLoading(false));
   }, [open, clientId, productId]);
@@ -66,6 +71,22 @@ const PriceHistoryDialog = ({
             <Typography variant="body2" color="error">
               {error}
             </Typography>
+          )}
+
+          {!isLoading && !error && (
+            <>
+              <Box className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+                <Typography variant="body2" className="text-gray-600 font-medium">
+                  Precio de lista actual
+                </Typography>
+                <Typography variant="body2" className="font-bold text-gray-800">
+                  {currentListPrice != null
+                    ? formatCurrency(currentListPrice)
+                    : "No disponible en la lista de este cliente"}
+                </Typography>
+              </Box>
+              <Divider />
+            </>
           )}
 
           {!isLoading && !error && entries.length === 0 && (
