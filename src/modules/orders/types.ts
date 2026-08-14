@@ -58,6 +58,7 @@ export interface SalesOrder {
 export interface OrderFilters {
   state?: OrderState;
   orderNumber?: string;
+  clientName?: string;
 }
 
 // ─── Request DTOs ───────────────────────────────────────────────────────────

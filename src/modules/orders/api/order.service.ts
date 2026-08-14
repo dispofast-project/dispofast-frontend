@@ -27,6 +27,7 @@ export const getAllOrders = async (
       sort: "orderDate,desc",
       ...(filters?.state && { state: filters.state }),
       ...(filters?.orderNumber && { orderNumber: filters.orderNumber }),
+      ...(filters?.clientName && { clientName: filters.clientName }),
     },
   });
   return data;
