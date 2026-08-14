@@ -38,6 +38,7 @@ const filterConfigs: FilterConfig[] = [
     label: "Buscar",
     scopes: [
       { value: "orderNumber", label: "# Orden" },
+      { value: "clientName", label: "Cliente" },
     ],
     debounceMs: 400,
   },
@@ -111,7 +112,8 @@ const OrdersContent = (): JSX.Element => {
   const handleFilterChange = useCallback(
     (state: FilterState) => {
       const term = state["search"]?.term ?? "";
-      handleSearchChange(term);
+      const scope = (state["search"]?.scope ?? "orderNumber") as "orderNumber" | "clientName";
+      handleSearchChange(term, scope);
     },
     [handleSearchChange]
   );

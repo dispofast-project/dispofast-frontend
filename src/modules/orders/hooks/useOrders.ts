@@ -48,8 +48,12 @@ export const useOrders = () => {
     handleFilterChange({ ...filters, state });
   };
 
-  const handleSearchChange = (orderNumber: string) => {
-    handleFilterChange({ ...filters, orderNumber: orderNumber || undefined });
+  const handleSearchChange = (term: string, scope: "orderNumber" | "clientName") => {
+    handleFilterChange({
+      ...filters,
+      orderNumber: scope === "orderNumber" ? term || undefined : undefined,
+      clientName: scope === "clientName" ? term || undefined : undefined,
+    });
   };
 
   const handleRefresh = () => {
