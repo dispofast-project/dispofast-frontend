@@ -41,6 +41,7 @@ export type RetefuenteType = (typeof RetefuenteType)[keyof typeof RetefuenteType
 export interface ClientPreview {
   id: string;
   legalEntityType: LegalEntityType;
+  clientType: string;
   name: string;
   identificationNumber: string;
   isActive: boolean;
@@ -83,6 +84,11 @@ export interface PriceHistoryEntry {
   date: string;
   quantity: number;
   unitPrice: number;
+}
+
+export interface PriceHistoryResponse {
+  entries: PriceHistoryEntry[];
+  currentListPrice: number | null;
 }
 
 export interface IndividualResponse extends ClientResponse {
