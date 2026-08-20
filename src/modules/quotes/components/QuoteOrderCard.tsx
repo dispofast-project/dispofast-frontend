@@ -1,6 +1,6 @@
 import { Box, Typography, Button, CircularProgress, Alert } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import SectionTitle from "./SectionTitle";
+import SectionTitle from "../../../shared/components/SectionTitle/SectionTitle";
 
 interface QuoteOrderCardProps {
   isCreatingOrder: boolean;

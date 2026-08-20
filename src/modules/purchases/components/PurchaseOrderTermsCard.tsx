@@ -1,46 +1,38 @@
 import { Box, Typography, Select, MenuItem, TextField, InputAdornment } from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import { PaymentCondition, OfferValidity } from "../types";
+import { PaymentCondition } from "../types";
 import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
 import CommercialDiscountSelect from "../../../shared/components/CommercialDiscountSelect/CommercialDiscountSelect";
 import { RetefuenteTypeSelector } from "../../../shared/components/RetefuenteTypeSelector/RetefuenteTypeSelector";
 import { RetefuenteType } from "../../clients/types";
-import type { PaymentCondition as PaymentConditionType, OfferValidity as OfferValidityType } from "../types";
+import type { PaymentCondition as PaymentConditionType } from "../types";
 import SectionTitle from "../../../shared/components/SectionTitle/SectionTitle";
 
-interface QuoteTermsCardProps {
+interface PurchaseOrderTermsCardProps {
   paymentCondition: PaymentConditionType | "";
-  offerValidity: OfferValidityType | "";
   commercialRate: string;
   otherRate: string;
   freight: number;
-  shipmentAddress: string;
   retefuenteOverride: RetefuenteType | "";
   onPaymentConditionChange: (value: PaymentConditionType | "") => void;
-  onOfferValidityChange: (value: OfferValidityType | "") => void;
   onCommercialRateChange: (value: string) => void;
   onOtherRateChange: (value: string) => void;
   onFreightChange: (value: number) => void;
-  onShipmentAddressChange: (value: string) => void;
   onRetefuenteOverrideChange: (value: RetefuenteType | "") => void;
 }
 
-const QuoteTermsCard = ({
+const PurchaseOrderTermsCard = ({
   paymentCondition,
-  offerValidity,
   commercialRate,
   otherRate,
   freight,
-  shipmentAddress,
   retefuenteOverride,
   onPaymentConditionChange,
-  onOfferValidityChange,
   onCommercialRateChange,
   onOtherRateChange,
   onFreightChange,
-  onShipmentAddressChange,
   onRetefuenteOverrideChange,
-}: QuoteTermsCardProps) => (
+}: PurchaseOrderTermsCardProps) => (
   <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
     <SectionTitle icon={<AssignmentIcon fontSize="small" />}>Términos</SectionTitle>
     <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -56,21 +48,6 @@ const QuoteTermsCard = ({
           <MenuItem value="">Elegir</MenuItem>
           {(Object.keys(PaymentCondition) as Array<keyof typeof PaymentCondition>).map((key) => (
             <MenuItem key={key} value={key}>{PaymentCondition[key]}</MenuItem>
-          ))}
-        </Select>
-      </Box>
-      <Box>
-        <Typography variant="body2" className="text-gray-500 mb-1">Validez de oferta</Typography>
-        <Select
-          size="small"
-          fullWidth
-          displayEmpty
-          value={offerValidity}
-          onChange={(e) => onOfferValidityChange(e.target.value as OfferValidityType | "")}
-        >
-          <MenuItem value="">Elegir</MenuItem>
-          {(Object.keys(OfferValidity) as Array<keyof typeof OfferValidity>).map((key) => (
-            <MenuItem key={key} value={key}>{OfferValidity[key]}</MenuItem>
           ))}
         </Select>
       </Box>
@@ -105,18 +82,8 @@ const QuoteTermsCard = ({
           onChange={(e) => onRetefuenteOverrideChange(e.target.value as RetefuenteType)}
         />
       </Box>
-      <Box className="sm:col-span-2">
-        <Typography variant="body2" className="text-gray-500 mb-1">Dirección de despacho</Typography>
-        <TextField
-          size="small"
-          fullWidth
-          value={shipmentAddress}
-          onChange={(e) => onShipmentAddressChange(e.target.value)}
-          placeholder="Dirección para el despacho de la orden"
-        />
-      </Box>
     </Box>
   </Box>
 );
 
-export default QuoteTermsCard;
+export default PurchaseOrderTermsCard;

@@ -1,6 +1,7 @@
 import {
     LayoutDashboard,
     ShoppingCart,
+    ShoppingBag,
     FileText,
     Wallet,
     Package,
@@ -60,6 +61,12 @@ const ALL_NAV_ITEMS = [
         path: '/despachos',
         icon: <Truck />,
         requiredAuthorities: ['PURCHASE_ORDERS_VIEW'],
+    },
+    {
+        label: 'Compras',
+        path: '/compras',
+        icon: <ShoppingBag />,
+        requiredAuthorities: ['PURCHASES_VIEW'],
     },
     {
         label: 'Usuarios',

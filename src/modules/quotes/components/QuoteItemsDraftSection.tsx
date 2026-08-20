@@ -17,7 +17,7 @@ import { Trash2 } from "lucide-react";
 import { NumericFormat } from "react-number-format";
 
 import { History } from "lucide-react";
-import SectionTitle from "./SectionTitle";
+import SectionTitle from "../../../shared/components/SectionTitle/SectionTitle";
 import AddLineItemDialog from "../../../shared/components/AddLineItemDialog/AddLineItemDialog";
 import type { LineItemResult } from "../../../shared/components/AddLineItemDialog/AddLineItemDialog";
 import PriceHistoryDialog from "../../../shared/components/PriceHistoryDialog/PriceHistoryDialog";

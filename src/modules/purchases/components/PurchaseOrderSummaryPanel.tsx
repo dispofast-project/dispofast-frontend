@@ -1,0 +1,220 @@
+import { Box, Typography, Divider, Alert, CircularProgress } from "@mui/material";
+import { AlertCircle, Circle, Download } from "lucide-react";
+import { Button } from "../../../shared/components/Button/Button";
+import { formatCurrency } from "../../../shared/utils/currency";
+import { formatRate } from "../../../shared/utils/format";
+import { RetefuenteType } from "../../clients/types";
+
+interface SupplierInfo {
+  name: string;
+  identificationNumber?: string;
+}
+
+interface PurchaseOrderSummaryPanelProps {
+  supplierInfo: SupplierInfo;
+  subtotal: number;
+  tax: number;
+  commercialDiscountAmt: number;
+  otherDiscountAmt: number;
+  retefuenteType: RetefuenteType;
+  retefuenteRate: number;
+  retefuenteAmt: number;
+  freight: number;
+  total: number;
+  itemCount: number;
+  missingFields: string[];
+  isSaving: boolean;
+  error?: string | null;
+  onSave: () => void;
+  onDownload?: () => void;
+  isDownloading?: boolean;
+}
+
+const SummaryRow = ({
+  label,
+  value,
+  negative = false,
+}: {
+  label: string;
+  value: number;
+  negative?: boolean;
+}) => (
+  <Box className="flex items-center justify-between">
+    <Typography variant="body2" className="text-gray-500">
+      {label}
+    </Typography>
+    <Typography
+      variant="body2"
+      className={`font-medium ${negative ? "text-red-600" : "text-gray-700"}`}
+    >
+      {negative ? `- ${formatCurrency(value)}` : formatCurrency(value)}
+    </Typography>
+  </Box>
+);
+
+const PurchaseOrderSummaryPanel = ({
+  supplierInfo,
+  subtotal,
+  tax,
+  commercialDiscountAmt,
+  otherDiscountAmt,
+  retefuenteType,
+  retefuenteRate,
+  retefuenteAmt,
+  freight,
+  total,
+  itemCount,
+  missingFields,
+  isSaving,
+  error,
+  onSave,
+  onDownload,
+  isDownloading,
+}: PurchaseOrderSummaryPanelProps) => {
+  return (
+    <Box className="lg:col-span-1 sticky top-4">
+      <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <Box className="px-5 py-4 border-b border-gray-100">
+          <Typography variant="body1" className="font-bold text-gray-800">
+            Resumen de la Orden de Compra
+          </Typography>
+        </Box>
+
+        <Box className="px-5 py-4 flex flex-col gap-4">
+          {/* Proveedor */}
+          <Box>
+            <Typography
+              variant="caption"
+              className="font-semibold text-gray-400 uppercase tracking-wide"
+            >
+              Proveedor
+            </Typography>
+            <Box className="mt-1 p-2.5 bg-blue-50 rounded-lg">
+              <Typography variant="body2" className="font-semibold text-dispofast-primary">
+                {supplierInfo.name}
+              </Typography>
+              <Typography variant="caption" className="text-gray-500">
+                {supplierInfo.identificationNumber}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Divider />
+
+          {/* Metadata */}
+          <Box className="flex flex-col gap-2.5">
+            <Box className="flex items-center justify-between">
+              <Typography variant="body2" className="text-gray-500">
+                Ítems
+              </Typography>
+              <Typography variant="body2" className="font-medium text-gray-700">
+                {itemCount} {itemCount === 1 ? "ítem" : "ítems"}
+              </Typography>
+            </Box>
+            {retefuenteType !== RetefuenteType.NO_APLICA && (
+              <Box className="flex items-center justify-between">
+                <Typography variant="body2" className="text-gray-500">
+                  Retefuente
+                </Typography>
+                <Typography variant="body2" className="font-medium text-orange-500">
+                  {retefuenteType === RetefuenteType.PERSONA_JURIDICA
+                    ? `Persona jurídica (${formatRate(retefuenteRate)})`
+                    : `Persona natural (${formatRate(retefuenteRate)})`}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          <Divider />
+
+          {/* Desglose financiero */}
+          <Box className="flex flex-col gap-2">
+            <SummaryRow label="Subtotal" value={subtotal} />
+            <SummaryRow label="IVA (19%)" value={tax} />
+            {commercialDiscountAmt > 0 && (
+              <SummaryRow label="Descuento comercial" value={commercialDiscountAmt} negative />
+            )}
+            {otherDiscountAmt > 0 && (
+              <SummaryRow label="Otros descuentos" value={otherDiscountAmt} negative />
+            )}
+            {retefuenteAmt > 0 && (
+              <SummaryRow label={`Retefuente (${formatRate(retefuenteRate)})`} value={retefuenteAmt} negative />
+            )}
+            {freight > 0 && <SummaryRow label="Flete" value={freight} />}
+          </Box>
+
+          <Divider />
+
+          {/* Total */}
+          <Box className="flex items-center justify-between">
+            <Typography variant="body1" className="font-bold text-gray-800">
+              Total Estimado
+            </Typography>
+            <Typography
+              variant="h6"
+              className="font-bold"
+              sx={{ color: "var(--dispofast-primary)" }}
+            >
+              {formatCurrency(total)}
+            </Typography>
+          </Box>
+
+          {error && (
+            <Alert severity="error" sx={{ fontSize: "0.8rem" }}>
+              {error}
+            </Alert>
+          )}
+
+          <Button
+            variant="primary"
+            onClick={onSave}
+            isLoading={isSaving}
+            disabled={missingFields.length > 0 || isSaving}
+            className="w-full justify-center"
+          >
+            Guardar Orden de Compra
+          </Button>
+
+          {onDownload && (
+            <Button
+              variant="secondary"
+              onClick={onDownload}
+              disabled={isDownloading}
+              className="w-full justify-center gap-1.5"
+            >
+              {isDownloading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              Descargar PDF
+            </Button>
+          )}
+
+          {missingFields.length > 0 && (
+            <Box className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <Box className="flex items-center gap-1.5 mb-2">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                <Typography variant="caption" className="font-semibold text-amber-700">
+                  Campos requeridos
+                </Typography>
+              </Box>
+              <Box className="flex flex-col gap-1">
+                {missingFields.map((field) => (
+                  <Box key={field} className="flex items-center gap-1.5">
+                    <Circle className="w-2 h-2 text-amber-500" fill="currentColor" />
+                    <Typography variant="caption" className="text-amber-700">
+                      {field}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default PurchaseOrderSummaryPanel;

@@ -5,7 +5,7 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import { LegalEntityType } from "../types";
 import type { ProspectDetails } from "../types";
 import DetailItem from "./detailcard/DetailItem";
-import SectionTitle from "./SectionTitle";
+import SectionTitle from "../../../shared/components/SectionTitle/SectionTitle";
 
 interface QuoteProspectHeaderCardProps {
   prospect: ProspectDetails;
