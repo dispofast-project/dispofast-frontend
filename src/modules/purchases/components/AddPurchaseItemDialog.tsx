@@ -90,8 +90,8 @@ const AddPurchaseItemDialog = ({ open, onClose, onAdd }: AddPurchaseItemDialogPr
       setError("La cantidad debe ser mayor a 0.");
       return;
     }
-    if (price <= 0) {
-      setError("El precio debe ser mayor a 0.");
+    if (price < 0) {
+      setError("El precio no puede ser negativo.");
       return;
     }
 
@@ -217,8 +217,7 @@ const AddPurchaseItemDialog = ({ open, onClose, onAdd }: AddPurchaseItemDialogPr
                     htmlInput: { min: 0, step: 0.01 },
                     input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
                   }}
-                  helperText="Costo pactado con el proveedor"
-                  required
+                  helperText="Opcional — puedes completarlo después"
                 />
               </Box>
 
@@ -260,7 +259,7 @@ const AddPurchaseItemDialog = ({ open, onClose, onAdd }: AddPurchaseItemDialogPr
         <Button
           variant="primary"
           onClick={handleAdd}
-          disabled={!selectedProduct || qty <= 0 || price <= 0}
+          disabled={!selectedProduct || qty <= 0 || price < 0}
         >
           Agregar producto
         </Button>
