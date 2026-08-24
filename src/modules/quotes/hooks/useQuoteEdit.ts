@@ -31,6 +31,8 @@ interface UseQuoteEditReturn {
   setShipmentAddress: (value: string) => void;
   retefuenteOverride: RetefuenteType | "";
   setRetefuenteOverride: (value: RetefuenteType | "") => void;
+  backorder: boolean;
+  setBackorder: (value: boolean) => void;
   isSaving: boolean;
   saveError: string | null;
   hasChanges: boolean;
@@ -50,6 +52,7 @@ export function useQuoteEdit(
   const [freight, setFreight] = useState<number>(0);
   const [shipmentAddress, setShipmentAddress] = useState<string>("");
   const [retefuenteOverride, setRetefuenteOverride] = useState<RetefuenteType | "">("");
+  const [backorder, setBackorder] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -66,6 +69,7 @@ export function useQuoteEdit(
     setFreight(quote.freight ?? 0);
     setShipmentAddress(quote.shipmentAddress ?? "");
     setRetefuenteOverride(quote.retefuenteTypeOverride ?? "");
+    setBackorder(quote.backorder ?? false);
   }, [quote]);
 
   const hasChanges =
@@ -78,7 +82,8 @@ export function useQuoteEdit(
       otherRate !== String(Math.round((quote.otherDiscountsRate ?? 0) * 100)) ||
       freight !== (quote.freight ?? 0) ||
       shipmentAddress !== (quote.shipmentAddress ?? "") ||
-      (retefuenteOverride || null) !== (quote.retefuenteTypeOverride ?? null));
+      (retefuenteOverride || null) !== (quote.retefuenteTypeOverride ?? null) ||
+      backorder !== (quote.backorder ?? false));
 
   const handleSaveAll = async (id: string) => {
     setIsSaving(true);
@@ -94,6 +99,7 @@ export function useQuoteEdit(
         freight,
         shipmentAddress,
         retefuenteTypeOverride: retefuenteOverride || undefined,
+        backorder,
       } as Parameters<typeof updateQuoteService>[1]);
       onUpdated(updated);
     } catch (err) {
@@ -122,6 +128,8 @@ export function useQuoteEdit(
     setShipmentAddress,
     retefuenteOverride,
     setRetefuenteOverride,
+    backorder,
+    setBackorder,
     isSaving,
     saveError,
     hasChanges,

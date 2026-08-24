@@ -120,6 +120,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setShipmentAddress,
     retefuenteOverride,
     setRetefuenteOverride,
+    backorder,
+    setBackorder,
     isSaving,
     saveError,
     hasChanges,
@@ -525,6 +527,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             freight={freight}
             shipmentAddress={shipmentAddress}
             retefuenteOverride={effectiveRetefuenteType}
+            backorder={backorder}
             onPaymentConditionChange={setSelectedPaymentCondition}
             onOfferValidityChange={setSelectedOfferValidity}
             onCommercialRateChange={setCommercialRate}
@@ -532,6 +535,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
             onFreightChange={setFreight}
             onShipmentAddressChange={setShipmentAddress}
             onRetefuenteOverrideChange={setRetefuenteOverride}
+            onBackorderChange={setBackorder}
           />
 
           {isCreateMode && (

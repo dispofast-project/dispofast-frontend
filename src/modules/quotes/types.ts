@@ -91,6 +91,7 @@ export interface QuotePreview {
   createdAt: string;
   total: number;
   offerValidity: OfferValidity | null;
+  backorder: boolean;
 }
 
 export interface Account {
@@ -166,4 +167,5 @@ export interface Quote {
   retefuenteTypeOverride: RetefuenteType | null;
   totalAmount: number;
   freight: number;
+  backorder: boolean;
 }
