@@ -1,4 +1,4 @@
-import { Box, Typography, Select, MenuItem, TextField, InputAdornment, Checkbox, FormControlLabel } from "@mui/material";
+import { Box, Typography, Select, MenuItem, TextField, InputAdornment } from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { PaymentCondition, OfferValidity } from "../types";
 import PercentageInput from "../../../shared/components/PercentageInput/PercentageInput";
@@ -16,7 +16,6 @@ interface QuoteTermsCardProps {
   freight: number;
   shipmentAddress: string;
   retefuenteOverride: RetefuenteType | "";
-  backorder: boolean;
   onPaymentConditionChange: (value: PaymentConditionType | "") => void;
   onOfferValidityChange: (value: OfferValidityType | "") => void;
   onCommercialRateChange: (value: string) => void;
@@ -24,7 +23,6 @@ interface QuoteTermsCardProps {
   onFreightChange: (value: number) => void;
   onShipmentAddressChange: (value: string) => void;
   onRetefuenteOverrideChange: (value: RetefuenteType | "") => void;
-  onBackorderChange: (value: boolean) => void;
 }
 
 const QuoteTermsCard = ({
@@ -35,7 +33,6 @@ const QuoteTermsCard = ({
   freight,
   shipmentAddress,
   retefuenteOverride,
-  backorder,
   onPaymentConditionChange,
   onOfferValidityChange,
   onCommercialRateChange,
@@ -43,7 +40,6 @@ const QuoteTermsCard = ({
   onFreightChange,
   onShipmentAddressChange,
   onRetefuenteOverrideChange,
-  onBackorderChange,
 }: QuoteTermsCardProps) => (
   <Box className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
     <SectionTitle icon={<AssignmentIcon fontSize="small" />}>Términos</SectionTitle>
@@ -117,17 +113,6 @@ const QuoteTermsCard = ({
           value={shipmentAddress}
           onChange={(e) => onShipmentAddressChange(e.target.value)}
           placeholder="Dirección para el despacho de la orden"
-        />
-      </Box>
-      <Box className="sm:col-span-2">
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={backorder}
-              onChange={(e) => onBackorderChange(e.target.checked)}
-            />
-          }
-          label="Backorder — producto sin stock disponible actualmente"
         />
       </Box>
     </Box>
