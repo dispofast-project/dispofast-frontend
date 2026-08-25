@@ -10,6 +10,7 @@ import type {
     UserCommissionRate,
     UserGoal,
     UserPermissionsDetail,
+    UserProductAllocation,
 } from "../types";
 
 export interface UserServiceParams {
@@ -113,4 +114,41 @@ export const createUserCommissionRate = async (
 
 export const deleteUserCommissionRate = async (id: string, rateId: string): Promise<void> => {
     await apiClient.delete(`${BASE_URL}/${id}/commission-rates/${rateId}`);
+};
+
+export const getUserInventoryAllocations = async (id: string): Promise<UserProductAllocation[]> => {
+    const { data } = await apiClient.get<UserProductAllocation[]>(
+        `${BASE_URL}/${id}/inventory-allocations`
+    );
+    return data;
+};
+
+export const createUserInventoryAllocation = async (
+    id: string,
+    payload: { productId: string; assignedQuantity: number }
+): Promise<UserProductAllocation> => {
+    const { data } = await apiClient.post<UserProductAllocation>(
+        `${BASE_URL}/${id}/inventory-allocations`,
+        payload
+    );
+    return data;
+};
+
+export const updateUserInventoryAllocation = async (
+    id: string,
+    allocationId: string,
+    payload: { assignedQuantity: number }
+): Promise<UserProductAllocation> => {
+    const { data } = await apiClient.put<UserProductAllocation>(
+        `${BASE_URL}/${id}/inventory-allocations/${allocationId}`,
+        payload
+    );
+    return data;
+};
+
+export const deleteUserInventoryAllocation = async (
+    id: string,
+    allocationId: string
+): Promise<void> => {
+    await apiClient.delete(`${BASE_URL}/${id}/inventory-allocations/${allocationId}`);
 };

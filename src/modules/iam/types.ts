@@ -101,3 +101,13 @@ export interface UserCommissionRate {
     categoryName: string;
     rate: number;
 }
+
+export interface UserProductAllocation {
+    id: string;
+    productId: string;
+    productName: string;
+    productSku: string;
+    assignedQuantity: number;
+    consumedQuantity: number;
+    remainingQuantity: number;
+}
