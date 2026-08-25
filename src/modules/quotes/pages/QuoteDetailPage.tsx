@@ -31,6 +31,7 @@ import QuoteTermsCard from "../components/QuoteTermsCard";
 import QuotePriceListCard from "../components/QuotePriceListCard";
 import QuotePaymentDetailsCard from "../components/QuotePaymentDetailsCard";
 import QuoteOrderCard from "../components/QuoteOrderCard";
+import { BackorderToggle } from "../components/BackorderToggle";
 import QuoteItemsSection from "../components/QuoteItemsSection";
 import type { QuoteItemsSectionHandle } from "../components/QuoteItemsSection";
 import QuoteItemsDraftSection from "../components/QuoteItemsDraftSection";
@@ -120,6 +121,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
     setShipmentAddress,
     retefuenteOverride,
     setRetefuenteOverride,
+    backorder,
+    setBackorder,
     isSaving,
     saveError,
     hasChanges,
@@ -587,6 +590,8 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
               onSave={handleSave}
               onDownload={handleDownloadQuote}
               isDownloading={downloadQuoteLoading}
+              backorder={backorder}
+              onBackorderChange={setBackorder}
             />
           ) : (
             <>
@@ -636,6 +641,7 @@ const QuoteDetailPage = ({ mode }: QuoteDetailPageProps) => {
                 >
                   Descargar PDF
                 </Button>
+                <BackorderToggle checked={backorder} onChange={setBackorder} />
               </Box>
             </>
           )}

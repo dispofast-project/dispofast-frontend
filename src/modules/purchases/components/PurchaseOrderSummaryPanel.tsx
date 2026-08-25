@@ -1,18 +1,17 @@
 import { Box, Typography, Divider, Alert, CircularProgress } from "@mui/material";
 import { AlertCircle, Circle, Download } from "lucide-react";
-import { Button } from "../../../../shared/components/Button/Button";
-import { formatCurrency } from "../../../../shared/utils/currency";
-import { formatRate } from "../../../../shared/utils/format";
-import { RetefuenteType } from "../../../clients/types";
-import { BackorderToggle } from "../BackorderToggle";
+import { Button } from "../../../shared/components/Button/Button";
+import { formatCurrency } from "../../../shared/utils/currency";
+import { formatRate } from "../../../shared/utils/format";
+import { RetefuenteType } from "../../clients/types";
 
-interface AccountInfo {
+interface SupplierInfo {
   name: string;
   identificationNumber?: string;
 }
 
-interface QuoteSummaryPanelProps {
-  accountInfo: AccountInfo;
+interface PurchaseOrderSummaryPanelProps {
+  supplierInfo: SupplierInfo;
   subtotal: number;
   tax: number;
   commercialDiscountAmt: number;
@@ -29,8 +28,6 @@ interface QuoteSummaryPanelProps {
   onSave: () => void;
   onDownload?: () => void;
   isDownloading?: boolean;
-  backorder: boolean;
-  onBackorderChange: (value: boolean) => void;
 }
 
 const SummaryRow = ({
@@ -55,8 +52,8 @@ const SummaryRow = ({
   </Box>
 );
 
-const QuoteSummaryPanel = ({
-  accountInfo,
+const PurchaseOrderSummaryPanel = ({
+  supplierInfo,
   subtotal,
   tax,
   commercialDiscountAmt,
@@ -73,33 +70,31 @@ const QuoteSummaryPanel = ({
   onSave,
   onDownload,
   isDownloading,
-  backorder,
-  onBackorderChange,
-}: QuoteSummaryPanelProps) => {
+}: PurchaseOrderSummaryPanelProps) => {
   return (
     <Box className="lg:col-span-1 sticky top-4">
       <Box className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <Box className="px-5 py-4 border-b border-gray-100">
           <Typography variant="body1" className="font-bold text-gray-800">
-            Resumen de la Cotización
+            Resumen de la Orden de Compra
           </Typography>
         </Box>
 
         <Box className="px-5 py-4 flex flex-col gap-4">
-          {/* Cliente */}
+          {/* Proveedor */}
           <Box>
             <Typography
               variant="caption"
               className="font-semibold text-gray-400 uppercase tracking-wide"
             >
-              Cliente
+              Proveedor
             </Typography>
             <Box className="mt-1 p-2.5 bg-blue-50 rounded-lg">
               <Typography variant="body2" className="font-semibold text-dispofast-primary">
-                {accountInfo.name}
+                {supplierInfo.name}
               </Typography>
               <Typography variant="caption" className="text-gray-500">
-                {accountInfo.identificationNumber}
+                {supplierInfo.identificationNumber}
               </Typography>
             </Box>
           </Box>
@@ -177,7 +172,7 @@ const QuoteSummaryPanel = ({
             disabled={missingFields.length > 0 || isSaving}
             className="w-full justify-center"
           >
-            Guardar Cotización
+            Guardar Orden de Compra
           </Button>
 
           {onDownload && (
@@ -195,8 +190,6 @@ const QuoteSummaryPanel = ({
               Descargar PDF
             </Button>
           )}
-
-          <BackorderToggle checked={backorder} onChange={onBackorderChange} />
 
           {missingFields.length > 0 && (
             <Box className="rounded-lg border border-amber-200 bg-amber-50 p-3">
@@ -224,4 +217,4 @@ const QuoteSummaryPanel = ({
   );
 };
 
-export default QuoteSummaryPanel;
+export default PurchaseOrderSummaryPanel;

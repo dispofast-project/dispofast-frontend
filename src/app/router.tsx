@@ -7,6 +7,8 @@ import IamRoutes from "../modules/iam/IamRoutes";
 import OrdersRoutes from "../modules/orders/OrdersRoutes";
 import QuotesPage from "../modules/quotes/pages/QuotesPage";
 import QuoteDetailPage from "../modules/quotes/pages/QuoteDetailPage";
+import PurchaseOrdersPage from "../modules/purchases/pages/PurchaseOrdersPage";
+import PurchaseOrderDetailPage from "../modules/purchases/pages/PurchaseOrderDetailPage";
 import ClientsPage from "../modules/clients/pages/ClientsPage";
 import ClientDetailsPage from "../modules/clients/pages/ClientDetailsPage";
 import CreateClientPage from "../modules/clients/pages/CreateClientPage";
@@ -93,6 +95,13 @@ const AppRouter = (): ReactElement => {
           
           <Route element={<ProtectedRoute requiredAuthorities={["PRICE_LISTS_VIEW"]} />}>
             <Route path="/lista-precios" element={<PriceListPage />} />
+          </Route>
+
+          {/* Compras */}
+          <Route element={<ProtectedRoute requiredAuthorities={["PURCHASES_VIEW"]} />}>
+            <Route path="/compras" element={<PurchaseOrdersPage />} />
+            <Route path="/compras/nuevo/:supplierId" element={<PurchaseOrderDetailPage mode="create" />} />
+            <Route path="/compras/:id" element={<PurchaseOrderDetailPage mode="edit" />} />
           </Route>
 
         

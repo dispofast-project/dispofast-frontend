@@ -15,39 +15,36 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import InventoryIcon from "@mui/icons-material/Inventory2Outlined";
-import { Trash2, History } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { NumericFormat } from "react-number-format";
 
 import SectionTitle from "../../../shared/components/SectionTitle/SectionTitle";
-import AddLineItemDialog from "../../../shared/components/AddLineItemDialog/AddLineItemDialog";
-import PriceHistoryDialog from "../../../shared/components/PriceHistoryDialog/PriceHistoryDialog";
+import AddPurchaseItemDialog from "./AddPurchaseItemDialog";
 import {
-  getQuoteItemsService,
-  addQuoteItemService,
-  updateQuoteItemService,
-  removeQuoteItemService,
-} from "../api/quotes.api";
-import type { QuoteItem } from "../types";
+  getPurchaseOrderItemsService,
+  addPurchaseOrderItemService,
+  updatePurchaseOrderItemService,
+  removePurchaseOrderItemService,
+} from "../api/purchases.api";
+import type { PurchaseOrderItem } from "../types";
 
-interface QuoteItemsSectionProps {
-  quoteId: string;
-  priceListId: string;
-  clientId?: string;
+interface PurchaseOrderItemsSectionProps {
+  purchaseOrderId: string;
   onHasPendingChanges?: (hasPending: boolean) => void;
   onItemsChanged?: () => void;
 }
 
-export interface QuoteItemsSectionHandle {
+export interface PurchaseOrderItemsSectionHandle {
   saveChanges: () => Promise<void>;
-  getItems: () => QuoteItem[];
+  getItems: () => PurchaseOrderItem[];
 }
 
 const fmt = (value: number) =>
   new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
 
-const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionProps>(
-  ({ quoteId, priceListId, clientId, onHasPendingChanges, onItemsChanged }, ref) => {
-    const [items, setItems] = useState<QuoteItem[]>([]);
+const PurchaseOrderItemsSection = forwardRef<PurchaseOrderItemsSectionHandle, PurchaseOrderItemsSectionProps>(
+  ({ purchaseOrderId, onHasPendingChanges, onItemsChanged }, ref) => {
+    const [items, setItems] = useState<PurchaseOrderItem[]>([]);
     const [isLoadingItems, setIsLoadingItems] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -55,14 +52,13 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
     const [isAdding, setIsAdding] = useState(false);
     const [addError, setAddError] = useState<string | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
-    const [historyItem, setHistoryItem] = useState<{ productId: string; productName: string } | null>(null);
 
     const [pendingQty, setPendingQty] = useState<Record<string, string>>({});
     const [pendingPrice, setPendingPrice] = useState<Record<string, string>>({});
 
     const loadItems = useCallback(() => {
       setIsLoadingItems(true);
-      getQuoteItemsService(quoteId)
+      getPurchaseOrderItemsService(purchaseOrderId)
         .then((loaded) => {
           setItems(loaded);
           const initialQty: Record<string, string> = {};
@@ -78,7 +74,7 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
           setLoadError(err instanceof Error ? err.message : "Error al cargar los ítems"),
         )
         .finally(() => setIsLoadingItems(false));
-    }, [quoteId]);
+    }, [purchaseOrderId]);
 
     useEffect(() => {
       loadItems();
@@ -104,7 +100,7 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
         if (changed.length === 0) return;
         await Promise.all(
           changed.map((i) =>
-            updateQuoteItemService(quoteId, i.id, {
+            updatePurchaseOrderItemService(purchaseOrderId, i.id, {
               quantity: parseFloat(pendingQty[i.id] ?? String(i.quantity)),
               unitPrice: parseFloat(pendingPrice[i.id] ?? String(i.unitPrice)),
             }),
@@ -115,11 +111,11 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
       },
     }));
 
-    const handleAdd = async (productId: string, quantity: number, unitPrice?: number) => {
+    const handleAdd = async (productId: string, quantity: number, unitPrice: number) => {
       setIsAdding(true);
       setAddError(null);
       try {
-        await addQuoteItemService(quoteId, { productId, quantity, unitPrice });
+        await addPurchaseOrderItemService(purchaseOrderId, { productId, quantity, unitPrice });
         loadItems();
         onItemsChanged?.();
       } catch (err: unknown) {
@@ -132,7 +128,7 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
     const handleRemove = async (itemId: string) => {
       setRemovingId(itemId);
       try {
-        await removeQuoteItemService(quoteId, itemId);
+        await removePurchaseOrderItemService(purchaseOrderId, itemId);
         setItems((prev) => prev.filter((i) => i.id !== itemId));
         setPendingQty((prev) => { const next = { ...prev }; delete next[itemId]; return next; });
         setPendingPrice((prev) => { const next = { ...prev }; delete next[itemId]; return next; });
@@ -185,11 +181,10 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
                   <TableCell>Código</TableCell>
                   <TableCell>Producto</TableCell>
                   <TableCell align="right">Cantidad</TableCell>
-                  <TableCell align="right">Valor Unit.</TableCell>
+                  <TableCell align="right">Costo Unit.</TableCell>
                   <TableCell align="right">Subtotal</TableCell>
                   <TableCell align="right">IVA</TableCell>
                   <TableCell align="right">Total</TableCell>
-                  <TableCell />
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -256,16 +251,6 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
                       <TableCell align="right" padding="none">
                         <IconButton
                           size="small"
-                          disabled={!clientId}
-                          onClick={() => setHistoryItem({ productId: item.product.id, productName: item.product.name })}
-                          title="Histórico de precios"
-                        >
-                          <History className="w-3.5 h-3.5" />
-                        </IconButton>
-                      </TableCell>
-                      <TableCell align="right" padding="none">
-                        <IconButton
-                          size="small"
                           color="error"
                           disabled={removingId === item.id}
                           onClick={() => handleRemove(item.id)}
@@ -286,28 +271,16 @@ const QuoteItemsSection = forwardRef<QuoteItemsSectionHandle, QuoteItemsSectionP
         )}
       </Box>
 
-      <AddLineItemDialog
+      <AddPurchaseItemDialog
         open={dialogOpen}
-        priceListId={priceListId}
         onClose={() => setDialogOpen(false)}
         onAdd={(result) => handleAdd(result.productId, result.quantity, result.unitPrice)}
-        priceEditable
       />
-
-      {clientId && historyItem && (
-        <PriceHistoryDialog
-          open={!!historyItem}
-          onClose={() => setHistoryItem(null)}
-          clientId={clientId}
-          productId={historyItem.productId}
-          productName={historyItem.productName}
-        />
-      )}
       </>
     );
   },
 );
 
-QuoteItemsSection.displayName = "QuoteItemsSection";
+PurchaseOrderItemsSection.displayName = "PurchaseOrderItemsSection";
 
-export default QuoteItemsSection;
+export default PurchaseOrderItemsSection;

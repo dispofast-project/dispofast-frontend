@@ -4,7 +4,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import BadgeIcon from "@mui/icons-material/Badge";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import DataField from "./detailcard/DetailItem";
-import SectionTitle from "./SectionTitle";
+import SectionTitle from "../../../shared/components/SectionTitle/SectionTitle";
 import { LegalEntityType } from "../types";
 import type { Quote } from "../types";
 import { RetefuenteType } from "../../clients/types";

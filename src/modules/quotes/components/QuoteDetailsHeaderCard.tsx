@@ -7,6 +7,7 @@ import { changeQuoteStatusService } from "../api/quotes.api";
 import ColoredDropdown from "../../../shared/components/ColoredDropdown/ColoredDropdown";
 import type { Quote } from "../types";
 import { LegalEntityType } from "../types";
+import { BackorderBadge } from "./BackorderBadge";
 
 const STATUS_OPTIONS = [
   { value: "pendiente", label: "Pendiente", color: "#c2410c" },
@@ -104,12 +105,15 @@ const QuoteDetailsHeaderCard = ({ quote, onUpdated }: QuoteHeaderCardProps) => {
           Actualizado:{" "}
           <strong className="text-gray-800 font-semibold">{formatDate(quote.updatedAt)}</strong>
         </Typography>
-        <ColoredDropdown
-          options={STATUS_OPTIONS}
-          value={quote.status}
-          onChange={handleStatusChange}
-          isSaving={isSaving}
-        />
+        <Box className="flex items-center gap-2">
+          <BackorderBadge backorder={quote.backorder} />
+          <ColoredDropdown
+            options={STATUS_OPTIONS}
+            value={quote.status}
+            onChange={handleStatusChange}
+            isSaving={isSaving}
+          />
+        </Box>
       </Box>
     </Box>
   );
