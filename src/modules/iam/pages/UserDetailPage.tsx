@@ -6,6 +6,7 @@ import { Button } from "../../../shared/components/Button/Button";
 import CustomTitle from "../../../shared/components/Title/Title";
 import EditUserForm from "../components/EditUserForm/EditUserForm";
 import UserGoalsSection from "../components/UserGoalsSection/UserGoalsSection";
+import UserInventoryAllocationSection from "../components/UserInventoryAllocationSection/UserInventoryAllocationSection";
 import { getUserById } from "../api/user.service";
 import { useNotificationStore } from "../../../shared/store/notification.store";
 import { formatRole } from "../utils/formatRole";
@@ -75,6 +76,17 @@ const UserDetailPage = () => {
                 <Divider sx={{ mb: 2 }} />
                 <UserGoalsSection userId={user.id} />
             </Box>
+
+            {/* Cupo de inventario por producto — solo para vendedores */}
+            {user.role === "VENDEDOR" && (
+                <Box className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <Typography variant="subtitle1" fontWeight={600} className="mb-2">
+                        Cupo de inventario por producto
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <UserInventoryAllocationSection userId={user.id} />
+                </Box>
+            )}
         </Box>
     );
 };
