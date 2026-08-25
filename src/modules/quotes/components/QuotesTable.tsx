@@ -5,6 +5,7 @@ import { QuoteStatus } from "../types";
 import CustomTable from "../../../shared/components/CustomTable/CustomTable";
 import { formatCurrency } from "../../../shared/utils/currency";
 import { QuoteStatusBadge } from "./QuoteStatusBadge";
+import { BackorderBadge } from "./BackorderBadge";
 
 interface QuotesTableProps {
   quotes: QuotePreview[];
@@ -41,10 +42,10 @@ const QuotesTable = ({
 
   const renderRow = (quote: QuotePreview) => {
     return [
-      <QuoteStatusBadge
-        key={`status-${quote.id}`}
-        status={quote.status}
-      />,
+      <Box key={`status-${quote.id}`} className="flex flex-col items-start gap-1">
+        <QuoteStatusBadge status={quote.status} />
+        <BackorderBadge backorder={quote.backorder} />
+      </Box>,
 
       <span className="font-medium text-gray-900">{quote.number}</span>,
 

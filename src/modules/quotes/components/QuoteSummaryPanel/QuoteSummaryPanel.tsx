@@ -4,6 +4,7 @@ import { Button } from "../../../../shared/components/Button/Button";
 import { formatCurrency } from "../../../../shared/utils/currency";
 import { formatRate } from "../../../../shared/utils/format";
 import { RetefuenteType } from "../../../clients/types";
+import { BackorderToggle } from "../BackorderToggle";
 
 interface AccountInfo {
   name: string;
@@ -28,6 +29,8 @@ interface QuoteSummaryPanelProps {
   onSave: () => void;
   onDownload?: () => void;
   isDownloading?: boolean;
+  backorder: boolean;
+  onBackorderChange: (value: boolean) => void;
 }
 
 const SummaryRow = ({
@@ -70,6 +73,8 @@ const QuoteSummaryPanel = ({
   onSave,
   onDownload,
   isDownloading,
+  backorder,
+  onBackorderChange,
 }: QuoteSummaryPanelProps) => {
   return (
     <Box className="lg:col-span-1 sticky top-4">
@@ -190,6 +195,8 @@ const QuoteSummaryPanel = ({
               Descargar PDF
             </Button>
           )}
+
+          <BackorderToggle checked={backorder} onChange={onBackorderChange} />
 
           {missingFields.length > 0 && (
             <Box className="rounded-lg border border-amber-200 bg-amber-50 p-3">
