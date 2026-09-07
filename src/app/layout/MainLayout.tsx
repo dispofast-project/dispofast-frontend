@@ -51,12 +51,6 @@ const ALL_NAV_ITEMS = [
         requiredAuthorities: ['INVENTORY_VIEW'],
     },
     {
-        label: 'Lista de precios',
-        path: '/lista-precios',
-        icon: <ScrollText />,
-        requiredAuthorities: ['PRICE_LISTS_VIEW'],
-    },
-    {
         label: 'Despachos',
         path: '/despachos',
         icon: <Truck />,
@@ -67,6 +61,12 @@ const ALL_NAV_ITEMS = [
         path: '/compras',
         icon: <ShoppingBag />,
         requiredAuthorities: ['PURCHASES_VIEW'],
+    },
+    {
+        label: 'Lista de precios',
+        path: '/lista-precios',
+        icon: <ScrollText />,
+        requiredAuthorities: ['PRICE_LISTS_VIEW'],
     },
     {
         label: 'Usuarios',
