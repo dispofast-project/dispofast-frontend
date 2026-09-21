@@ -247,6 +247,7 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
               const pendingTotal = pendingPayment + pendingDiscount;
               if (pendingTotal <= 0) return null;
               const remaining = data.balance - pendingTotal;
+              const exceeds = remaining < 0;
               return (
                 <Box className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2">
                   {pendingPayment > 0 && (
@@ -271,16 +272,20 @@ const ReceiptSummaryPanel = ({ data }: ReceiptSummaryPanelProps) => {
                   )}
                   <Box className="flex items-center justify-between">
                     <Typography variant="body2" className="text-gray-500">
-                      Saldo restante
+                      {exceeds ? "Excede el saldo" : "Saldo restante"}
                     </Typography>
                     <Typography
                       variant="body2"
                       className="font-bold"
                       sx={{
-                        color: remaining <= 0 ? "success.main" : "var(--dispofast-primary)",
+                        color: exceeds
+                          ? "error.main"
+                          : remaining === 0
+                            ? "success.main"
+                            : "var(--dispofast-primary)",
                       }}
                     >
-                      {fmt(Math.max(0, remaining))}
+                      {exceeds ? `+${fmt(Math.abs(remaining))}` : fmt(remaining)}
                     </Typography>
                   </Box>
                 </Box>
