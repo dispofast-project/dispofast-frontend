@@ -83,7 +83,9 @@ const PaymentReceiptPage = () => {
     (s, it) => s + (it.taxFree ? 0 : it.lineTotal * IVA_RATE),
     0
   );
-  const totalValue = order?.totalValue ?? entry.value;
+  // entry.value is the invoice amount the backend validates against
+  // (order.totalValue can drift from it if the order was edited after invoicing).
+  const totalValue = entry.value;
 
   // Compute live balance from fetched receipts so it updates after payment.
   // Prompt-payment discounts are forgiven debt: they settle the balance just like cash.
@@ -133,9 +135,9 @@ const PaymentReceiptPage = () => {
         promptPaymentDiscountRate: values.promptPaymentDiscountRate,
       });
       showNotification("Recibo de caja registrado exitosamente", "success");
-      // Stay on the page and refresh receipts to show updated balance
       setDiscountRate(undefined);
       await loadReceipts();
+      navigate("/cartera", { replace: true });
     } catch (error: any) {
       showNotification(
         `No se pudo registrar el recibo: ${error.message}`,
@@ -143,7 +145,6 @@ const PaymentReceiptPage = () => {
       );
     } finally {
       setSubmitting(false);
-      navigate("/cartera", { replace: true });
     }
   };
 
